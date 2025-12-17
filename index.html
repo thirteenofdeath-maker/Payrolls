@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payroll App</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Payroll App">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+bbody {
+    /* ใช้ฟอนต์ Sarabun หากเครื่องมี หรือใช้ฟอนต์ระบบที่อ่านง่ายที่สุด */
+    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 20px;
+    background: #f0f2f5; /* สีพื้นหลังโทนแอปสมัยใหม่ */
+    color: #333;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+}
+
+h2 {
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+}
+select,input{padding:6px 8px;border-radius:8px;border:1px solid #ccc}
+
+/* ===== CALENDAR ===== */
+.calendar{margin:12px 0}
+.weekdays,.days{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  text-align:center;
+  background: #eeeeee;
+  margin-bottom: 8px;
+    padding: 5px 0;
+}
+.weekdays div {
+    font-size: 13px;
+    font-weight: 700;
+    color: #555;
+    padding: 5px 0;
+}
+/* เพิ่มสีแดงและน้ำเงินให้วันอาทิตย์และวันเสาร์ในส่วนหัว */
+.weekdays div:first-child { color: #e53935; } /* วันอาทิตย์สีแดง */
+.weekdays div:last-child { color: #1976d2; }  /* วันเสาร์สีน้ำเงิน */
+.day-cell{
+  background:#fff;
+  margin:4px;
+  padding:10px 0;
+  border-radius:10px;
+  cursor:pointer;
+  position:relative;
+  transition: background 0.4s ease, transform 0.3s ease;
+}
+.day-cell.active{
+  background:#1976d2;
+  color:#fff;
+  box-shadow:0 0 0 2px #1976d2 inset;
+  transform: scale(1.05);
+}
+.day-cell::after{
+  content:"";
+  width:6px;height:6px;
+  border-radius:50%;
+  position:absolute;
+  bottom:4px;
+  display:none;
+}
+/* จุดซ้าย (เดิม): แสดงสถานะ (ลางาน, ขาดงาน ฯลฯ) */
+.day-cell::after {
+    left: 35%;
+    transform: translateX(-50%);
+}
+
+/* จุดขวา (ใหม่): แสดงกะ (เช้า, ดึก) */
+.day-cell::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 4px;
+    left: 65%; /* วางไว้ค่อนไปทางขวา */
+    transform: translateX(-50%);
+    display: none;
+}
+/* สถานะสีเดิม */
+.day-work::after { background: #4caf50; display: block; }
+.day-leave::after { background: #ff9800; display: block; }
+.day-absent::after { background: #e53935; display: block; }
+.day-holiday::after { background: #607d8b; display: block; }
+
+/* สีสำหรับกะ (Shift) */
+.shift-morning::before { background: #FFD700; display: block; } /* สีทอง/เหลือง */
+.shift-night::before { background: #000080; display: block; }   /* สี Navy */
+.day-cell.active{
+  transform:scale(1.08);
+}
+
+/* ===== CARD ===== */
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+.card-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.card-actions{display:flex;gap:6px}
+.card.collapsed .card-body{display:none}
+
+.badge{
+  padding:2px 8px;
+  border-radius:10px;
+  font-size:12px;
+  font-weight:bold;
+  color:#fff;
+}
+.badge-work{background:#4caf50}
+.badge-holiday{background:#607d8b}
+.badge-leave{background:#ff9900}
+.badge-absent{background:#e53935}
+
+.row{display:flex;align-items:center;margin-bottom:8px}
+.row label{width:70px;font-weight:bold}
+.row select{flex:1}
+
+/* ===== INLINE EXPAND ===== */
+#cardContainer .card{display:none}
+
+/* ===== SLIDE DOWN ANIMATION ===== */
+.calendar-expand{
+  grid-column:1 / -1;
+  overflow:hidden;
+
+  max-height:0;
+  opacity:0;
+  transform:translateY(-6px);
+}
+.calendar-expand .card{
+  margin:0;
+}
+.card-body .row {
+  margin-bottom: 12px; /* เพิ่มระยะห่างระหว่างบรรทัด */
+}
+.card-body select {
+  width: 100%; /* ให้ dropdown เต็มความกว้าง */
+  box-sizing: border-box;
+}
+/* ===== SUMMARY CARD ===== */
+.sum-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  border: 1px solid #e0e0e0;
+}
+.sum-card h4 {
+  margin: 0 0 12px 0;
+  color: #333;
+  border-bottom: 2px solid #1976d2;
+  padding-bottom: 8px;
+  display: inline-block;
+}
+.sum-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+}
+.sum-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0 0 0;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #1976d2;
+  margin-top: 8px;
+  border-top: 2px dashed #ddd;
+}
+.calendar-expand{
+  grid-column:1 / -1;
+  overflow:hidden;
+  will-change: transform, max-height, opacity;
+}
+
+.wage-row{
+  display:flex;
+  gap:8px;                 /* ⭐ ลดช่องว่าง */
+  align-items:flex-end;
+}
+
+.wage-row label{
+  font-size:13px;          /* เล็กลง */
+  color:#555;
+}
+
+.wage-row input{
+  width:90px;              /* ⭐ ลดความกว้าง */
+  padding:4px 6px;         /* ⭐ ลด padding */
+  font-size:14px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+/* มือถือ */
+@media (max-width:480px){
+  .wage-row input{
+    width:80px;
+  }
+}
+
+.triple-row{
+  display:grid;
+  grid-template-columns: 100px 80px auto;
+  align-items:center;
+  gap:8px;
+  padding:4px 0;
+}
+
+.triple-row .col-1{
+  text-align:left;
+}
+
+.triple-row .col-2{
+  text-align:right;
+  color:#555;
+  font-size:13px;
+}
+
+.triple-row .col-3{
+  text-align:right;
+  font-weight:bold;
+}
+
+.money{
+  font-weight:bold;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* แก้ไขใน <style> */
+.calendar-expand {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  /* ลบ transition: max-height ... เดิมออก */
+  will-change: max-height, opacity, transform;
+}
+
+.day-cell {
+  /* ปรับให้การขยายตัวของวันที่นุ่มนวลขึ้นแต่ไม่เด้ง */
+  transition: background 0.3s ease, transform 0.4s ease;
+}
+
+.day-cell.active {
+  transform: scale(1.05); /* ขยายเพียงเล็กน้อยพอให้รู้ว่าเลือก */
+}
+
+/* จัดกึ่งกลางหน้าจอ */
+body {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  background: #f0f2f5;
+}
+
+/* ตัวคลุมเนื้อหาหลัก */
+.main-container {
+  width: 100%;
+  max-width: 450px; /* จำกัดความกว้างให้ดูสวยงามบนคอมและมือถือ */
+  text-align: center; /* ให้หัวข้อและข้อความทั่วไปอยู่กลาง */
+  padding-bottom: 50px; /* เพิ่มพื้นที่ว่างด้านล่างเพื่อให้แตะปิดได้ง่ายขึ้น */
+}
+
+/* จัดการส่วน Input และ Label ให้เป็นระเบียบ */
+.wage-row, .setting-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.setting-row label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ปรับให้ Dropdown ของเดือนและปีอยู่กลาง */
+.selector-group {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ส่วนหัววันของสัปดาห์ (ทำให้สมดุล) */
+.weekdays {
+  background: #e0e0e0;
+  border-radius: 8px 8px 0 0;
+  padding: 5px 0;
+}
+/* สไตล์สำหรับกรอบเบี้ยขยัน */
+.incentive-box {
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    margin: 0 auto;
+    padding: auto;
+    background-color: #ffffff;
+}
+
+.incentive-box legend {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1976d2;
+    padding: 0 10px;
+    text-align: auto; /* จั่วหัวไว้ด้านซ้าย */
+    margin-left: 10px;
+}
+
+/* ปรับระยะห่างในการจัดวางภายในกรอบ */
+.incentive-box .setting-row {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 0;
+    padding: 5px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="main-container">
+  <h2>บันทึกเวลาประจำงวดจ่าย</h2>
+
+  <div class="wage-row" style="align-items: center; margin-top: 10px;">
+    <span>เดือน:</span> <select id="monthSelect"></select>
+    <span>ปี:</span> <select id="yearSelect"></select>
+  </div><br>
+
+  <div class="wage-row">
+    <label>ค่าแรง/วัน <input type="number" id="dailyWage" value="447"></label>
+    <label>ค่าแรง/ชม <input type="number" id="hourlyWage" readonly style="background:#eee"></label>
+  </div>
+
+  <div class="setting-row">
+    <label><input type="checkbox" id="skillCheck"> ทักษะ</label>
+    <label><input type="checkbox" id="mentorCheck"> พี่เลี้ยง</label>
+  </div>
+
+  <fieldset class="incentive-box">
+    <legend>เบี้ยขยัน</legend>
+    <div class="setting-row">
+      <label>รอบ 1: 
+        <select id="incentive1">
+          <option value="0">-</option>
+          <option value="180">ระดับ 1 (180)</option>
+          <option value="210">ระดับ 2 (210)</option>
+        </select>
+      </label>
+      <label>รอบ 2: 
+        <select id="incentive2">
+          <option value="0">-</option>
+          <option value="180">ระดับ 1 (180)</option>
+          <option value="210">ระดับ 2 (210)</option>
+        </select>
+      </label>
+    </div>
+  </fieldset>
+
+<div class="calendar">
+  <div class="weekdays">
+    <div>อา</div><div>จ</div><div>อ</div>
+    <div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
+  </div>
+  <div class="days" id="calendarDays"></div>
+</div>
+
+<div id="cardContainer"></div>
+
+<div id="summaryContainer" style="margin-top: 20px;"></div>
+
+<div id="result" style="margin-top:20px;"></div>
+
+<script>
+
+function num(v){
+  return Number(v) || 0;
+}
+
+/* ===== SETUP ===== */
+const daysTH=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+const container=document.getElementById("cardContainer");
+const calendarEl=document.getElementById("calendarDays");
+const monthSelect=document.getElementById("monthSelect");
+const yearSelect=document.getElementById("yearSelect");
+
+const monthNames=[
+  "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
+  "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
+];
+
+monthNames.forEach((m,i)=>{
+  const o=document.createElement("option");
+  o.value=i;o.textContent=m;
+  monthSelect.appendChild(o);
+});
+
+const dailyInput  = document.getElementById("dailyWage");
+const hourlyInput = document.getElementById("hourlyWage");
+
+function syncHourly(){
+  const daily = num(dailyInput.value);
+  hourlyInput.value = (daily / 8).toFixed(2);
+}
+
+// initial
+syncHourly();
+
+// change
+dailyInput.addEventListener("input", () => {
+  syncHourly();
+  renderSummary();   // คำนวณใหม่ทันที
+});
+
+// เพิ่มต่อจากส่วนของ dailyInput.addEventListener
+document.getElementById("skillCheck").addEventListener("change", renderSummary);
+document.getElementById("mentorCheck").addEventListener("change", renderSummary);
+
+const now=new Date();
+for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
+  const o=document.createElement("option");
+  o.value=y;o.textContent=y;
+  yearSelect.appendChild(o);
+}
+
+let selectedDate=null;
+let expandRow=null;
+let activeCell = null; // ⭐ cell ที่เปิดอยู่จริง
+let lastTapTime = 0;
+
+/* ===== UTIL ===== */
+function formatLocalDate(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function getMonthKey(){
+  return `payroll-${yearSelect.value}-${monthSelect.value}`;
+}
+
+/* ===== STORAGE ===== */
+function saveCards(){
+  const data = [...document.querySelectorAll(".card")].map(c => ({
+    date: c.dataset.date,
+    status: c.querySelector(".status").value,
+    shift: c.querySelector(".shift").value,    // เพิ่ม
+    normal: c.querySelector(".normal").value,  // เพิ่ม
+    ot: c.querySelector(".ot").value           // เพิ่ม
+  }));
+  localStorage.setItem(getMonthKey(), JSON.stringify(data));
+}
+function loadCards(){
+  return JSON.parse(localStorage.getItem(getMonthKey())||"[]");
+}
+
+/* ===== BADGE ===== */
+function updateBadge(card){
+  const b = card.querySelector(".badge");
+  const statusEl = card.querySelector(".status");
+
+  if (!b || !statusEl) return;
+
+  const s = statusEl.value.trim();
+
+  // reset class
+  b.classList.remove(
+    "badge-work",
+    "badge-holiday",
+    "badge-leave",
+    "badge-absent"
+  );
+
+  // ไม่มีค่า → ซ่อน
+  if (!s) {
+    b.style.display = "none";
+    return;
+  }
+
+  b.style.display = "inline-block";
+
+  if (s === "ขาดงาน") {
+    b.classList.add("badge-absent");
+  }
+  else if (s.includes("หยุด")) {
+    b.classList.add("badge-holiday");
+  }
+  else if (s.includes("ลา") || s.includes("ป่วย")) {
+    b.classList.add("badge-leave");
+  }
+  else {
+    b.classList.add("badge-work");
+  }
+
+  b.textContent = s;
+
+}
+
+function createCard(date, saved) {
+  const dateStr = formatLocalDate(date);
+  const card = document.createElement("div");
+  card.className = "card";
+  card.dataset.date = dateStr;
+  card.innerHTML = `
+    <div class="card-header">
+      <div>${dateStr} (${daysTH[date.getDay()]})</div>
+      <div class="card-actions">
+        <span class="badge"></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row"><label>สถานะ</label>
+        <select class="status">
+          <option>วันทำงาน</option>
+          <option>วันหยุด</option>
+          <option>วันหยุดพิเศษ</option>
+          <option>ลาพักร้อน</option>
+          <option>ลาป่วยแพทย์</option>
+          <option>ลากิจพิเศษ</option>
+          <option>ลาป่วย</option>
+          <option>ลากิจ</option>
+          <option>ขาดงาน</option>
+        </select>
+      </div>
+      <div class="row"><label>กะ</label>
+        <select class="shift"><option></option><option>เช้า</option><option>ดึก</option></select>
+      </div>
+      <div class="row"><label>ปกติ</label>
+        <select class="normal"><option value="0">0</option><option value="4">4</option><option value="8">8</option></select>
+      </div>
+      <div class="row"><label>โอที</label>
+        <select class="ot">
+          <option value="0">0</option>
+          <option value="0.17">0.17</option>
+          <option value="2.51">2.51</option>
+          <option value="4.51">4.51</option>
+        </select>
+      </div>
+    </div>
+  `;
+  
+  container.appendChild(card);
+
+  // --- กำหนดค่าเริ่มต้น (Load Saved Data) ---
+  const statusSelect = card.querySelector(".status");
+  const shiftSelect = card.querySelector(".shift");
+  const normalSelect = card.querySelector(".normal");
+  const otSelect = card.querySelector(".ot");
+
+  statusSelect.value = saved?.status || "วันทำงาน";
+  shiftSelect.value = saved?.shift || "";
+  normalSelect.value = saved?.normal || "0";
+  otSelect.value = saved?.ot || "0";
+
+  updateBadge(card);
+
+  // ค้นหาส่วนนี้ในฟังก์ชัน createCard
+  [statusSelect, shiftSelect, normalSelect, otSelect].forEach(el => {
+      el.onchange = () => {
+          updateBadge(card);
+          saveCards();      
+        
+          // อัปเดตสีบนปฏิทินทันที
+          const cell = document.querySelector(`.day-cell[data-date="${card.dataset.date}"]`);
+          if (cell) {
+              // ล้างคลาสทั้งหมดก่อน
+              cell.classList.remove("day-work", "day-holiday", "day-leave", "day-absent", "shift-morning", "shift-night");
+            
+              //  ใส่คลาสสถานะ (จุดซ้าย)
+              const sClass = getStatusClass(statusSelect.value);
+              if (sClass) cell.classList.add(sClass);
+            
+              // ใส่คลาสประจำกะ (จุดขวา)
+              const shClass = getShiftClass(shiftSelect.value);
+              if (shClass) cell.classList.add(shClass);
+          }
+
+          renderSummary(); 
+      };
+  });
+}
+/* ===== CALENDAR ===== */
+function getStatusClass(status) {
+    if (status.includes("หยุด")) return "day-holiday";
+    if (status.includes("ลา")) return "day-leave";
+    if (status === "ขาดงาน") return "day-absent";
+    return "day-work";
+}
+
+// เพิ่มฟังก์ชันใหม่สำหรับกะ
+function getShiftClass(shift) {
+    if (shift === "เช้า") return "shift-morning";
+    if (shift === "ดึก") return "shift-night";
+    return "";
+}
+
+function renderCalendar() {
+    calendarEl.innerHTML = "";
+    selectedDate = null;
+    removeExpand(true);
+
+    const y = +yearSelect.value;
+    const m = +monthSelect.value;
+    
+    // ขอบเขตวันที่: 16 เดือนที่แล้ว ถึง 15 เดือนนี้
+    const start = new Date(y, m - 1, 16);
+    const end = new Date(y, m, 15);
+
+    // 1. สร้างช่องว่าง (Blank) ของแถวแรก
+    // หาว่าวันที่ 16 (วันเริ่มวิก) ตรงกับวันอะไร (0=อาทิตย์, 6=เสาร์)
+    const firstDayType = start.getDay(); 
+    for (let i = 0; i < firstDayType; i++) {
+        const blank = document.createElement("div");
+        blank.className = "day-cell-blank"; 
+        calendarEl.appendChild(blank);
+    }
+
+    // 2. ดึงข้อมูลที่บันทึกไว้
+    const savedDataList = loadCards();
+
+    // 3. วนลูปสร้างวันที่ตั้งแต่วันที่ 16 ถึง 15
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const key = formatLocalDate(d);
+        const dayOfWeek = d.getDay();
+
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        cell.textContent = d.getDate(); // แสดงเลขวันที่ (16, 17, ... 1, 2, ... 15)
+        cell.dataset.date = key;
+
+        // เน้นสีตัวเลขวันเสาร์-อาทิตย์
+        if (dayOfWeek === 0) cell.style.color = "#e53935"; // อาทิตย์แดง
+        if (dayOfWeek === 6) cell.style.color = "#1976d2"; // เสาร์น้ำเงิน
+
+        // แสดงจุดสี Status และ Shift
+        const dayData = savedDataList.find(x => x.date === key);
+        if (dayData) {
+            const sClass = getStatusClass(dayData.status);
+            if (sClass) cell.classList.add(sClass);
+            
+            const shClass = getShiftClass(dayData.shift);
+            if (shClass) cell.classList.add(shClass);
+        }
+
+        cell.onclick = () => toggleInline(cell);
+        calendarEl.appendChild(cell);
+    }
+}
+
+function slideOpen(element) {
+  element.animate([
+    {
+      maxHeight: "0px",
+      opacity: 0,
+      transform: "translateY(-10px)" // เริ่มจากขยับขึ้นไปนิดนึง
+    },
+    {
+      maxHeight: "500px", // ค่าที่พอดีกับความสูงการ์ด
+      opacity: 1,
+      transform: "translateY(0)"
+    }
+  ], {
+    duration: 350, // ปรับความช้า-เร็วที่ตรงนี้ (350ms กำลังนุ่ม)
+    easing: "ease-out", // ค่อยๆ ผ่อนตอนจบ
+    fill: "forwards"
+  });
+}
+
+function slideClose(element) {
+  return element.animate([
+    {
+      maxHeight: "500px",
+      opacity: 1,
+      transform: "translateY(0)"
+    },
+    {
+      maxHeight: "0px",
+      opacity: 0,
+      transform: "translateY(-10px)"
+    }
+  ], {
+    duration: 250,
+    easing: "ease-in",
+    fill: "forwards"
+  }).finished; // คืนค่า promise เมื่อจบ animation
+}
+
+function toggleInline(cell) {
+    const dateKey = cell.dataset.date;
+    const cells = [...calendarEl.children];
+    const index = cells.indexOf(cell);
+    const rowIndex = Math.floor(index / 7);
+    const rowEnd = rowIndex * 7 + 6;
+
+    /* 1. กรณีเลือกซ้ำวันเดิม -> ปิดการ์ด */
+    if (selectedDate === dateKey && activeCell === cell && expandRow) {
+        slideClose(expandRow).then(() => {
+            removeExpand(true);
+            cell.classList.remove("active"); // ลบไฮไลท์เมื่อปิด
+            selectedDate = null;
+            activeCell = null;
+        });
+        return;
+    }
+
+    /* 2. กรณีเลือกวันใหม่ (ไม่ว่าจะแถวเดิมหรือคนละแถว) */
+    
+    // เก็บสถานะว่าเป็นการเปลี่ยนในแถวเดิมหรือไม่ก่อนจะลบอะไร
+    const isSameRow = expandRow && expandRow.dataset.rowIndex == rowIndex;
+
+    // ลบไฮไลท์จากทุกช่องก่อน
+    document.querySelectorAll(".day-cell").forEach(c => c.classList.remove("active"));
+    // เพิ่มไฮไลท์ให้ช่องที่กดใหม่
+    cell.classList.add("active");
+    
+    selectedDate = dateKey;
+    activeCell = cell;
+
+    if (isSameRow) {
+        /* --- กรณีแถวเดิม: สลับเนื้อหาการ์ดทันที --- */
+        const card = document.querySelector(`.card[data-date="${dateKey}"]`);
+        if (card) {
+            const oldCard = expandRow.querySelector(".card");
+            if (oldCard) {
+                document.getElementById("cardContainer").appendChild(oldCard);
+                oldCard.style.display = "none";
+            }
+            expandRow.appendChild(card);
+            card.style.display = "block";
+            updateBadge(card);
+        }
+    } else {
+        /* --- กรณีคนละแถว: ปิดของเก่า (ทันที) แล้วเปิดของใหม่ (สไลด์ลง) --- */
+        removeExpand(true); 
+
+        expandRow = document.createElement("div");
+        expandRow.className = "calendar-expand";
+        expandRow.dataset.rowIndex = rowIndex;
+
+        const card = document.querySelector(`.card[data-date="${dateKey}"]`);
+        if (card) {
+            expandRow.appendChild(card);
+            card.style.display = "block";
+            updateBadge(card);
+        }
+
+        // แทรก expandRow เข้าไปหลังจบแถวนั้นๆ
+        if (cells[rowEnd + 1]) {
+            calendarEl.insertBefore(expandRow, cells[rowEnd + 1]);
+        } else {
+            calendarEl.appendChild(expandRow);
+        }
+
+        slideOpen(expandRow);
+    }
+}
+
+function removeExpand(immediate = false) {
+    if (!expandRow) return;
+
+    const cleanupLogic = () => {
+        const cardInExpand = expandRow.querySelector(".card");
+        if (cardInExpand) {
+            document.getElementById("cardContainer").appendChild(cardInExpand);
+            cardInExpand.style.display = "none";
+        }
+        expandRow.remove();
+        expandRow = null;
+    };
+
+    if (immediate) {
+        cleanupLogic();
+    } else {
+        // หากต้องการสไลด์ปิดให้ใช้ slideClose ที่ส่งให้ก่อนหน้า
+        slideClose(expandRow).then(cleanupLogic);
+    }
+    
+    // ลบบรรทัดที่สั่งลบ .active ทิ้งไป (เราจะไปลบใน toggleInline แทน)
+}
+// Settings
+function getSettings(){
+  const DAILY_WAGE = num(dailyInput.value);
+  return {
+    DAILY_WAGE, HOURLY_WAGE: DAILY_WAGE/8,
+    OT_RATE_1:1,OT_RATE_15:1.5, OT_RATE_2:2, OT_RATE_3:3,
+    NIGHT_SHIFT_FEE:140, FOOD_NIGHT_FEE:70, FOOD_OT_FEE:45, SKILL_FEE:20,MENTOR_FEE:200,
+    SOCIAL_SECURITY_RATE:0.05
+  };
+}
+
+/* ===== RENDER MONTH ===== */
+function renderMonth(){
+  container.innerHTML="";
+  const y=+yearSelect.value;
+  const m=+monthSelect.value;
+  const start=new Date(y,m-1,16);
+  const end=new Date(y,m,15);
+
+  const saved=loadCards();
+  const map={};
+  saved.forEach(d=>map[d.date]=d);
+
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    createCard(d,map[formatLocalDate(d)]);
+  }
+
+  document.querySelectorAll(".card").forEach(card=>{
+  updateBadge(card);
+  });
+
+  renderCalendar();
+
+  renderSummary();
+}
+
+function buildWorkTableFromCards(){
+
+  // ลบ table เก่าถ้ามี
+  let table = document.getElementById("workTable");
+  if (table) table.remove();
+
+  table = document.createElement("table");
+  table.id = "workTable";
+  table.style.display = "none";
+  document.body.appendChild(table);
+
+  document.querySelectorAll(".card").forEach(card => {
+
+    const tr = document.createElement("tr");
+    tr.className = "data-row";
+
+    tr.innerHTML = `
+      <td>
+        <select class="statusSelect">
+          <option selected>${card.querySelector(".status").value}</option>
+        </select>
+      </td>
+      <td>
+        <select class="shiftSelect">
+          <option selected>${card.querySelector(".shift").value}</option>
+        </select>
+      </td>
+      <td>
+        <input class="normalHour" value="${card.querySelector(".normal").value}">
+      </td>
+      <td>
+        <input class="otHour" value="${card.querySelector(".ot").value}">
+      </td>
+    `;
+
+    table.appendChild(tr);
+  });
+}
+
+function renderSummary(){
+  buildWorkTableFromCards(); // ⭐ แปลงข้อมูลจากการ์ด
+  calculate();               // ⭐ ใช้สูตรเดิม 100%
+}
+function round(v, n = 0){
+  const p = Math.pow(10, n);
+  return Math.round(v * p) / p;
+}
+
+function format2(v){
+  return Number(v || 0).toLocaleString("th-TH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+function countIncludeStatusNormal(statusList, normalHour = null) {
+  return [...document.querySelectorAll("#workTable tr.data-row")]
+    .filter(row => {
+      const status = row.querySelector(".statusSelect").value;
+      const normal = row.querySelector(".normalHour").value;
+
+      if (!statusList.includes(status)) return false;
+      if (normalHour === null) return true;
+
+      return normal === String(normalHour);
+    }).length;
+}
+
+// Calculation
+function calculate(){
+  const S=getSettings();
+  const rows=document.querySelectorAll("#workTable tr.data-row");
+  let workDays=0,workHours=0,ot1Hour=0,ot15Hours=0,ot2Hours=0,ot3Hours=0,nightShiftDays=0,otFoodDays=0;
+
+  rows.forEach(row => {
+    const status = row.querySelector(".statusSelect").value;
+    const shift = row.querySelector(".shiftSelect").value;
+    const normal = num(row.querySelector(".normalHour").value);
+    const ot = num(row.querySelector(".otHour").value);
+    const hasNormalOT = ot > 0.17; // ตรวจสอบว่าทำ OT เกิน 10 นาทีหรือไม่ เพื่อให้ค่าอาหาร OT
+
+    // 1. จัดการแยกตามสถานะ (Status Logic)
+    if (status === "วันทำงาน") {
+      workHours += normal;
+      workDays += normal / 8;
+      if (ot > 0) { ot15Hours += ot; }
+      if (shift === "ดึก") nightShiftDays++;
+    } 
+    else if (status === "วันหยุด") { 
+      ot2Hours += normal; 
+      ot3Hours += ot; 
+      if (shift === "ดึก") nightShiftDays++; 
+    } 
+    else if (status === "วันหยุดพิเศษ") {
+      ot1Hour += normal; 
+      ot3Hours += ot;
+      // ให้ค่ากะด้วยหากเป็นกะดึกในวันหยุดพิเศษ
+      if (shift === "ดึก") nightShiftDays++; 
+    }
+    // สำหรับสถานะการลาต่างๆ ที่คุณต้องการให้ได้ค่ากะดึกด้วย
+    else if (["ลาพักร้อน", "ขาดงาน", "ลาป่วย", "ลาป่วยแพทย์", "ลากิจ", "ลากิจพิเศษ"].includes(status)) {
+      if (shift === "ดึก") {
+        nightShiftDays++;
+      }
+    }
+
+    // 2. จัดการเรื่องค่าอาหาร OT (แยกออกมาอิสระ)
+    if (hasNormalOT) {
+      otFoodDays++;
+    }
+  });
+  const cNormalday      = countIncludeStatusNormal(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+countIncludeStatusNormal(["วันทำงาน"],"8")*1;
+  const cHolidaySpecial = countIncludeStatusNormal(["วันหยุดพิเศษ"]);
+  const cVacation       = countIncludeStatusNormal(["ลาพักร้อน"],"4")*0.5+countIncludeStatusNormal(["ลาพักร้อน"],"0")*1;
+  const cSickDoctor     = countIncludeStatusNormal(["ลาป่วยแพทย์"],"4")*0.5+countIncludeStatusNormal(["ลาป่วยแพทย์"],"0")*1;
+  const cBusinessExtra  = countIncludeStatusNormal(["ลากิจพิเศษ"],"4")*0.5+countIncludeStatusNormal(["ลากิจพิเศษ"],"0")*1;
+  const cSick           = countIncludeStatusNormal(["ลาป่วย"],"4")*0.5+countIncludeStatusNormal(["ลาป่วย"],"0")*1;
+  const cBusiness       = countIncludeStatusNormal(["ลากิจ"],"4")*0.5+countIncludeStatusNormal(["ลากิจ"],"0")*1;
+  const cAbsent         = countIncludeStatusNormal(["ขาดงาน"]);
+  const cHoliday        = countIncludeStatusNormal(["วันหยุด"]);
+  const salaryPay=cNormalday * S.DAILY_WAGE;
+  const ot1Pay=S.HOURLY_WAGE*S.OT_RATE_1*ot1Hour;
+  const ot15Pay=S.HOURLY_WAGE*S.OT_RATE_15*ot15Hours;
+  const ot2Pay=S.HOURLY_WAGE*S.OT_RATE_2*ot2Hours;
+  const ot3Pay=S.HOURLY_WAGE*S.OT_RATE_3*ot3Hours;
+  const nightShiftPay=nightShiftDays*S.NIGHT_SHIFT_FEE;
+  const nightFoodPay=nightShiftDays*S.FOOD_NIGHT_FEE;
+  const otFoodPay=otFoodDays*S.FOOD_OT_FEE;
+  const forcedOtPay=Math.floor((S.HOURLY_WAGE * S.OT_RATE_15)*0.17);
+  const skillPay  = skillCheck.checked ? Math.floor(workDays) * S.SKILL_FEE : 0;
+  const mentorPay=mentorCheck.checked ? S.MENTOR_FEE : 0 ;
+  const holidayspecialPay=cHolidaySpecial*(S.DAILY_WAGE+forcedOtPay)
+  const vacationPay=cVacation*(S.DAILY_WAGE+forcedOtPay)
+  const sickdocterPay=cSickDoctor*(S.DAILY_WAGE+forcedOtPay)
+  const businessextraPay=cBusinessExtra*(S.DAILY_WAGE+forcedOtPay)
+  const incentive1Pay = num(document.getElementById("incentive1").value);
+  const incentive2Pay = num(document.getElementById("incentive2").value);
+  const totalIncome=salaryPay+ot1Pay+ot15Pay+ot2Pay+ot3Pay+
+    nightShiftPay+nightFoodPay+otFoodPay+skillPay+mentorPay+
+    holidayspecialPay+vacationPay+sickdocterPay+businessextraPay+
+    incentive1Pay+incentive2Pay;
+  const socialSecurity=round(salaryPay * S.SOCIAL_SECURITY_RATE,0);
+  const netPay=totalIncome-socialSecurity;
+  
+
+  document.getElementById("result").innerHTML = `
+  <div style="
+    line-height:1;
+    font-size:14px;
+    max-width:420px;
+    margin:auto;
+  ">
+
+    <div style="text-align:center; font-size:16px; font-weight:bold;">
+      สรุปเงินเดือน
+    </div>
+
+    <hr>
+
+    <div class="triple-row">
+      <span class="col-1">วันทำงาน</span>
+      <span class="col-2">${format2(cNormalday)} วัน</span>
+      <span class="col-3"></span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">เงินเดือน</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(salaryPay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">OT 1x</span>
+      <span class="col-2">${format2(ot1Hour)} ชม.</span>
+      <span class="col-3 money">${format2(ot1Pay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">OT 1.5x</span>
+      <span class="col-2">${format2(ot15Hours)} ชม.</span>
+      <span class="col-3 money">${format2(ot15Pay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">OT 2x</span>
+      <span class="col-2">${format2(ot2Hours)} ชม.</span>
+      <span class="col-3 money">${format2(ot2Pay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">OT 3x</span>
+      <span class="col-2">${format2(ot3Hours)} ชม.</span>
+      <span class="col-3 money">${format2(ot3Pay)} บาท</span>
+    </div>
+
+    <hr>
+
+    <div class="triple-row">
+      <span class="col-1">วันหยุดพิเศษ</span>
+      <span class="col-2">${cHolidaySpecial} วัน</span>
+      <span class="col-3 money">${holidayspecialPay} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ลาพักร้อน</span>
+      <span class="col-2">${cVacation} วัน</span>
+      <span class="col-3 money">${vacationPay} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ลาป่วยแพทย์</span>
+      <span class="col-2">${cSickDoctor} วัน</span>
+      <span class="col-3 money">${sickdocterPay} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ลากิจพิเศษ</span>
+      <span class="col-2">${cBusinessExtra} วัน</span>
+      <span class="col-3 money">${businessextraPay} บาท</span>
+    </div>
+
+    <hr>
+
+    <div class="triple-row">
+      <span class="col-1">ค่ากะดึก</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(nightShiftPay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ค่าอาหารกะดึก</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(nightFoodPay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ค่าอาหาร OT</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(otFoodPay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ค่าทักษะ</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(skillPay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ค่าพี่เลี้ยง</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(mentorPay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">เบี้ยขยัน</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(incentive1Pay+incentive2Pay)} บาท</span>
+    </div>
+
+    <hr>
+
+    <div class="triple-row">
+      <span class="col-1"><b>รวมรายได้</b></span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(totalIncome)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1">ประกันสังคม</span>
+      <span class="col-2"></span>
+      <span class="col-3 money">${format2(socialSecurity)} บาท</span>
+    </div>
+
+    <hr>
+
+    <div class="triple-row" style="font-size:20px;background:#2e7d32;color:#ffffff;border-radius: 5px;">
+      <span class="col-1"><b>สุทธิ</b></span>
+      <span class="col-2"></span>
+      <span class="col-3 money">
+        ${format2(netPay)} บาท
+      </span>
+    </div>
+  </div>
+`;
+}
+/* --- ส่วนท้ายที่ถูกต้อง --- */
+
+function saveSettings() {
+    const y = document.getElementById("yearSelect").value;
+    const m = document.getElementById("monthSelect").value;
+    
+    const settings = {
+        skill: document.getElementById("skillCheck").checked,
+        mentor: document.getElementById("mentorCheck").checked,
+        dailyWage: document.getElementById("dailyWage").value,
+        incentive1: document.getElementById("incentive1").value,
+        incentive2: document.getElementById("incentive2").value
+    };
+    
+    localStorage.setItem(`settings-${y}-${m}`, JSON.stringify(settings));
+    localStorage.setItem('lastViewedMonth', m);
+    localStorage.setItem('lastViewedYear', y);
+}
+
+function loadSettings() {
+    const y = document.getElementById("yearSelect").value;
+    const m = document.getElementById("monthSelect").value;
+    const saved = JSON.parse(localStorage.getItem(`settings-${y}-${m}`));
+    
+    if (saved) {
+        document.getElementById("skillCheck").checked = saved.skill;
+        document.getElementById("mentorCheck").checked = saved.mentor;
+        document.getElementById("dailyWage").value = saved.dailyWage || 447;
+        document.getElementById("incentive1").value = saved.incentive1 || "0";
+        document.getElementById("incentive2").value = saved.incentive2 || "0";
+    } else {
+        document.getElementById("skillCheck").checked = false;
+        document.getElementById("mentorCheck").checked = false;
+        document.getElementById("dailyWage").value = 447; 
+        document.getElementById("incentive1").value = "0";
+        document.getElementById("incentive2").value = "0";
+    }
+    syncHourly();
+}
+
+// ผูกเหตุการณ์ต่างๆ
+document.getElementById("monthSelect").onchange = () => { saveSettings(); loadSettings(); renderMonth(); };
+document.getElementById("yearSelect").onchange = () => { saveSettings(); loadSettings(); renderMonth(); };
+
+document.getElementById("skillCheck").onchange = () => { saveSettings(); renderSummary(); };
+document.getElementById("mentorCheck").onchange = () => { saveSettings(); renderSummary(); };
+document.getElementById("dailyWage").oninput = () => { syncHourly(); saveSettings(); renderSummary(); };
+document.getElementById("incentive1").onchange = () => { saveSettings(); renderSummary(); };
+document.getElementById("incentive2").onchange = () => { saveSettings(); renderSummary(); };
+
+// ฟีเจอร์: แตะพื้นที่ว่างแล้วการ์ดหุบ
+document.addEventListener("click", function(event) {
+    if (!expandRow) return;
+    const isClickInsideCalendar = calendarEl.contains(event.target);
+    const isClickInsideCard = expandRow.contains(event.target);
+    if (!isClickInsideCalendar && !isClickInsideCard) {
+        slideClose(expandRow).then(() => {
+            removeExpand(true);
+            if (activeCell) activeCell.classList.remove("active");
+            selectedDate = null;
+            activeCell = null;
+        });
+    }
+});
+
+function initApp() {
+    const savedMonth = localStorage.getItem('lastViewedMonth');
+    const savedYear = localStorage.getItem('lastViewedYear');
+
+    if (savedMonth !== null && savedYear !== null) {
+        monthSelect.value = savedMonth;
+        yearSelect.value = savedYear;
+    } else {
+        const d = new Date();
+        monthSelect.value = d.getMonth();
+        yearSelect.value = d.getFullYear();
+    }
+
+    // --- ส่วนที่แก้ไข: ต้องโหลดข้อมูลของเดือนนั้นๆ ขึ้นมาแสดงทันที ---
+    loadSettings(); 
+    renderMonth(); 
+}
+
+initApp();
+</script>
+
+</body>
+</html>
