@@ -9,424 +9,109 @@
 <meta name="apple-mobile-web-app-title" content="Payroll App">
 <link rel="apple-touch-icon" href="icon.png">
 <style>
-/* ดึงฟอนต์ Kanit จาก Google Fonts */
+/* 1. Global Setup */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
 
 body {
-    /* ลำดับฟอนต์: Kanit -> ฟอนต์ระบบ iOS/Android -> ฟอนต์ไร้หัวมาตรฐาน */
-    font-family: 'Kanit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    margin: 0;
-    padding: 15px;
-    background: #f0f2f5;
-    color: #333;
+    font-family: 'Kanit', sans-serif;
+    margin: 0; padding: 15px; background: #f0f2f5; color: #333;
+    display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
     -webkit-font-smoothing: antialiased;
-    display: flex;
-    justify-content: center;
 }
-.main-container {
-    width: 100%;
-    max-width: 450px;
-    text-align: center;
-}
+
+.main-container { width: 100%; max-width: 400px; text-align: center; }
 
 h2 { font-weight: 700; color: #1a1a1a; margin-bottom: 20px; }
-select, input { padding: 8px 10px; border-radius: 10px; border: 1px solid #ccc; font-size: 14px; }
 
-/* ===== CALENDAR ===== */
-.calendar{margin:12px 0}
-.weekdays,.days{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  text-align:center;
-  background: #eeeeee;
-  margin-bottom: 8px;
-    padding: 5px 0;
-}
-.weekdays div {
-    font-size: 13px;
-    font-weight: 700;
-    color: #555;
-    padding: 5px 0;
-}
-/* เพิ่มสีแดงและน้ำเงินให้วันอาทิตย์และวันเสาร์ในส่วนหัว */
-.weekdays div:first-child { color: #e53935; } /* วันอาทิตย์สีแดง */
-.weekdays div:last-child { color: #1976d2; }  /* วันเสาร์สีน้ำเงิน */
-.day-cell{
-  background:#fff;
-  margin:4px;
-  padding:10px 0;
-  border-radius:10px;
-  cursor:pointer;
-  position:relative;
-  transition: background 0.4s ease, transform 0.3s ease;
-}
-.day-cell.active{
-  background:#1976d2;
-  color:#fff;
-  box-shadow:0 0 0 2px #1976d2 inset;
-  transform: scale(1.05);
-}
-.day-cell::after{
-  content:"";
-  width:6px;height:6px;
-  border-radius:50%;
-  position:absolute;
-  bottom:4px;
-  display:none;
-}
-/* จุดซ้าย (เดิม): แสดงสถานะ (ลางาน, ขาดงาน ฯลฯ) */
-.day-cell::after {
-    left: 35%;
-    transform: translateX(-50%);
+/* 2. Dropdown (Select) แบบมนและสวย - ประกาศที่เดียวใช้ทั้งแอป */
+select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 8px 30px 8px 12px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 14px; color: #333; cursor: pointer;
+    transition: all 0.3s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-/* จุดขวา (ใหม่): แสดงกะ (เช้า, ดึก) */
-.day-cell::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    position: absolute;
-    bottom: 4px;
-    left: 65%; /* วางไว้ค่อนไปทางขวา */
-    transform: translateX(-50%);
-    display: none;
+select:focus {
+    outline: none; border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
 }
-/* สถานะสีเดิม */
+
+/* 3. Calendar & Cells */
+.calendar { margin: 12px 0; }
+.weekdays, .days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+.weekdays { background: #e0e0e0; border-radius: 8px 8px 0 0; padding: 5px 0; font-weight: 600; font-size: 13px; color: #555; }
+.weekdays div:first-child { color: #e53935; }
+.weekdays div:last-child { color: #1976d2; }
+
+.day-cell {
+    background: #fff; margin: 3px; padding: 10px 0; border-radius: 10px; cursor: pointer;
+    position: relative; transition: all 0.2s ease;
+}
+.day-cell.active { background: #1976d2; color: #fff; transform: scale(1.05); }
+
+/* Indicators */
+.day-cell::after, .day-cell::before { content: ""; width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: 4px; display: none; }
+.day-cell::after { left: 35%; transform: translateX(-50%); } 
+.day-cell::before { left: 65%; transform: translateX(-50%); }
+
 .day-work::after { background: #4caf50; display: block; }
 .day-leave::after { background: #ff9800; display: block; }
 .day-absent::after { background: #e53935; display: block; }
 .day-holiday::after { background: #607d8b; display: block; }
+.shift-morning::before { background: #FFD700; display: block; }
+.shift-night::before { background: #000080; display: block; }
 
-/* สีสำหรับกะ (Shift) */
-.shift-morning::before { background: #FFD700; display: block; } /* สีทอง/เหลือง */
-.shift-night::before { background: #000080; display: block; }   /* สี Navy */
-.day-cell.active{
-  transform:scale(1.08);
-}
-
-/* ===== CARD ===== */
-.card{
-  background:#fff;
-  border-radius:14px;
-  padding:12px;
-  box-shadow:0 2px 6px rgba(0,0,0,.08);
-}
-.card-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-}
-.card-actions{display:flex;gap:6px}
-.card.collapsed .card-body{display:none}
-
-.badge{
-  padding:2px 8px;
-  border-radius:10px;
-  font-size:12px;
-  font-weight:bold;
-  color:#fff;
-}
-.badge-work{background:#4caf50}
-.badge-holiday{background:#607d8b}
-.badge-leave{background:#ff9900}
-.badge-absent{background:#e53935}
-
-.row{display:flex;align-items:center;margin-bottom:8px}
-.row label{width:70px;font-weight:bold}
-.row select{flex:1}
-
-/* ===== INLINE EXPAND ===== */
-#cardContainer .card{display:none}
-
-/* ===== SLIDE DOWN ANIMATION ===== */
-.calendar-expand{
-  grid-column:1 / -1;
-  overflow:hidden;
-
-  max-height:0;
-  opacity:0;
-  transform:translateY(-6px);
-}
-.calendar-expand .card{
-  margin:0;
-}
-.card-body .row {
-  margin-bottom: 12px; /* เพิ่มระยะห่างระหว่างบรรทัด */
-}
-.card-body select {
-  width: 100%; /* ให้ dropdown เต็มความกว้าง */
-  box-sizing: border-box;
-}
-/* ===== SUMMARY CARD ===== */
-.sum-card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.08);
-  border: 1px solid #e0e0e0;
-}
-.sum-card h4 {
-  margin: 0 0 12px 0;
-  color: #333;
-  border-bottom: 2px solid #1976d2;
-  padding-bottom: 8px;
-  display: inline-block;
-}
-.sum-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 14px;
-}
-.sum-total {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0 0 0;
-  font-weight: bold;
-  font-size: 1.2em;
-  color: #1976d2;
-  margin-top: 8px;
-  border-top: 2px dashed #ddd;
-}
-.calendar-expand{
-  grid-column:1 / -1;
-  overflow:hidden;
-  will-change: transform, max-height, opacity;
-}
-
-.wage-row{
-  display:flex;
-  gap:8px;                 /* ⭐ ลดช่องว่าง */
-  align-items:flex-end;
-}
-
-.wage-row label{
-  font-size:13px;          /* เล็กลง */
-  color:#555;
-}
-
-.wage-row input{
-  width:90px;              /* ⭐ ลดความกว้าง */
-  padding:4px 6px;         /* ⭐ ลด padding */
-  font-size:14px;
-  border-radius:8px;
-  border:1px solid #ccc;
-}
-
-/* มือถือ */
-@media (max-width:480px){
-  .wage-row input{
-    width:80px;
-  }
-}
-
-.triple-row{
-  display:grid;
-  grid-template-columns: 100px 80px auto;
-  align-items:center;
-  gap:8px;
-  padding:4px 0;
-}
-
-.triple-row .col-1{
-  text-align:left;
-}
-
-.triple-row .col-2{
-  text-align:right;
-  color:#555;
-  font-size:13px;
-}
-
-.triple-row .col-3{
-  text-align:right;
-  font-weight:bold;
-}
-
-.money{
-  font-weight:bold;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* แก้ไขใน <style> */
-.calendar-expand {
-  grid-column: 1 / -1;
-  overflow: hidden;
-  /* ลบ transition: max-height ... เดิมออก */
-  will-change: max-height, opacity, transform;
-}
-
-.day-cell {
-  /* ปรับให้การขยายตัวของวันที่นุ่มนวลขึ้นแต่ไม่เด้ง */
-  transition: background 0.3s ease, transform 0.4s ease;
-}
-
-.day-cell.active {
-  transform: scale(1.05); /* ขยายเพียงเล็กน้อยพอให้รู้ว่าเลือก */
-}
-
-/* จัดกึ่งกลางหน้าจอ */
-body {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  min-height: 100vh;
-  margin: 0;
-  padding: 20px;
-  background: #f0f2f5;
-}
-
-/* ตัวคลุมเนื้อหาหลัก */
-.main-container {
-  width: 100%;
-  max-width: 450px; /* จำกัดความกว้างให้ดูสวยงามบนคอมและมือถือ */
-  text-align: center; /* ให้หัวข้อและข้อความทั่วไปอยู่กลาง */
-  padding-bottom: 50px; /* เพิ่มพื้นที่ว่างด้านล่างเพื่อให้แตะปิดได้ง่ายขึ้น */
-}
-
-/* จัดการส่วน Input และ Label ให้เป็นระเบียบ */
-.wage-row, .setting-row {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 10px;
-}
+/* 4. Forms & Settings */
+.wage-row, .setting-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; }
+.wage-row label { font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wage-row input { width: 60px; text-align: center; font-weight: 600; border-radius: 8px; border: 1px solid #ccc; padding: 6px; font-family: 'Kanit';font-size: medium; }
+#hourlyWage { background: #eee !important; border: 1px dashed #999; }
 
 .setting-row label {
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+    font-size: 14px; padding: 6px 12px; background: #fff; border-radius: 8px; border: 1px solid #ddd;
+    display: flex; align-items: center; cursor: pointer; transition: 0.2s;
+}
+.setting-row input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; accent-color: #1976d2; }
+
+/* 5. Specific Element Styles (Override เฉพาะจุด) */
+#monthSelect, #yearSelect {
+    background-color: #e3f2fd; border-color: #bbdefb; font-weight: 600; color: #1565c0;
 }
 
-/* ปรับให้ Dropdown ของเดือนและปีอยู่กลาง */
-.selector-group {
-  margin-bottom: 15px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-/* ส่วนหัววันของสัปดาห์ (ทำให้สมดุล) */
-.weekdays {
-  background: #e0e0e0;
-  border-radius: 8px 8px 0 0;
-  padding: 5px 0;
-}
-/* สไตล์สำหรับกรอบเบี้ยขยัน */
-.incentive-box {
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    margin: 0 auto;
-    padding: auto;
-    background-color: #ffffff;
-}
-
-.incentive-box legend {
-    font-size: 16px;
-    font-weight: bold;
-    color: #000000;
-    padding: 0 10px;
-    text-align: left;
-    margin-left: 10px;
-}
-
-/* ปรับระยะห่างในการจัดวางภายในกรอบ */
+.incentive-box { border: none; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; margin: 15px 0; padding: 12px 0; }
+.incentive-box legend { font-size: 13px; font-weight: 600; color: #666; text-align: left; }
 .incentive-box .setting-row {
     display: flex;
-    justify-content: space-around;
-    margin-bottom: 0;
-    padding: 5px 0;
+    justify-content: center; /* จัดให้อยู่กลาง */
+    gap: 10px;               /* กำหนดระยะห่างที่แน่นอนระหว่าง 2 ช่อง */
+    margin-top: 5px;
 }
-/* ปรับสไตล์ของ Checkbox ให้ใหญ่และสวยงาม */
-.setting-row input[type="checkbox"] {
-    /* ปรับขนาด */
-    width: 22px;
-    height: 22px;
-    
-    /* ทำให้ Checkbox และข้อความอยู่กึ่งกลางกัน */
-    vertical-align: middle;
-    
-    /* เพิ่มระยะห่างระหว่าง Checkbox กับข้อความด้านข้าง */
-    margin-right: 8px;
-    
-    /* ทำให้ขอบมนเล็กน้อย (สำหรับเบราว์เซอร์สมัยใหม่) */
-    accent-color: #1976d2; /* เปลี่ยนสีติ๊กถูกให้เป็นสีน้ำเงินตามธีม */
-    cursor: pointer;
+.incentive-box label {
+    flex: 1;                 /* บังคับให้ทั้ง 2 ฝั่งมีขนาดเท่ากัน */
+    max-width: 135px;        /* จำกัดความกว้างไม่ให้ยืดจนน่าเกลียด */
+    justify-content: center; 
 }
+.incentive-box select { width: 90px; height: 36px; text-align: center; padding: 4px 20px 4px 4px; font-weight: 500; }
 
-/* ปรับสไตล์ Label ที่หุ้ม Checkbox */
-.setting-row label {
-    font-family: 'Kanit', sans-serif;
-    font-size: 16px; /* ปรับตัวอักษรให้อ่านง่ายขึ้น */
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 5px 10px;
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #ddd; /* ทำเป็นกรอบเล็กๆ ให้ดูเหมือนปุ่ม */
-    transition: background 0.2s;
-}
+.row select { height: 40px; border-radius: 10px; width: 100%; box-sizing: border-box; }
 
-/* เมื่อแตะหรือคลิก ให้เปลี่ยนสีพื้นหลังเล็กน้อย */
-.setting-row label:active {
-    background: #e3f2fd;
-}
-/* ปรับสไตล์ช่องกรอกค่าแรงให้เล็กลง */
-.wage-row {
-    display: flex;
-    justify-content: center;
-    gap: 15px; /* เพิ่มระยะห่างระหว่างช่อง */
-    margin-bottom: 15px;
-}
+/* 6. Summary & Card Expand */
+.triple-row { display: grid; grid-template-columns: 100px 80px auto; align-items: center; gap: 8px; padding: 5px 0; font-size: 14px; text-align: left; }
+.money { font-weight: bold; text-align: right; }
+.total-box { font-size: 18px; background: #2e7d32; color: #fff; border-radius: 8px; padding: 10px; margin-top: 15px; }
 
-.wage-row label {
-    font-family: 'Kanit', sans-serif;
-    font-size: 14px;
-    display: flex;
-    flex-direction: column; /* วางชื่อหัวข้อไว้บนช่องกรอก */
-    align-items: center;
-    gap: 5px;
-}
-
-.wage-row input {
-    width: 80px; /* ลดความกว้างลง */
-    padding: 6px;
-    text-align: center; /* ตัวเลขอยู่กึ่งกลาง */
-    font-family: 'Kanit', sans-serif;
-    font-weight: 600;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background: #ffffff;
-    outline: none;
-    -moz-appearance: textfield; /* เอาลูกศรเพิ่ม/ลดเลขออก (Firefox) */
-}
-
-/* เอาลูกศรเพิ่ม/ลดเลขออก (Chrome, Safari, Edge) */
-.wage-row input::-webkit-outer-spin-button,
-.wage-row input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-/* ช่องค่าแรง/ชม (Read-only) */
-#hourlyWage {
-    background: #e9ecef !important;
-    color: #495057;
-    border: 1px dashed #adb5bd;
-}
+.calendar-expand { grid-column: 1 / -1; overflow: hidden; will-change: transform, max-height; }
+.card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+#cardContainer .card { display: none; }
 </style>
 </head>
 
@@ -436,8 +121,7 @@ body {
   <h2>แบบฟอร์มบันทึกเวลา</h2>
 
   <div class="wage-row" style="align-items: center; margin-top: 10px;">
-    <span>ประจำงวดจ่าย</span>
-    <span>เดือน:</span> <select id="monthSelect"></select>
+    <span>ประจำงวดจ่ายเดือน:</span> <select id="monthSelect"></select>
     <span>ปี:</span> <select id="yearSelect"></select>
   </div><br>
 
@@ -452,22 +136,24 @@ body {
   </div>
 
   <fieldset class="incentive-box">
-    <legend>เบี้ยขยัน</legend>
+    <legend>เบี้ยขยัน (รายงวด)</legend>
     <div class="setting-row">
-      <label>รอบ 1: 
-        <select id="incentive1">
-          <option value="0">-</option>
-          <option value="180">ระดับ 1 (180)</option>
-          <option value="210">ระดับ 2 (210)</option>
-        </select>
-      </label>
-      <label>รอบ 2: 
-        <select id="incentive2">
-          <option value="0">-</option>
-          <option value="180">ระดับ 1 (180)</option>
-          <option value="210">ระดับ 2 (210)</option>
-        </select>
-      </label>
+        <label>
+            <span>รอบ 1&nbsp;&nbsp;</span>
+            <select id="incentive1">
+                <option value="0">-</option>
+                <option value="180">180</option>
+                <option value="210">210</option>
+            </select>
+        </label>
+        <label>
+            <span>รอบ 2&nbsp;&nbsp;</span>
+            <select id="incentive2">
+                <option value="0">-</option>
+                <option value="180">180</option>
+                <option value="210">210</option>
+            </select>
+        </label>
     </div>
   </fieldset>
 
@@ -1084,25 +770,25 @@ function calculate(){
     </div>
 
     <div class="triple-row">
-      <span class="col-1">OT 1x</span>
+      <span class="col-1">โอที 1 แรง</span>
       <span class="col-2">${format2(ot1Hour)} ชม.</span>
       <span class="col-3 money">${format2(ot1Pay)} บาท</span>
     </div>
 
     <div class="triple-row">
-      <span class="col-1">OT 1.5x</span>
+      <span class="col-1">โอที 1.5 แรง</span>
       <span class="col-2">${format2(ot15Hours)} ชม.</span>
       <span class="col-3 money">${format2(ot15Pay)} บาท</span>
     </div>
 
     <div class="triple-row">
-      <span class="col-1">OT 2x</span>
+      <span class="col-1">โอที 2 แรง</span>
       <span class="col-2">${format2(ot2Hours)} ชม.</span>
       <span class="col-3 money">${format2(ot2Pay)} บาท</span>
     </div>
 
     <div class="triple-row">
-      <span class="col-1">OT 3x</span>
+      <span class="col-1">โอที 3 แรง</span>
       <span class="col-2">${format2(ot3Hours)} ชม.</span>
       <span class="col-3 money">${format2(ot3Pay)} บาท</span>
     </div>
@@ -1266,12 +952,29 @@ document.getElementById("skillCheck").onchange = () => { saveSettings(); renderS
 document.getElementById("mentorCheck").onchange = () => { saveSettings(); renderSummary(); };
 document.getElementById("incentive1").onchange = () => { saveSettings(); renderSummary(); };
 document.getElementById("incentive2").onchange = () => { saveSettings(); renderSummary(); };
+/* ===== ปรับปรุงระบบหุบการ์ดเมื่อคลิกด้านนอก ===== */
+document.addEventListener("click", function(event) {
+    if (!expandRow) return; // ถ้าไม่มีการ์ดเปิดอยู่ ไม่ต้องทำอะไร
+    
+    // ตรวจสอบว่าจุดที่คลิก อยู่นอกปฏิทิน และ อยู่นอกการ์ดที่กำลังกางอยู่หรือไม่
+    const isClickInsideCalendar = calendarEl.contains(event.target);
+    const isClickInsideCard = expandRow.contains(event.target);
+    
+    if (!isClickInsideCalendar && !isClickInsideCard) {
+        slideClose(expandRow).then(() => {
+            removeExpand(true);
+            if (activeCell) activeCell.classList.remove("active");
+            selectedDate = null;
+            activeCell = null;
+        });
+    }
+});
 
-/* ===== 4. ฟังก์ชันเริ่มต้น (หัวใจสำคัญของการแก้ปัญหา) ===== */
+/* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
 function initApp() {
     const now = new Date();
 
-    // 1. สร้างตัวเลือก "ปี" ใน Dropdown (ถ้าไม่มีส่วนนี้ ปีจะว่าง)
+    // 1. สร้างตัวเลือก "ปี" (ย้อนหลัง 1 ปี และ ล่วงหน้า 1 ปี)
     yearSelect.innerHTML = "";
     for (let y = now.getFullYear() - 1; y <= now.getFullYear() + 1; y++) {
         const o = document.createElement("option");
@@ -1280,11 +983,11 @@ function initApp() {
         yearSelect.appendChild(o);
     }
 
-    // 2. ดึงหน้าล่าสุดที่เคยเปิดจากความจำ
+    // 2. ดึงค่าหน้าล่าสุด
     const savedMonth = localStorage.getItem('lastViewedMonth');
     const savedYear = localStorage.getItem('lastViewedYear');
 
-    // 3. เซตค่าให้ Dropdown (ถ้ามีของเก่าให้ใช้ของเก่า ถ้าไม่มีให้ใช้ปัจจุบัน)
+    // 3. กำหนดค่าให้ Dropdown (ป้องกันค่าว่าง)
     if (savedMonth !== null && savedYear !== null) {
         monthSelect.value = savedMonth;
         yearSelect.value = savedYear;
@@ -1293,12 +996,12 @@ function initApp() {
         yearSelect.value = now.getFullYear();
     }
 
-    // 4. เมื่อได้ ปี และ เดือน ที่แน่นอนแล้ว ค่อยโหลดค่าแรง/ทักษะ และวาดปฏิทิน
+    // 4. โหลดข้อมูลและแสดงผล
     loadSettings(); 
     renderMonth(); 
 }
 
-// เรียกใช้เพียงครั้งเดียว
+// เรียกใช้เพียงครั้งเดียวที่บรรทัดสุดท้าย
 initApp();
 </script>
 
