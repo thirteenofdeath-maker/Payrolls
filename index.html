@@ -332,11 +332,11 @@ body {
 }
 
 .incentive-box legend {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
-    color: #1976d2;
+    color: #000000;
     padding: 0 10px;
-    text-align: auto; /* จั่วหัวไว้ด้านซ้าย */
+    text-align: left;
     margin-left: 10px;
 }
 
@@ -347,15 +347,96 @@ body {
     margin-bottom: 0;
     padding: 5px 0;
 }
+/* ปรับสไตล์ของ Checkbox ให้ใหญ่และสวยงาม */
+.setting-row input[type="checkbox"] {
+    /* ปรับขนาด */
+    width: 22px;
+    height: 22px;
+    
+    /* ทำให้ Checkbox และข้อความอยู่กึ่งกลางกัน */
+    vertical-align: middle;
+    
+    /* เพิ่มระยะห่างระหว่าง Checkbox กับข้อความด้านข้าง */
+    margin-right: 8px;
+    
+    /* ทำให้ขอบมนเล็กน้อย (สำหรับเบราว์เซอร์สมัยใหม่) */
+    accent-color: #1976d2; /* เปลี่ยนสีติ๊กถูกให้เป็นสีน้ำเงินตามธีม */
+    cursor: pointer;
+}
+
+/* ปรับสไตล์ Label ที่หุ้ม Checkbox */
+.setting-row label {
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px; /* ปรับตัวอักษรให้อ่านง่ายขึ้น */
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 10px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd; /* ทำเป็นกรอบเล็กๆ ให้ดูเหมือนปุ่ม */
+    transition: background 0.2s;
+}
+
+/* เมื่อแตะหรือคลิก ให้เปลี่ยนสีพื้นหลังเล็กน้อย */
+.setting-row label:active {
+    background: #e3f2fd;
+}
+/* ปรับสไตล์ช่องกรอกค่าแรงให้เล็กลง */
+.wage-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* เพิ่มระยะห่างระหว่างช่อง */
+    margin-bottom: 15px;
+}
+
+.wage-row label {
+    font-family: 'Kanit', sans-serif;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column; /* วางชื่อหัวข้อไว้บนช่องกรอก */
+    align-items: center;
+    gap: 5px;
+}
+
+.wage-row input {
+    width: 80px; /* ลดความกว้างลง */
+    padding: 6px;
+    text-align: center; /* ตัวเลขอยู่กึ่งกลาง */
+    font-family: 'Kanit', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #ffffff;
+    outline: none;
+    -moz-appearance: textfield; /* เอาลูกศรเพิ่ม/ลดเลขออก (Firefox) */
+}
+
+/* เอาลูกศรเพิ่ม/ลดเลขออก (Chrome, Safari, Edge) */
+.wage-row input::-webkit-outer-spin-button,
+.wage-row input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ช่องค่าแรง/ชม (Read-only) */
+#hourlyWage {
+    background: #e9ecef !important;
+    color: #495057;
+    border: 1px dashed #adb5bd;
+}
 </style>
 </head>
 
 <body>
 
 <div class="main-container">
-  <h2>บันทึกเวลาประจำงวดจ่าย</h2>
+  <h2>แบบฟอร์มบันทึกเวลา</h2>
 
   <div class="wage-row" style="align-items: center; margin-top: 10px;">
+    <span>ประจำงวดจ่าย</span>
     <span>เดือน:</span> <select id="monthSelect"></select>
     <span>ปี:</span> <select id="yearSelect"></select>
   </div><br>
