@@ -112,6 +112,65 @@ select:focus {
 .calendar-expand { grid-column: 1 / -1; overflow: hidden; will-change: transform, max-height; }
 .card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 #cardContainer .card { display: none; }
+/* ปรับสไตล์แถวภายในการ์ดแก้ไขข้อมูล */
+.card-body .row {
+    display: flex;
+    justify-content: space-between; /* แยกหัวข้อไปซ้าย ช่องเลือกไปขวา */
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 15px;
+}
+
+.card-body .row label {
+    width: auto; /* ให้ความกว้างปรับตามข้อความ */
+    min-width: 60px;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: left;
+    margin-bottom: 0; /* เอา margin เดิมออก */
+}
+
+.card-body select {
+    flex: 1; /* ให้ Dropdown ขยายเต็มพื้นที่ที่เหลือ */
+    max-width: 200px; /* จำกัดความกว้างไม่ให้ยาวเกินไป */
+    height: 38px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* ปรับหัวการ์ด (วันที่) ให้เด่นชัดและอยู่กลาง */
+.card-header {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    position: relative;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+/* ย้าย Badge ไปไว้มุมขวาบนของหัวการ์ด */
+.card-actions {
+    position: absolute;
+    right: 0;
+}
+/* สีของ Badge ที่มุมขวาบน  */
+.badge-work { background-color: #4caf50 !important; }    /* เขียว */
+.badge-holiday { background-color: #607d8b !important; } /* เทา */
+.badge-leave { background-color: #ff9800 !important; }   /* ส้ม */
+.badge-absent { background-color: #e53935 !important; }  /* แดง */
+
+/* ตกแต่ง Badge ให้ดูเป็นปุ่มมนสวยงาม  */
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    display: inline-block;
+}
 @media print {
     /* ตั้งค่าหน้ากระดาษ A4 และขอบกระดาษ */
     @page { size: A4; margin: 15mm; }
@@ -311,46 +370,31 @@ function loadCards(){
   return JSON.parse(localStorage.getItem(getMonthKey())||"[]");
 }
 
-/* ===== BADGE ===== */
-function updateBadge(card){
-  const b = card.querySelector(".badge");
-  const statusEl = card.querySelector(".status");
+function updateBadge(card) {
+    const b = card.querySelector(".badge");
+    const statusEl = card.querySelector(".status");
+    if (!b || !statusEl) return;
 
-  if (!b || !statusEl) return;
+    const s = statusEl.value.trim();
 
-  const s = statusEl.value.trim();
+    // 1. ล้างคลาสสีเดิมออกให้หมดก่อน 
+    b.classList.remove("badge-work", "badge-holiday", "badge-leave", "badge-absent");
 
-  // reset class
-  b.classList.remove(
-    "badge-work",
-    "badge-holiday",
-    "badge-leave",
-    "badge-absent"
-  );
+    // 2. ตรวจสอบเงื่อนไขและใส่สีตามที่กำหนดไว้ใน CSS 
+    if (s === "ขาดงาน") {
+        b.classList.add("badge-absent"); // สีแดง 
+    } 
+    else if (s.includes("หยุด")) {
+        b.classList.add("badge-holiday"); // สีเทา 
+    } 
+    else if (s.includes("ลา") || s.includes("ป่วย")) {
+        b.classList.add("badge-leave"); // สีส้ม 
+    } 
+    else {
+        b.classList.add("badge-work"); // สีเขียวสำหรับ "วันทำงาน" 
+    }
 
-  // ไม่มีค่า → ซ่อน
-  if (!s) {
-    b.style.display = "none";
-    return;
-  }
-
-  b.style.display = "inline-block";
-
-  if (s === "ขาดงาน") {
-    b.classList.add("badge-absent");
-  }
-  else if (s.includes("หยุด")) {
-    b.classList.add("badge-holiday");
-  }
-  else if (s.includes("ลา") || s.includes("ป่วย")) {
-    b.classList.add("badge-leave");
-  }
-  else {
-    b.classList.add("badge-work");
-  }
-
-  b.textContent = s;
-
+    b.textContent = s; // อัปเดตข้อความในป้าย 
 }
 
 function createCard(date, saved) {
@@ -382,10 +426,10 @@ function createCard(date, saved) {
       <div class="row"><label>กะ</label>
         <select class="shift"><option></option><option>เช้า</option><option>ดึก</option></select>
       </div>
-      <div class="row"><label>ปกติ</label>
+      <div class="row"><label>ช่วงปกติ</label>
         <select class="normal"><option value="0">0</option><option value="4">4</option><option value="8">8</option></select>
       </div>
-      <div class="row"><label>โอที</label>
+      <div class="row"><label>ช่วงโอที</label>
         <select class="ot">
           <option value="0">0</option>
           <option value="0.17">0.17</option>
