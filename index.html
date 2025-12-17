@@ -112,6 +112,66 @@ select:focus {
 .calendar-expand { grid-column: 1 / -1; overflow: hidden; will-change: transform, max-height; }
 .card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 #cardContainer .card { display: none; }
+@media print {
+    /* ตั้งค่าหน้ากระดาษ A4 และขอบกระดาษ */
+    @page { size: A4; margin: 15mm; }
+
+    /* ซ่อนส่วนที่ไม่เกี่ยวข้อง */
+    button, select, fieldset, .calendar, h2, .wage-row, .setting-row, .no-print {
+        display: none !important;
+    }
+
+    body { background: white; margin: 0; padding: 0; }
+
+    /* ขยาย Container หลักให้เต็มหน้ากระดาษด้านข้าง */
+    .main-container { 
+        max-width: 100% !important; 
+        width: 100% !important; 
+    }
+    
+    #result { 
+        display: block !important; 
+        width: 100% !important;
+    }
+
+    /* หัวกระดาษรายงาน */
+    #result::before {
+        content: attr(data-period);
+        display: block;
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+    }
+
+    /* จัดระเบียบแถวข้อมูลให้ขยายออกด้านข้าง */
+    .triple-row {
+        display: flex !important;
+        justify-content: space-between;
+        width: 100%;
+        font-size: 16px;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .col-1 { flex: 2; text-align: left; }
+    .col-2 { flex: 1; text-align: right; }
+    .col-3 { flex: 1; text-align: right; font-weight: bold; }
+
+    /* บังคับสีพื้นหลังยอดสุทธิ */
+    .triple-row[style*="background"] {
+        background: #2e7d32 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        padding: 15px !important;
+        border-radius: 5px;
+    }
+}
+@media print {
+    .no-print { display: none !important; }
+}
 </style>
 </head>
 
@@ -170,6 +230,13 @@ select:focus {
 <div id="summaryContainer" style="margin-top: 20px;"></div>
 
 <div id="result" style="margin-top:20px;"></div>
+
+<div style="display: flex; gap: 8px; margin-top: 30px; justify-content: center;">
+    <button id="pdfBtn" style="background: #e53935; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; flex: 1;">📄 PDF</button>
+    <button id="exportBtn" style="background: #455a64; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; flex: 1;">📥 สำรอง</button>
+    <button id="importBtn" style="background: #607d8b; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; flex: 1;">📤 นำเข้า</button>
+</div>
+<input type="file" id="fileInput" style="display: none;" accept=".json">
 
 <script>
 
@@ -744,18 +811,13 @@ function calculate(){
   
 
   document.getElementById("result").innerHTML = `
-  <div style="
-    line-height:1;
-    font-size:14px;
-    max-width:420px;
-    margin:auto;
-  ">
+  <div style="line-height:1.2; font-size:14px; width:100%; margin:auto;"> 
 
-    <div style="text-align:center; font-size:16px; font-weight:bold;">
+    <div class="no-print" style="text-align:center; font-size:16px; font-weight:bold; margin-bottom:10px;">
       สรุปเงินเดือน
     </div>
 
-    <hr>
+    <hr class="no-print">
 
     <div class="triple-row">
       <span class="col-1">วันทำงาน</span>
@@ -884,6 +946,9 @@ function calculate(){
     <div style="font-size:8px;"><br><br>
       <span class="col-3 money">***ข้อมูลนี้เป็นเพียงการคำนวณแบบคร่าวๆ ไม่สามารถนำมาอ้างอิงจริงได้ โปรดใช้วิจารณญาณในการใช้งาน***</span>
     </div>
+
+    <div id="result" style="margin-top:20px;">
+    </div>
   </div>
 `;
 }
@@ -970,6 +1035,77 @@ document.addEventListener("click", function(event) {
     }
 });
 
+document.getElementById("pdfBtn").onclick = () => {
+    // 1. คำนวณข้อมูลล่าสุดก่อนพิมพ์เพื่อให้ข้อมูลไม่หาย
+    renderSummary(); 
+    
+    // 2. ดึงชื่อเดือนและปีจาก Dropdown
+    const monthName = monthSelect.options[monthSelect.selectedIndex].text; // เช่น December (มกราคม, ...)
+    const yearValue = yearSelect.value; // เช่น 2025
+    
+    // แปลงชื่อเดือนไทยเป็นอังกฤษสำหรับชื่อไฟล์ (ถ้าต้องการ) หรือใช้ชื่อตาม Dropdown
+    // ในที่นี้จะดึงค่าจาก monthNames ที่คุณประกาศไว้
+    const monthEN = ["January", "February", "March", "April", "May", "June", 
+                     "July", "August", "September", "October", "November", "December"];
+    const mIdx = monthSelect.value;
+    
+    // 3. ตั้งชื่อไฟล์ตามรูปแบบ: Payroll_2025_December.pdf
+    const fileName = `Payroll_${yearValue}_${monthEN[mIdx]}`;
+    
+    // 4. เปลี่ยนชื่อหัวข้อเว็บชั่วคราวเพื่อกำหนดชื่อไฟล์ PDF
+    const originalTitle = document.title;
+    document.title = fileName;
+    
+    // 5. กำหนดหัวรายงานในเนื้อหา (แสดงชื่อเดือนปีที่เลือก)
+    const res = document.getElementById("result");
+    res.setAttribute("data-period", `สรุปเงินเดือนประจำงวด ${monthName} ${yearValue}`);
+    
+    // 6. สั่งพิมพ์
+    window.print();
+    
+    // 7. คืนค่าชื่อหัวข้อเดิมหลังจากสั่งพิมพ์
+    setTimeout(() => {
+        document.title = originalTitle;
+    }, 1000);
+};
+
+// --- 2. สำรองข้อมูล (Export JSON) ---
+document.getElementById("exportBtn").onclick = () => {
+    const backupData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        // เก็บเฉพาะข้อมูล payroll และ settings
+        if (key.includes("payroll-") || key.includes("settings-")) {
+            backupData[key] = localStorage.getItem(key);
+        }
+    }
+    const blob = new Blob([JSON.stringify(backupData)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `payroll_backup_${new Date().toLocaleDateString()}.json`;
+    a.click();
+};
+
+// --- 3. นำเข้าข้อมูล (Import JSON) ---
+document.getElementById("importBtn").onclick = () => document.getElementById("fileInput").click();
+
+document.getElementById("fileInput").onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const data = JSON.parse(event.target.result);
+            if (confirm("ต้องการนำเข้าข้อมูลใช่หรือไม่? ข้อมูลเดิมในเครื่องจะถูกเขียนทับ")) {
+                Object.keys(data).forEach(key => localStorage.setItem(key, data[key]));
+                alert("นำเข้าข้อมูลสำเร็จ!");
+                location.reload();
+            }
+        } catch (err) { alert("ไฟล์ไม่ถูกต้อง"); }
+    };
+    reader.readAsText(file);
+};
 /* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
 function initApp() {
     const now = new Date();
