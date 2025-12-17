@@ -9,22 +9,28 @@
 <meta name="apple-mobile-web-app-title" content="Payroll App">
 <link rel="apple-touch-icon" href="icon.png">
 <style>
-bbody {
-    /* ใช้ฟอนต์ Sarabun หากเครื่องมี หรือใช้ฟอนต์ระบบที่อ่านง่ายที่สุด */
-    font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 20px;
-    background: #f0f2f5; /* สีพื้นหลังโทนแอปสมัยใหม่ */
+/* ดึงฟอนต์ Kanit จาก Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+
+body {
+    /* ลำดับฟอนต์: Kanit -> ฟอนต์ระบบ iOS/Android -> ฟอนต์ไร้หัวมาตรฐาน */
+    font-family: 'Kanit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    padding: 15px;
+    background: #f0f2f5;
     color: #333;
     -webkit-font-smoothing: antialiased;
-    line-height: 1.5;
+    display: flex;
+    justify-content: center;
 }
-
-h2 {
-    font-weight: 700;
-    color: #1a1a1a;
+.main-container {
+    width: 100%;
+    max-width: 450px;
     text-align: center;
 }
-select,input{padding:6px 8px;border-radius:8px;border:1px solid #ccc}
+
+h2 { font-weight: 700; color: #1a1a1a; margin-bottom: 20px; }
+select, input { padding: 8px 10px; border-radius: 10px; border: 1px solid #ccc; font-size: 14px; }
 
 /* ===== CALENDAR ===== */
 .calendar{margin:12px 0}
@@ -443,13 +449,6 @@ dailyInput.addEventListener("input", () => {
 document.getElementById("skillCheck").addEventListener("change", renderSummary);
 document.getElementById("mentorCheck").addEventListener("change", renderSummary);
 
-const now=new Date();
-for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
-  const o=document.createElement("option");
-  o.value=y;o.textContent=y;
-  yearSelect.appendChild(o);
-}
-
 let selectedDate=null;
 let expandRow=null;
 let activeCell = null; // ⭐ cell ที่เปิดอยู่จริง
@@ -651,10 +650,6 @@ function renderCalendar() {
         cell.className = "day-cell";
         cell.textContent = d.getDate(); // แสดงเลขวันที่ (16, 17, ... 1, 2, ... 15)
         cell.dataset.date = key;
-
-        // เน้นสีตัวเลขวันเสาร์-อาทิตย์
-        if (dayOfWeek === 0) cell.style.color = "#e53935"; // อาทิตย์แดง
-        if (dayOfWeek === 6) cell.style.color = "#1976d2"; // เสาร์น้ำเงิน
 
         // แสดงจุดสี Status และ Shift
         const dayData = savedDataList.find(x => x.date === key);
@@ -1121,89 +1116,104 @@ function calculate(){
   </div>
 `;
 }
-/* --- ส่วนท้ายที่ถูกต้อง --- */
-
+/* ===== 1. ปรับปรุงฟังก์ชันบันทึก ให้จำทั้งการตั้งค่าและหน้าล่าสุด ===== */
 function saveSettings() {
-    const y = document.getElementById("yearSelect").value;
-    const m = document.getElementById("monthSelect").value;
+    const y = yearSelect.value;
+    const m = monthSelect.value;
     
     const settings = {
         skill: document.getElementById("skillCheck").checked,
         mentor: document.getElementById("mentorCheck").checked,
-        dailyWage: document.getElementById("dailyWage").value,
+        dailyWage: dailyInput.value,
         incentive1: document.getElementById("incentive1").value,
         incentive2: document.getElementById("incentive2").value
     };
     
+    // บันทึกแยกรายเดือน
     localStorage.setItem(`settings-${y}-${m}`, JSON.stringify(settings));
+    // บันทึกว่าเปิดหน้าไหนล่าสุด
     localStorage.setItem('lastViewedMonth', m);
     localStorage.setItem('lastViewedYear', y);
 }
 
+/* ===== 2. ฟังก์ชันโหลด ต้องทำงานหลังจากระบุเดือน/ปีแล้วเท่านั้น ===== */
 function loadSettings() {
-    const y = document.getElementById("yearSelect").value;
-    const m = document.getElementById("monthSelect").value;
+    const y = yearSelect.value;
+    const m = monthSelect.value;
     const saved = JSON.parse(localStorage.getItem(`settings-${y}-${m}`));
     
     if (saved) {
         document.getElementById("skillCheck").checked = saved.skill;
         document.getElementById("mentorCheck").checked = saved.mentor;
-        document.getElementById("dailyWage").value = saved.dailyWage || 447;
+        dailyInput.value = saved.dailyWage || 447;
         document.getElementById("incentive1").value = saved.incentive1 || "0";
         document.getElementById("incentive2").value = saved.incentive2 || "0";
     } else {
+        // ถ้าเดือนใหม่ยังไม่มีข้อมูล ให้รีเซ็ตเป็นค่าเริ่มต้น
         document.getElementById("skillCheck").checked = false;
         document.getElementById("mentorCheck").checked = false;
-        document.getElementById("dailyWage").value = 447; 
+        dailyInput.value = 447; 
         document.getElementById("incentive1").value = "0";
         document.getElementById("incentive2").value = "0";
     }
     syncHourly();
 }
 
-// ผูกเหตุการณ์ต่างๆ
-document.getElementById("monthSelect").onchange = () => { saveSettings(); loadSettings(); renderMonth(); };
-document.getElementById("yearSelect").onchange = () => { saveSettings(); loadSettings(); renderMonth(); };
+/* ===== 3. จัดระเบียบเหตุการณ์ (Events) ให้มีการบันทึกที่ถูกต้อง ===== */
+monthSelect.onchange = () => { 
+    // ไม่ต้อง saveSettings ตรงนี้ เพราะจะไปทับเดือนใหม่ 
+    // แค่โหลดของเดือนใหม่มาโชว์พอ
+    loadSettings(); 
+    renderMonth(); 
+    // บันทึกสถานะว่าตอนนี้ดูเดือนนี้อยู่
+    localStorage.setItem('lastViewedMonth', monthSelect.value);
+};
 
+yearSelect.onchange = () => { 
+    loadSettings(); 
+    renderMonth(); 
+    localStorage.setItem('lastViewedYear', yearSelect.value);
+};
+
+// ส่วน Input อื่นๆ ให้บันทึกทันทีเมื่อเปลี่ยนค่า
+dailyInput.oninput = () => { syncHourly(); saveSettings(); renderSummary(); };
 document.getElementById("skillCheck").onchange = () => { saveSettings(); renderSummary(); };
 document.getElementById("mentorCheck").onchange = () => { saveSettings(); renderSummary(); };
-document.getElementById("dailyWage").oninput = () => { syncHourly(); saveSettings(); renderSummary(); };
 document.getElementById("incentive1").onchange = () => { saveSettings(); renderSummary(); };
 document.getElementById("incentive2").onchange = () => { saveSettings(); renderSummary(); };
 
-// ฟีเจอร์: แตะพื้นที่ว่างแล้วการ์ดหุบ
-document.addEventListener("click", function(event) {
-    if (!expandRow) return;
-    const isClickInsideCalendar = calendarEl.contains(event.target);
-    const isClickInsideCard = expandRow.contains(event.target);
-    if (!isClickInsideCalendar && !isClickInsideCard) {
-        slideClose(expandRow).then(() => {
-            removeExpand(true);
-            if (activeCell) activeCell.classList.remove("active");
-            selectedDate = null;
-            activeCell = null;
-        });
-    }
-});
-
+/* ===== 4. ฟังก์ชันเริ่มต้น (หัวใจสำคัญของการแก้ปัญหา) ===== */
 function initApp() {
+    const now = new Date();
+
+    // 1. สร้างตัวเลือก "ปี" ใน Dropdown (ถ้าไม่มีส่วนนี้ ปีจะว่าง)
+    yearSelect.innerHTML = "";
+    for (let y = now.getFullYear() - 1; y <= now.getFullYear() + 1; y++) {
+        const o = document.createElement("option");
+        o.value = y;
+        o.textContent = y;
+        yearSelect.appendChild(o);
+    }
+
+    // 2. ดึงหน้าล่าสุดที่เคยเปิดจากความจำ
     const savedMonth = localStorage.getItem('lastViewedMonth');
     const savedYear = localStorage.getItem('lastViewedYear');
 
+    // 3. เซตค่าให้ Dropdown (ถ้ามีของเก่าให้ใช้ของเก่า ถ้าไม่มีให้ใช้ปัจจุบัน)
     if (savedMonth !== null && savedYear !== null) {
         monthSelect.value = savedMonth;
         yearSelect.value = savedYear;
     } else {
-        const d = new Date();
-        monthSelect.value = d.getMonth();
-        yearSelect.value = d.getFullYear();
+        monthSelect.value = now.getMonth();
+        yearSelect.value = now.getFullYear();
     }
 
-    // --- ส่วนที่แก้ไข: ต้องโหลดข้อมูลของเดือนนั้นๆ ขึ้นมาแสดงทันที ---
+    // 4. เมื่อได้ ปี และ เดือน ที่แน่นอนแล้ว ค่อยโหลดค่าแรง/ทักษะ และวาดปฏิทิน
     loadSettings(); 
     renderMonth(); 
 }
 
+// เรียกใช้เพียงครั้งเดียว
 initApp();
 </script>
 
