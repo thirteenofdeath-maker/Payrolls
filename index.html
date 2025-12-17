@@ -157,20 +157,85 @@ select:focus {
     right: 0;
 }
 /* สีของ Badge ที่มุมขวาบน  */
-.badge-work { background-color: #4caf50 !important; }    /* เขียว */
-.badge-holiday { background-color: #607d8b !important; } /* เทา */
-.badge-leave { background-color: #ff9800 !important; }   /* ส้ม */
-.badge-absent { background-color: #e53935 !important; }  /* แดง */
-
+.badge-work { background-color: #a5d6a7 !important; color: #1b5e20 !important; }    /* เขียวซอฟต์ */
+.badge-holiday { background-color: #cfd8dc !important; color: #37474f !important; } /* เทาสบายตา */
+.badge-leave { background-color: #ffe0b2 !important; color: #e65100 !important; }   /* ส้มพาสเทล */
+.badge-absent { background-color: #ffcdd2 !important; color: #b71c1c !important; }  /* แดงอ่อน */
 /* ตกแต่ง Badge ให้ดูเป็นปุ่มมนสวยงาม  */
 .badge {
-    padding: 4px 10px;
-    border-radius: 12px;
+    padding: 4px 12px;
+    border-radius: 50px; /* ทรงมนสวย */
     font-size: 12px;
-    font-weight: bold;
+    font-weight: 500;
     color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+/* ปรับแต่งปุ่มให้ดูน่ารักและมนเป็นพิเศษ */
+button {
+    font-family: 'Kanit', sans-serif;
+    border: none;
+    transition: transform 0.2s active;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+button:active { transform: scale(0.95); }
+
+/* สไตล์ปุ่มกดด้านล่างแบบก้อนเมฆมนๆ */
+#pdfBtn { background: #ffcdd2; color: #b71c1c; } /* สีชมพูอ่อน */
+#exportBtn { background: #d1c4e9; color: #4527a0; } /* สีม่วงอ่อน */
+#importBtn { background: #c8e6c9; color: #1b5e20; } /* สีเขียวอ่อน */
+
+/* ไอคอนสถานะในการ์ดแก้ไขข้อมูล */
+/* ใส่ไอคอนปฏิทินเฉพาะ div ตัวแรก (วันที่) ที่อยู่ทางซ้าย */
+.card-header div:first-child::before {
+    content: "📅 "; 
     display: inline-block;
 }
+
+/* ป้องกันไม่ให้ actions หรือ badge แสดงไอคอนซ้ำ */
+.card-actions::before {
+    content: none !important;
+}
+/* ปรับปรุง Label ในการ์ดให้ดูสะอาดตา */
+.card-body .row {
+    display: flex;
+    justify-content: space-between; /* ผลัก label ไปซ้ายสุด select ไปขวาสุด */
+    align-items: center;
+    margin-bottom: 12px;
+    background: #fafafa; /* เพิ่มพื้นหลังจางๆ ให้แต่ละแถวดูแยกกันชัดเจน */
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+.card-body label {
+    font-size: 14px;
+    color: #546e7a;
+    font-weight: 500;
+    margin: 0;
+}
+
+.card-body select {
+    width: 60%; /* ปรับความกว้างช่องเลือกให้พอดี */
+    border: 1px solid #eceff1;
+    background-color: #fff;
+    height: 35px;
+}
+.badge {
+    padding: 3px 12px;
+    border-radius: 20px; /* ทรงแคปซูล */
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* เพิ่ม Icon เล็กๆ หน้าสถานะผ่าน CSS */
+.badge-work::before { content: "✅ "; }
+.badge-holiday::before { content: "🏖️ "; }
+.badge-leave::before { content: "📝 "; }
+.badge-absent::before { content: "❌ "; }
 @media print {
     /* ตั้งค่าหน้ากระดาษ A4 และขอบกระดาษ */
     @page { size: A4; margin: 15mm; }
@@ -227,6 +292,47 @@ select:focus {
         padding: 15px !important;
         border-radius: 5px;
     }
+}
+/* คอนเทนเนอร์คุมปุ่มด้านล่าง */
+.button-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+    justify-content: center;
+    padding: 0 10px;
+}
+
+/* สไตล์ปุ่มกดหลัก */
+.btn-action {
+    flex: 1;
+    border: none;
+    border-radius: 15px; /* มนพิเศษแบบน่ารัก */
+    padding: 12px 8px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column; /* ไอคอนอยู่บน ข้อความอยู่ล่าง */
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.btn-action:active {
+    transform: scale(0.92);
+    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+}
+
+/* สีพาสเทลแยกตามประเภทปุ่ม */
+#pdfBtn { background-color: #ff8a80; color: #fff; }    /* สีแดงซอฟต์ */
+#exportBtn { background-color: #546e7a; color: #fff; } /* สีเทาเข้มสวย */
+#importBtn { background-color: #78909c; color: #fff; } /* สีเทาอ่อน */
+
+/* ไอคอนภายในปุ่ม */
+.btn-icon {
+    font-size: 20px;
 }
 @media print {
     .no-print { display: none !important; }
@@ -290,10 +396,19 @@ select:focus {
 
 <div id="result" style="margin-top:20px;"></div>
 
-<div style="display: flex; gap: 8px; margin-top: 30px; justify-content: center;">
-    <button id="pdfBtn" style="background: #e53935; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; flex: 1;">📄 PDF</button>
-    <button id="exportBtn" style="background: #455a64; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; flex: 1;">📥 สำรอง</button>
-    <button id="importBtn" style="background: #607d8b; color: white; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; flex: 1;">📤 นำเข้า</button>
+<div class="button-group">
+    <button id="pdfBtn" class="btn-action">
+        <span class="btn-icon">📄</span>
+        <span>PDF</span>
+    </button>
+    <button id="exportBtn" class="btn-action">
+        <span class="btn-icon">📤</span>
+        <span>สำรอง</span>
+    </button>
+    <button id="importBtn" class="btn-action">
+        <span class="btn-icon">📥</span>
+        <span>นำเข้า</span>
+    </button>
 </div>
 <input type="file" id="fileInput" style="display: none;" accept=".json">
 
@@ -410,7 +525,7 @@ function createCard(date, saved) {
       </div>
     </div>
     <div class="card-body">
-      <div class="row"><label>สถานะ</label>
+      <div class="row"><label>📌 สถานะ</label>
         <select class="status">
           <option>วันทำงาน</option>
           <option>วันหยุด</option>
@@ -423,13 +538,17 @@ function createCard(date, saved) {
           <option>ขาดงาน</option>
         </select>
       </div>
-      <div class="row"><label>กะ</label>
-        <select class="shift"><option></option><option>เช้า</option><option>ดึก</option></select>
+      <div class="row"><label>⏰ กะ</label>
+        <select class="shift">
+          <option value="">เลือกกะ</option>
+          <option value="เช้า">☀️ กะเช้า</option>
+          <option value="ดึก">🌙 กะดึก</option>
+        </select>
       </div>
-      <div class="row"><label>ช่วงปกติ</label>
+      <div class="row"><label>⚙️ ปกติ</label>
         <select class="normal"><option value="0">0</option><option value="4">4</option><option value="8">8</option></select>
       </div>
-      <div class="row"><label>ช่วงโอที</label>
+      <div class="row"><label>🚀 โอที</label>
         <select class="ot">
           <option value="0">0</option>
           <option value="0.17">0.17</option>
@@ -438,6 +557,8 @@ function createCard(date, saved) {
         </select>
       </div>
     </div>
+    
+    
   `;
   
   container.appendChild(card);
@@ -979,7 +1100,7 @@ function calculate(){
 
     <hr>
 
-    <div class="triple-row" style="font-size:20px;background:#2e7d32;color:#ffffff;border-radius: 5px;">
+    <div class="triple-row" style="font-size:20px;background:#42a847;color:#ffffff;border-radius: 5px;">
       <span class="col-1"><b>&nbsp;สุทธิ</b></span>
       <span class="col-2"></span>
       <span class="col-3 money">
