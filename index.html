@@ -495,7 +495,7 @@ function updateBadge(card) {
     const s = statusEl.value.trim();
 
     // 1. ล้างคลาสสีเดิมออกให้หมดก่อน 
-    b.classList.remove("badge-work", "badge-holiday", "badge-leave", "badge-absent");
+    b.classList.remove("badge-normal","badge-work", "badge-holiday", "badge-leave", "badge-absent");
 
     // 2. ตรวจสอบเงื่อนไขและใส่สีตามที่กำหนดไว้ใน CSS 
     if (s === "ขาดงาน") {
