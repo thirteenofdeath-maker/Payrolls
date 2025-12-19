@@ -505,10 +505,12 @@ function updateBadge(card) {
     else if (s.includes("ลา") || s.includes("ป่วย")) {
         b.classList.add("badge-leave"); // สีส้ม 
     } 
-    else {
+    else if (s === "วันทำงาน") {
         b.classList.add("badge-work"); // สีเขียวสำหรับ "วันทำงาน" 
     }
-
+    else {
+        b.className = "badge";
+    }
     b.textContent = s; // อัปเดตข้อความในป้าย 
 }
 
