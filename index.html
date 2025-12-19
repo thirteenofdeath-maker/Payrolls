@@ -63,6 +63,7 @@ select:focus {
 .day-cell::after { left: 35%; transform: translateX(-50%); } 
 .day-cell::before { left: 65%; transform: translateX(-50%); }
 
+.day-normal::after { background: #ffffff; display: block; }
 .day-work::after { background: #4caf50; display: block; }
 .day-leave::after { background: #ff9800; display: block; }
 .day-absent::after { background: #e53935; display: block; }
@@ -590,7 +591,7 @@ function createCard(date, saved) {
           const cell = document.querySelector(`.day-cell[data-date="${card.dataset.date}"]`);
           if (cell) {
               // ล้างคลาสทั้งหมดก่อน
-              cell.classList.remove("day-work", "day-holiday", "day-leave", "day-absent", "shift-morning", "shift-night");
+              cell.classList.remove("day-normal","day-work", "day-holiday", "day-leave", "day-absent", "shift-morning", "shift-night");
             
               //  ใส่คลาสสถานะ (จุดซ้าย)
               const sClass = getStatusClass(statusSelect.value);
@@ -610,7 +611,8 @@ function getStatusClass(status) {
     if (status.includes("หยุด")) return "day-holiday";
     if (status.includes("ลา")) return "day-leave";
     if (status === "ขาดงาน") return "day-absent";
-    return "day-work";
+    if (status === "วันทำงาน") return "day-work";
+    return "day-normal;
 }
 
 // เพิ่มฟังก์ชันใหม่สำหรับกะ
