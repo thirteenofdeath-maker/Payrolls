@@ -570,7 +570,7 @@ function createCard(date, saved) {
   const normalSelect = card.querySelector(".normal");
   const otSelect = card.querySelector(".ot");
 
-  statusSelect.value = saved?.status || "วันทำงาน";
+  statusSelect.value = saved?.status || "--เลือกวัน--";
   shiftSelect.value = saved?.shift || "";
   normalSelect.value = saved?.normal || "0";
   otSelect.value = saved?.ot || "0";
