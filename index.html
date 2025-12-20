@@ -551,14 +551,18 @@ function createCard(date, saved) {
         </select>
       </div>
       <div class="row"><label>⚙️ ช่วงเวลาปกติ</label>
-        <select class="normal"><option value="0">0</option><option value="4">4</option><option value="8">8</option></select>
+        <select class="normal">
+          <option value="0">-</option>
+          <option value="4">4 ชม.</option>
+          <option value="8">8 ชม.</option>
+        </select>
       </div>
       <div class="row"><label>🚀 ช่วงเวลาโอที</label>
         <select class="ot">
-          <option value="0">0</option>
-          <option value="0.17">0.17</option>
-          <option value="2.51">2.51</option>
-          <option value="4.51">4.51</option>
+          <option value="0">-</option>
+          <option value="0.17">0.17 ชม.</option>
+          <option value="2.51">2.51 ชม.</option>
+          <option value="4.51">4.51 ชม.</option>
         </select>
       </div>
     </div>
@@ -574,10 +578,10 @@ function createCard(date, saved) {
   const normalSelect = card.querySelector(".normal");
   const otSelect = card.querySelector(".ot");
 
-  statusSelect.value = saved?.status || "--เลือกวัน--";
+  statusSelect.value = saved?.status || "";
   shiftSelect.value = saved?.shift || "";
-  normalSelect.value = saved?.normal || "0";
-  otSelect.value = saved?.ot || "0";
+  normalSelect.value = saved?.normal || "";
+  otSelect.value = saved?.ot || "";
 
   updateBadge(card);
 
