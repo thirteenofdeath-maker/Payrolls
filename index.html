@@ -981,7 +981,7 @@ function calculate(){
     nightShiftPay+nightFoodPay+otFoodPay+skillPay+mentorPay+
     holidayspecialPay+vacationPay+sickdocterPay+businessextraPay+
     incentive1Pay+incentive2Pay;
-  const socialSecurity=round(salaryPay * S.SOCIAL_SECURITY_RATE,0);
+  const socialSecurity = round((salaryPay + holidayspecialPay + vacationPay + sickdocterPay + businessextraPay) * S.SOCIAL_SECURITY_RATE,0);
   const netPay=totalIncome-socialSecurity;
   
 
