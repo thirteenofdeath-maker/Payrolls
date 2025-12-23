@@ -536,7 +536,7 @@ function createCard(date, saved) {
           <option>วันหยุด</option>
           <option>วันหยุดพิเศษ</option>
           <option>ลาพักร้อน</option>
-          <option>ลาป่วยแพทย์</option>
+          <option>ลาป่วยแพทย์(เขียนใบสอบสวน)</option>
           <option>ลากิจพิเศษ</option>
           <option>ลาป่วย</option>
           <option>ลากิจ</option>
@@ -940,7 +940,7 @@ function calculate(){
       if (shift === "ดึก") nightShiftDays++; 
     }
     // สำหรับสถานะการลาต่างๆ ที่คุณต้องการให้ได้ค่ากะดึกด้วย
-    else if (["ลาพักร้อน", "ขาดงาน", "ลาป่วย", "ลาป่วยแพทย์", "ลากิจ", "ลากิจพิเศษ"].includes(status)) {
+    else if (["ลาพักร้อน", "ขาดงาน", "ลาป่วย", "ลาป่วยแพทย์(เขียนใบสอบสวน)", "ลากิจ", "ลากิจพิเศษ"].includes(status)) {
       if (shift === "ดึก") {
         nightShiftDays++;
       }
@@ -951,10 +951,10 @@ function calculate(){
       otFoodDays++;
     }
   });
-  const cNormalday      = countIncludeStatusNormal(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+countIncludeStatusNormal(["วันทำงาน"],"8")*1;
+  const cNormalday      = countIncludeStatusNormal(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์(เขียนใบสอบสวน)","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+countIncludeStatusNormal(["วันทำงาน"],"8")*1;
   const cHolidaySpecial = countIncludeStatusNormal(["วันหยุดพิเศษ"]);
   const cVacation       = countIncludeStatusNormal(["ลาพักร้อน"],"4")*0.5+countIncludeStatusNormal(["ลาพักร้อน"],"0")*1;
-  const cSickDoctor     = countIncludeStatusNormal(["ลาป่วยแพทย์"],"4")*0.5+countIncludeStatusNormal(["ลาป่วยแพทย์"],"0")*1;
+  const cSickDoctor     = countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"4")*0.5+countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"0")*1;
   const cBusinessExtra  = countIncludeStatusNormal(["ลากิจพิเศษ"],"4")*0.5+countIncludeStatusNormal(["ลากิจพิเศษ"],"0")*1;
   const cSick           = countIncludeStatusNormal(["ลาป่วย"],"4")*0.5+countIncludeStatusNormal(["ลาป่วย"],"0")*1;
   const cBusiness       = countIncludeStatusNormal(["ลากิจ"],"4")*0.5+countIncludeStatusNormal(["ลากิจ"],"0")*1;
@@ -1045,7 +1045,7 @@ function calculate(){
     </div>
 
     <div class="triple-row">
-      <span class="col-1">ลาป่วยแพทย์</span>
+      <span class="col-1">ลาป่วยแพทย์(เขียนใบสอบสวน)</span>
       <span class="col-2"style="text-align:right;">${format2(cSickDoctor)} วัน</span>
       <span class="col-3 money">${format2(sickdocterPay)} บาท</span>
     </div>
