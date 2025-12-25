@@ -952,7 +952,7 @@ function calculate(){
       otFoodDays++;
     }
   });
-  const cNormalday      = countIncludeStatusNormal(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์(เขียนใบสอบสวน)","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+countIncludeStatusNormal(["วันทำงาน"],"8")*1;
+  const cNormalday      = countIncludeStatusNormal(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์(เขียนใบสอบสวน)","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+countIncludeStatusNormal(["วันทำงาน"],"8")*1+countIncludeStatusNormal(["วันทำงาน"],"6")*0.75;
   const cHolidaySpecial = countIncludeStatusNormal(["วันหยุดพิเศษ"]);
   const cVacation       = countIncludeStatusNormal(["ลาพักร้อน"],"4")*0.5+countIncludeStatusNormal(["ลาพักร้อน"],"0")*1;
   const cSickDoctor     = countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"4")*0.5+countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"0")*1;
