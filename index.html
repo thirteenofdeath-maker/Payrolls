@@ -3326,12 +3326,12 @@ function formatThaiFullDate(d) {
 }
 
 function getPeriodRangeText() {
-  if (!yearSelect.value || monthSelect.value === "") return "งวด --";
+  if (!yearSelect.value || monthSelect.value === "") return "--";
   const y = Number(yearSelect.value);
   const m = Number(monthSelect.value);
   const start = new Date(y, m - 1, 16);
   const end = new Date(y, m, 15);
-  return `งวด ${formatThaiShortDate(start)} - ${formatThaiShortDate(end)}`;
+  return `${formatThaiShortDate(start)} - ${formatThaiShortDate(end)}`;
 }
 
 function updateHeaderInfo() {
