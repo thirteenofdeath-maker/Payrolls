@@ -3,11 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Payroll App - Friendly Period UI</title>
+<title>คำนวณเงินเดือนคร่าวๆ</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Payroll App">
-<link rel="apple-touch-icon" href="icon.png">
+<meta name="apple-mobile-web-app-title" content="เงินเดือนคร่าวๆ">
+<meta name="description" content="เว็บแอปคำนวณเงินเดือนแบบไม่เป็นทางการ ใช้ประเมินรายงวดเท่านั้น">
+<meta name="theme-color" content="#1976d2">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <style>
 /* 1. Global Setup */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
@@ -3073,8 +3077,8 @@ html[data-theme="dark"] .period-summary-quick .quick-period {
 <div class="main-container">
   <div class="app-header">
     <div class="app-title-block">
-      <h2>สรุปเงินเดือน</h2>
-      <div class="app-subtitle">บันทึกเวลา · คำนวณรายงวด</div>
+      <h2>คำนวณเงินเดือน</h2>
+      <div class="app-subtitle">ประเมินรายงวดแบบคร่าวๆ · ไม่ใช่สลิปจริง</div>
     </div>
     <div class="app-header-right" aria-label="วันที่ เวลา และปุ่มปรับธีม">
       <button type="button" id="themeToggle" class="theme-toggle" aria-label="สลับโหมดมืดหรือสว่าง">🌙</button>
@@ -4295,6 +4299,15 @@ function initApp() {
 
 // เรียกใช้เพียงครั้งเดียวที่บรรทัดสุดท้าย
 initApp();
+
+/* ===== PWA: register service worker for GitHub Pages ===== */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+      console.warn("Service worker registration failed:", error);
+    });
+  });
+}
 </script>
 
 </body>
