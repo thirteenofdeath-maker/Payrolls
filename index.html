@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Payroll App</title>
+<title>Payroll App Compact</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Payroll App">
@@ -19,7 +19,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
     
-.main-container { width: 100%; max-width: 100%; margi: auto; text-align: center; }
+.main-container { width: 100%; max-width: 100%; margin: auto; text-align: center; }
 
 h2 { font-weight: 700; color: #1a1a1a; margin-bottom: 20px; }
 
@@ -75,6 +75,9 @@ select:focus {
 .wage-row, .setting-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; }
 .wage-row label { font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .wage-row input { width: 60px; text-align: center; font-weight: 600; border-radius: 8px; border: 1px solid #ccc; padding: 6px; font-family: 'Kanit';font-size: medium; }
+.fee-row { flex-wrap: wrap; }
+.fee-row label { min-width: 95px; }
+.fee-row input { width: 70px; }
 #hourlyWage { background: #eee !important; border: 1px dashed #999; }
 
 .setting-row label {
@@ -176,7 +179,7 @@ select:focus {
 button {
     font-family: 'Kanit', sans-serif;
     border: none;
-    transition: transform 0.2s active;
+    transition: transform 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -185,10 +188,6 @@ button {
 
 button:active { transform: scale(0.95); }
 
-/* สไตล์ปุ่มกดด้านล่างแบบก้อนเมฆมนๆ */
-#pdfBtn { background: #ffcdd2; color: #b71c1c; } /* สีชมพูอ่อน */
-#exportBtn { background: #d1c4e9; color: #4527a0; } /* สีม่วงอ่อน */
-#importBtn { background: #c8e6c9; color: #1b5e20; } /* สีเขียวอ่อน */
 
 /* ไอคอนสถานะในการ์ดแก้ไขข้อมูล */
 /* ใส่ไอคอนปฏิทินเฉพาะ div ตัวแรก (วันที่) ที่อยู่ทางซ้าย */
@@ -238,114 +237,243 @@ button:active { transform: scale(0.95); }
 .badge-holiday::before { content: "🏖️ "; }
 .badge-leave::before { content: "📝 "; }
 .badge-absent::before { content: "❌ "; }
-@media print {
-    /* ตั้งค่าหน้ากระดาษ A4 และขอบกระดาษ */
-    @page { size: A4; margin: 15mm; }
 
-    /* ซ่อนส่วนที่ไม่เกี่ยวข้อง */
-    button, select, fieldset, .calendar, h2, .wage-row, .setting-row, .no-print {
-        display: none !important;
-    }
 
-    body { background: white; margin: 0; padding: 0; }
-
-    /* ขยาย Container หลักให้เต็มหน้ากระดาษด้านข้าง */
-    .main-container { 
-        max-width: 100% !important; 
-        width: 100% !important; 
-    }
-    
-    #result { 
-        display: block !important; 
-        width: 100% !important;
-    }
-
-    /* หัวกระดาษรายงาน */
-    #result::before {
-        content: attr(data-period);
-        display: block;
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 25px;
-        border-bottom: 2px solid #000;
-        padding-bottom: 10px;
-    }
-
-    /* จัดระเบียบแถวข้อมูลให้ขยายออกด้านข้าง */
-    .triple-row {
-        display: flex !important;
-        justify-content: space-between;
-        width: 100%;
-        font-size: 16px;
-        padding: 10px 0;
-        border-bottom: 1px solid #eee;
-    }
-    
-    .col-1 { flex: 2; text-align: left; }
-    .col-2 { flex: 1; text-align: right; }
-    .col-3 { flex: 1; text-align: right; font-weight: bold; }
-
-    /* บังคับสีพื้นหลังยอดสุทธิ */
-    .triple-row[style*="background"] {
-        background: #2e7d32 !important;
-        color: white !important;
-        -webkit-print-color-adjust: exact !important;
-        padding: 15px !important;
-        border-radius: 5px;
-    }
+/* ===== Compact one-screen UI: no PDF / backup / import buttons ===== */
+:root {
+  --card-bg: rgba(255,255,255,0.92);
+  --line: #e7edf3;
+  --text-soft: #607d8b;
 }
-/* คอนเทนเนอร์คุมปุ่มด้านล่าง */
-.button-group {
-    display: flex;
-    gap: 12px;
-    margin-top: 30px;
-    justify-content: center;
-    padding: 0 10px;
+* { box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  padding: 8px;
+  background: linear-gradient(180deg, #eef5ff 0%, #f8fafc 100%);
+  align-items: stretch;
+}
+.main-container {
+  height: calc(100svh - 16px);
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+h2 {
+  margin: 0;
+  font-size: clamp(16px, 4vw, 20px);
+  line-height: 1.1;
+  text-align: center;
+}
+.wage-row, .setting-row {
+  margin-bottom: 0 !important;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.wage-row:first-of-type {
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+}
+.wage-row label {
+  flex: 1 1 78px;
+  min-width: 0;
+  padding: 5px 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.15;
+}
+.wage-row input {
+  width: 100%;
+  min-width: 0;
+  height: 26px;
+  padding: 2px 4px;
+  font-size: 13px;
+}
+.fee-row label { min-width: 0; }
+.fee-row input { width: 100%; }
+select {
+  min-height: 30px;
+  padding: 4px 22px 4px 8px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+.setting-row label {
+  flex: 1;
+  justify-content: center;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+.setting-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+}
+.incentive-box {
+  margin: 0 !important;
+  padding: 5px 0 !important;
+  border-radius: 12px;
+  border: 1px solid var(--line) !important;
+  background: var(--card-bg);
+}
+.incentive-box legend {
+  padding: 0 6px;
+  font-size: 11px;
+}
+.incentive-box .setting-row { margin-top: 0 !important; }
+.incentive-box label { max-width: none; padding: 3px 6px; }
+.incentive-box select { width: 72px; height: 28px; font-size: 12px; }
+.calendar {
+  margin: 0 !important;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+}
+.weekdays {
+  padding: 2px 0;
+  font-size: 10.5px;
+  border-radius: 8px;
+  background: #edf2f7;
+}
+.day-cell {
+  margin: 1.5px;
+  padding: clamp(3px, 0.75svh, 7px) 0;
+  border-radius: 8px;
+  font-size: clamp(10px, 2.8vw, 12px);
+}
+.day-cell.active { transform: none; }
+.day-cell::after, .day-cell::before {
+  width: 4px;
+  height: 4px;
+  bottom: 2px;
+}
+#cardContainer { display: none; }
+.calendar-expand {
+  position: fixed;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 20;
+  grid-column: auto;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+}
+.card {
+  padding: 10px;
+  border-radius: 16px;
+  max-height: 52svh;
+  overflow: hidden;
+}
+.card-header {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.badge {
+  padding: 2px 8px;
+  font-size: 9px;
+}
+.card-body .row {
+  margin-bottom: 6px !important;
+  padding: 5px 8px !important;
+  gap: 8px;
+  border-radius: 9px;
+}
+.card-body .row label {
+  font-size: 11px !important;
+  min-width: 92px;
+}
+.card-body select {
+  width: 58%;
+  max-width: none;
+  height: 30px;
+  font-size: 11px;
+}
+#summaryContainer { display: none; }
+#result {
+  margin-top: 0 !important;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+#result > div {
+  width: 100% !important;
+  height: 100%;
+  margin: 0 !important;
+  line-height: 1.05 !important;
+  font-size: 10.5px !important;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 5px;
+  align-content: start;
+}
+#result .no-print {
+  grid-column: 1 / -1;
+  margin: 0 !important;
+  font-size: 12.5px !important;
+  line-height: 1 !important;
+}
+#result hr { display: none; }
+.triple-row {
+  grid-template-columns: minmax(0, 1fr) 39px 62px !important;
+  gap: 2px !important;
+  padding: 3px 5px !important;
+  min-height: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.9);
+  font-size: clamp(9px, 2.35vw, 10.5px) !important;
+}
+.triple-row .col-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.triple-row .col-2 {
+  color: var(--text-soft);
+  font-size: 0.92em;
+}
+.triple-row .col-3 {
+  white-space: nowrap;
+}
+.triple-row[style*="font-size:20px"] {
+  grid-column: 1 / -1;
+  font-size: 15px !important;
+  min-height: 28px;
+  align-items: center;
+}
+#result div[style*="font-size:8px"] {
+  grid-column: 1 / -1;
+  font-size: 8px !important;
+  line-height: 1.15 !important;
+  color: #78909c;
+  text-align: center;
+}
+button, .button-group, #fileInput { display: none !important; }
+@media (max-height: 720px) {
+  body { padding: 5px; }
+  .main-container { height: calc(100svh - 10px); gap: 4px; }
+  h2 { font-size: 15px; }
+  .wage-row label { padding: 3px 5px; font-size: 10px; }
+  .wage-row input { height: 22px; font-size: 12px; }
+  .incentive-box { padding: 3px 0 !important; }
+  .calendar { padding: 3px; }
+  .triple-row { min-height: 17px; padding: 2px 4px !important; }
+  #result > div { gap: 2px 4px; }
 }
 
-/* สไตล์ปุ่มกดหลัก */
-.btn-action {
-    flex: 1;
-    border: none;
-    border-radius: 15px; /* มนพิเศษแบบน่ารัก */
-    padding: 12px 8px;
-    font-family: 'Kanit', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column; /* ไอคอนอยู่บน ข้อความอยู่ล่าง */
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-}
-
-.btn-action:active {
-    transform: scale(0.92);
-    box-shadow: 0 2px 3px rgba(0,0,0,0.1);
-}
-
-/* สีพาสเทลแยกตามประเภทปุ่ม */
-#pdfBtn { background-color: #ff8a80; color: #fff; }    /* สีแดงซอฟต์ */
-#exportBtn { background-color: #546e7a; color: #fff; } /* สีเทาเข้มสวย */
-#importBtn { background-color: #78909c; color: #fff; } /* สีเทาอ่อน */
-
-/* ไอคอนภายในปุ่ม */
-.btn-icon {
-    font-size: 20px;
-}
-@media print {
-    .no-print { display: none !important; }
-}
 </style>
 </head>
 
 <body>
 
 <div class="main-container">
-  <h2>แบบฟอร์มบันทึกเวลา</h2>
+  <h2>สรุปเงินเดือน</h2>
 
   <div class="wage-row" style="align-items: center; margin-top: 10px;">
     <span>ประจำงวดจ่ายเดือน:</span> <select id="monthSelect"></select>
@@ -357,8 +485,13 @@ button:active { transform: scale(0.95); }
     <label>ค่าแรง/ชม <input type="number" id="hourlyWage" readonly style="background:#eee"></label>
   </div>
 
+  <div class="wage-row fee-row">
+    <label>ค่ากะดึก <input type="number" id="nightShiftFee" value="140"></label>
+    <label>ค่าอาหารกะดึก <input type="number" id="nightFoodFee" value="70"></label>
+    <label>ค่าอาหารโอที <input type="number" id="otFoodFee" value="45"></label>
+  </div>
+
   <div class="setting-row">
-    <label><input type="checkbox" id="skillCheck"> ทักษะ</label>
     <label><input type="checkbox" id="mentorCheck"> พี่เลี้ยง</label>
   </div>
 
@@ -398,22 +531,6 @@ button:active { transform: scale(0.95); }
 
 <div id="result" style="margin-top:20px;"></div>
 
-<div class="button-group">
-    <button id="pdfBtn" class="btn-action">
-        <span class="btn-icon">📄</span>
-        <span>PDF</span>
-    </button>
-    <button id="exportBtn" class="btn-action">
-        <span class="btn-icon">📤</span>
-        <span>สำรอง</span>
-    </button>
-    <button id="importBtn" class="btn-action">
-        <span class="btn-icon">📥</span>
-        <span>นำเข้า</span>
-    </button>
-</div>
-<input type="file" id="fileInput" style="display: none;" accept=".json">
-
 <script>
 
 function num(v){
@@ -440,6 +557,9 @@ monthNames.forEach((m,i)=>{
 
 const dailyInput  = document.getElementById("dailyWage");
 const hourlyInput = document.getElementById("hourlyWage");
+const nightShiftFeeInput = document.getElementById("nightShiftFee");
+const nightFoodFeeInput = document.getElementById("nightFoodFee");
+const otFoodFeeInput = document.getElementById("otFoodFee");
 
 function syncHourly(){
   const daily = num(dailyInput.value);
@@ -450,14 +570,8 @@ function syncHourly(){
 syncHourly();
 
 // change
-dailyInput.addEventListener("input", () => {
-  syncHourly();
-  renderSummary();   // คำนวณใหม่ทันที
-});
-
-// เพิ่มต่อจากส่วนของ dailyInput.addEventListener
-document.getElementById("skillCheck").addEventListener("change", renderSummary);
-document.getElementById("mentorCheck").addEventListener("change", renderSummary);
+// Events for these inputs are registered once in the settings section below
+// to avoid duplicate renderSummary() calls.
 
 let selectedDate=null;
 let expandRow=null;
@@ -479,7 +593,8 @@ function saveCards(){
     status: c.querySelector(".status").value,
     shift: c.querySelector(".shift").value,    // เพิ่ม
     normal: c.querySelector(".normal").value,  // เพิ่ม
-    ot: c.querySelector(".ot").value           // เพิ่ม
+    ot: c.querySelector(".ot").value,          // เพิ่ม
+    skill: c.querySelector(".skillDaily").value // บันทึกค่าทักษะรายวัน
   }));
   localStorage.setItem(getMonthKey(), JSON.stringify(data));
 }
@@ -496,6 +611,12 @@ function updateBadge(card) {
 
     // 1. ล้างคลาสสีเดิมออกให้หมดก่อน 
     b.classList.remove("badge-normal","badge-work", "badge-holiday", "badge-leave", "badge-absent");
+
+    if (!s) {
+        b.classList.add("badge-normal");
+        b.textContent = "--เลือกวัน--";
+        return;
+    }
 
     // 2. ตรวจสอบเงื่อนไขและใส่สีตามที่กำหนดไว้ใน CSS 
     if (s === "ขาดงาน") {
@@ -531,7 +652,7 @@ function createCard(date, saved) {
     <div class="card-body">
       <div class="row"><label>📌 สถานะ</label>
         <select class="status">
-          <option>--เลือกวัน--</option>
+          <option value="">--เลือกวัน--</option>
           <option>วันทำงาน</option>
           <option>วันหยุด</option>
           <option>วันหยุดพิเศษ</option>
@@ -566,6 +687,12 @@ function createCard(date, saved) {
           <option value="4.51">4.51 ชม.</option>
         </select>
       </div>
+      <div class="row"><label>⭐ ทักษะ</label>
+        <select class="skillDaily">
+          <option value="0">ไม่ได้รับ</option>
+          <option value="1">ได้รับ</option>
+        </select>
+      </div>
     </div>
     
     
@@ -578,16 +705,18 @@ function createCard(date, saved) {
   const shiftSelect = card.querySelector(".shift");
   const normalSelect = card.querySelector(".normal");
   const otSelect = card.querySelector(".ot");
+  const skillDailySelect = card.querySelector(".skillDaily");
 
   statusSelect.value = saved?.status || "";
   shiftSelect.value = saved?.shift || "";
   normalSelect.value = saved?.normal || "";
   otSelect.value = saved?.ot || "";
+  skillDailySelect.value = saved?.skill || "0";
 
   updateBadge(card);
 
   // ค้นหาส่วนนี้ในฟังก์ชัน createCard
-  [statusSelect, shiftSelect, normalSelect, otSelect].forEach(el => {
+  [statusSelect, shiftSelect, normalSelect, otSelect, skillDailySelect].forEach(el => {
       el.onchange = () => {
           updateBadge(card);
           saveCards();      
@@ -613,11 +742,12 @@ function createCard(date, saved) {
 }
 /* ===== CALENDAR ===== */
 function getStatusClass(status) {
+    if (!status || status === "--เลือกวัน--") return "";
     if (status.includes("หยุด")) return "day-holiday";
     if (status.includes("ลา")) return "day-leave";
     if (status === "ขาดงาน") return "day-absent";
     if (status === "วันทำงาน") return "day-work";
-    return "day-normal";
+    return "";
 }
 
 // เพิ่มฟังก์ชันใหม่สำหรับกะ
@@ -716,8 +846,12 @@ function slideClose(element) {
 
 function toggleInline(cell) {
     const dateKey = cell.dataset.date;
-    const cells = [...calendarEl.children];
+    // ใช้เฉพาะ cell ของปฏิทินจริง ๆ ไม่รวมแถวการ์ดที่ถูกแทรกเข้ามา
+    const cells = [...calendarEl.children].filter(el =>
+        el.classList.contains("day-cell") || el.classList.contains("day-cell-blank")
+    );
     const index = cells.indexOf(cell);
+    if (index === -1) return;
     const rowIndex = Math.floor(index / 7);
     const rowEnd = rowIndex * 7 + 6;
 
@@ -812,7 +946,7 @@ function getSettings(){
   return {
     DAILY_WAGE, HOURLY_WAGE: DAILY_WAGE/8,
     OT_RATE_1:1,OT_RATE_15:1.5, OT_RATE_2:2, OT_RATE_3:3,
-    NIGHT_SHIFT_FEE:140, FOOD_NIGHT_FEE:70, FOOD_OT_FEE:45, SKILL_FEE:20,MENTOR_FEE:200,
+    NIGHT_SHIFT_FEE:num(nightShiftFeeInput.value), FOOD_NIGHT_FEE:num(nightFoodFeeInput.value), FOOD_OT_FEE:num(otFoodFeeInput.value), SKILL_FEE:20,MENTOR_FEE:200,
     SOCIAL_SECURITY_RATE:0.05
   };
 }
@@ -874,6 +1008,9 @@ function buildWorkTableFromCards(){
       </td>
       <td>
         <input class="otHour" value="${card.querySelector(".ot").value}">
+      </td>
+      <td>
+        <input class="skillDailyValue" value="${card.querySelector(".skillDaily").value}">
       </td>
     `;
 
@@ -966,12 +1103,14 @@ function calculate(){
   const ot15Pay=S.HOURLY_WAGE*S.OT_RATE_15*ot15Hours;
   const ot2Pay=S.HOURLY_WAGE*S.OT_RATE_2*ot2Hours;
   const ot3Pay=S.HOURLY_WAGE*S.OT_RATE_3*ot3Hours;
+  const totalOtHours = ot1Hour + ot15Hours + ot2Hours + ot3Hours;
   const nightShiftPay=nightShiftDays*S.NIGHT_SHIFT_FEE;
   const nightFoodPay=nightShiftDays*S.FOOD_NIGHT_FEE;
   const otFoodPay=otFoodDays*S.FOOD_OT_FEE;
   const forcedOtPay=Math.floor((S.HOURLY_WAGE * S.OT_RATE_15)*0.17);
-  const skillPay  = skillCheck.checked ? Math.floor(workDays) * S.SKILL_FEE : 0;
-  const mentorPay=mentorCheck.checked ? S.MENTOR_FEE : 0 ;
+  const skillDays = [...rows].filter(row => num(row.querySelector(".skillDailyValue")?.value) === 1).length;
+  const skillPay  = skillDays * S.SKILL_FEE;
+  const mentorPay=document.getElementById("mentorCheck").checked ? S.MENTOR_FEE : 0 ;
   const holidayspecialPay=cHolidaySpecial*(S.DAILY_WAGE+forcedOtPay)
   const vacationPay=cVacation*(S.DAILY_WAGE+forcedOtPay)
   const sickdocterPay=cSickDoctor*(S.DAILY_WAGE+forcedOtPay)
@@ -1005,6 +1144,12 @@ function calculate(){
       <span class="col-1">เงินเดือน</span>
       <span class="col-2"></span>
       <span class="col-3 money">${format2(salaryPay)} บาท</span>
+    </div>
+
+    <div class="triple-row">
+      <span class="col-1"><b>รวมชั่วโมงโอที</b></span>
+      <span class="col-2" style="text-align:right;"><b>${format2(totalOtHours)} ชม.</b></span>
+      <span class="col-3"></span>
     </div>
 
     <div class="triple-row">
@@ -1079,7 +1224,7 @@ function calculate(){
 
     <div class="triple-row">
       <span class="col-1">ค่าทักษะ</span>
-      <span class="col-2"></span>
+      <span class="col-2"style="text-align:right;">${format2(skillDays)} วัน</span>
       <span class="col-3 money">${format2(skillPay)} บาท</span>
     </div>
 
@@ -1122,9 +1267,6 @@ function calculate(){
     <div style="font-size:8px;"><br><br>
       <span class="col-3 money">***ข้อมูลนี้เป็นเพียงการคำนวณแบบคร่าวๆ ไม่สามารถนำมาอ้างอิงจริงได้ โปรดใช้วิจารณญาณในการใช้งาน***</span>
     </div>
-
-    <div id="result" style="margin-top:20px;">
-    </div>
   </div>
 `;
 }
@@ -1134,9 +1276,11 @@ function saveSettings() {
     const m = monthSelect.value;
     
     const settings = {
-        skill: document.getElementById("skillCheck").checked,
         mentor: document.getElementById("mentorCheck").checked,
         dailyWage: dailyInput.value,
+        nightShiftFee: nightShiftFeeInput.value,
+        nightFoodFee: nightFoodFeeInput.value,
+        otFoodFee: otFoodFeeInput.value,
         incentive1: document.getElementById("incentive1").value,
         incentive2: document.getElementById("incentive2").value
     };
@@ -1152,19 +1296,28 @@ function saveSettings() {
 function loadSettings() {
     const y = yearSelect.value;
     const m = monthSelect.value;
-    const saved = JSON.parse(localStorage.getItem(`settings-${y}-${m}`));
+    let saved = null;
+    try {
+        saved = JSON.parse(localStorage.getItem(`settings-${y}-${m}`));
+    } catch (e) {
+        saved = null;
+    }
     
     if (saved) {
-        document.getElementById("skillCheck").checked = saved.skill;
         document.getElementById("mentorCheck").checked = saved.mentor;
         dailyInput.value = saved.dailyWage || 447;
+        nightShiftFeeInput.value = saved.nightShiftFee || 140;
+        nightFoodFeeInput.value = saved.nightFoodFee || 70;
+        otFoodFeeInput.value = saved.otFoodFee || 45;
         document.getElementById("incentive1").value = saved.incentive1 || "0";
         document.getElementById("incentive2").value = saved.incentive2 || "0";
     } else {
         // ถ้าเดือนใหม่ยังไม่มีข้อมูล ให้รีเซ็ตเป็นค่าเริ่มต้น
-        document.getElementById("skillCheck").checked = false;
         document.getElementById("mentorCheck").checked = false;
         dailyInput.value = 447; 
+        nightShiftFeeInput.value = 140;
+        nightFoodFeeInput.value = 70;
+        otFoodFeeInput.value = 45;
         document.getElementById("incentive1").value = "0";
         document.getElementById("incentive2").value = "0";
     }
@@ -1189,7 +1342,9 @@ yearSelect.onchange = () => {
 
 // ส่วน Input อื่นๆ ให้บันทึกทันทีเมื่อเปลี่ยนค่า
 dailyInput.oninput = () => { syncHourly(); saveSettings(); renderSummary(); };
-document.getElementById("skillCheck").onchange = () => { saveSettings(); renderSummary(); };
+[nightShiftFeeInput, nightFoodFeeInput, otFoodFeeInput].forEach(input => {
+    input.oninput = () => { saveSettings(); renderSummary(); };
+});
 document.getElementById("mentorCheck").onchange = () => { saveSettings(); renderSummary(); };
 document.getElementById("incentive1").onchange = () => { saveSettings(); renderSummary(); };
 document.getElementById("incentive2").onchange = () => { saveSettings(); renderSummary(); };
@@ -1210,78 +1365,8 @@ document.addEventListener("click", function(event) {
         });
     }
 });
+// --- Removed PDF / Export / Import tools for compact version ---
 
-document.getElementById("pdfBtn").onclick = () => {
-    // 1. คำนวณข้อมูลล่าสุดก่อนพิมพ์เพื่อให้ข้อมูลไม่หาย
-    renderSummary(); 
-    
-    // 2. ดึงชื่อเดือนและปีจาก Dropdown
-    const monthName = monthSelect.options[monthSelect.selectedIndex].text; // เช่น December (มกราคม, ...)
-    const yearValue = yearSelect.value; // เช่น 2025
-    
-    // แปลงชื่อเดือนไทยเป็นอังกฤษสำหรับชื่อไฟล์ (ถ้าต้องการ) หรือใช้ชื่อตาม Dropdown
-    // ในที่นี้จะดึงค่าจาก monthNames ที่คุณประกาศไว้
-    const monthEN = ["January", "February", "March", "April", "May", "June", 
-                     "July", "August", "September", "October", "November", "December"];
-    const mIdx = monthSelect.value;
-    
-    // 3. ตั้งชื่อไฟล์ตามรูปแบบ: Payroll_2025_December.pdf
-    const fileName = `Payroll_${yearValue}_${monthEN[mIdx]}`;
-    
-    // 4. เปลี่ยนชื่อหัวข้อเว็บชั่วคราวเพื่อกำหนดชื่อไฟล์ PDF
-    const originalTitle = document.title;
-    document.title = fileName;
-    
-    // 5. กำหนดหัวรายงานในเนื้อหา (แสดงชื่อเดือนปีที่เลือก)
-    const res = document.getElementById("result");
-    res.setAttribute("data-period", `สรุปเงินเดือนประจำงวด ${monthName} ${yearValue}`);
-    
-    // 6. สั่งพิมพ์
-    window.print();
-    
-    // 7. คืนค่าชื่อหัวข้อเดิมหลังจากสั่งพิมพ์
-    setTimeout(() => {
-        document.title = originalTitle;
-    }, 1000);
-};
-
-// --- 2. สำรองข้อมูล (Export JSON) ---
-document.getElementById("exportBtn").onclick = () => {
-    const backupData = {};
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        // เก็บเฉพาะข้อมูล payroll และ settings
-        if (key.includes("payroll-") || key.includes("settings-")) {
-            backupData[key] = localStorage.getItem(key);
-        }
-    }
-    const blob = new Blob([JSON.stringify(backupData)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `payroll_backup_${new Date().toLocaleDateString()}.json`;
-    a.click();
-};
-
-// --- 3. นำเข้าข้อมูล (Import JSON) ---
-document.getElementById("importBtn").onclick = () => document.getElementById("fileInput").click();
-
-document.getElementById("fileInput").onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        try {
-            const data = JSON.parse(event.target.result);
-            if (confirm("ต้องการนำเข้าข้อมูลใช่หรือไม่? ข้อมูลเดิมในเครื่องจะถูกเขียนทับ")) {
-                Object.keys(data).forEach(key => localStorage.setItem(key, data[key]));
-                alert("นำเข้าข้อมูลสำเร็จ!");
-                location.reload();
-            }
-        } catch (err) { alert("ไฟล์ไม่ถูกต้อง"); }
-    };
-    reader.readAsText(file);
-};
 /* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
 function initApp() {
     const now = new Date();
@@ -1319,4 +1404,3 @@ initApp();
 
 </body>
 </html>
-
