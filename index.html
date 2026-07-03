@@ -2752,6 +2752,147 @@ body {
   }
 }
 
+
+
+/* ===== Requested cleanup: header, smoother collapse, cleaner summary toggle ===== */
+.app-header {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: start !important;
+}
+.app-title-block .header-date-range {
+  display: inline-flex !important;
+  width: fit-content !important;
+  margin-top: 8px !important;
+  padding: 4px 10px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 18%, var(--final-line)) !important;
+  border-radius: 999px !important;
+  background: var(--final-primary-soft) !important;
+  color: var(--final-primary) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+}
+.app-header-right {
+  display: grid !important;
+  grid-template-columns: auto !important;
+  grid-template-areas: "theme" "clock" !important;
+  justify-items: end !important;
+  align-content: start !important;
+  gap: 7px !important;
+  text-align: right !important;
+}
+.theme-toggle {
+  grid-area: theme !important;
+  justify-self: end !important;
+}
+.header-clock {
+  grid-area: clock !important;
+  justify-items: end !important;
+}
+.period-controls .select-card:first-child > span::before,
+.period-controls .select-card:last-child > span::before {
+  content: none !important;
+  display: none !important;
+}
+.input-details,
+#result .summary-panel {
+  overflow: hidden;
+  will-change: max-height, opacity, transform;
+}
+.input-details[hidden],
+#result .summary-panel[hidden] {
+  display: none !important;
+}
+.summary-collapsed #summaryCategoryList {
+  display: grid !important;
+}
+.summary-shell {
+  display: grid !important;
+  gap: 10px !important;
+}
+.summary-toolbar {
+  display: block !important;
+}
+.summary-toolbar-title {
+  display: none !important;
+}
+.summary-collapse-toggle {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+#result {
+  margin-top: 0 !important;
+}
+@media (max-width: 520px) {
+  .app-header {
+    grid-template-columns: 1fr !important;
+  }
+  .app-header-right {
+    width: 100% !important;
+    grid-template-columns: auto !important;
+    grid-template-areas: "theme" "clock" !important;
+    align-items: start !important;
+    justify-items: end !important;
+    text-align: right !important;
+  }
+  .theme-toggle {
+    justify-self: end !important;
+  }
+  .header-clock {
+    justify-self: end !important;
+    justify-items: end !important;
+    text-align: right !important;
+  }
+}
+
+
+
+/* ===== Separate disclaimer card ===== */
+.summary-disclaimer-card {
+  border: 1px solid color-mix(in srgb, var(--final-amber) 34%, var(--final-line)) !important;
+  border-radius: 20px !important;
+  background: color-mix(in srgb, var(--final-amber) 9%, var(--final-surface)) !important;
+}
+.summary-disclaimer-card .summary-heading {
+  color: var(--final-text) !important;
+  margin-bottom: 8px !important;
+}
+.summary-disclaimer-text {
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--final-amber) 24%, var(--final-line));
+  color: var(--final-muted) !important;
+  font-size: 11.5px;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.standalone-disclaimer-card {
+  margin-top: 0;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--final-amber) 34%, var(--final-line));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--final-amber) 9%, var(--final-surface));
+  color: var(--final-text);
+  box-shadow: none !important;
+}
+.standalone-disclaimer-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--final-text);
+}
+.standalone-disclaimer-text {
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--final-amber) 24%, var(--final-line));
+  color: var(--final-muted);
+  font-size: 11.5px;
+  line-height: 1.55;
+  text-align: left;
+}
 </style>
 </head>
 
@@ -2762,11 +2903,11 @@ body {
     <div class="app-title-block">
       <h2>สรุปเงินเดือน</h2>
       <div class="app-subtitle">บันทึกเวลา · คำนวณรายงวด</div>
-    </div>
-    <div class="app-header-right" aria-label="ข้อมูลเวลาปัจจุบันและงวดจ่าย">
       <div class="header-date-range" id="headerDateRange">งวด --</div>
-      <div class="header-clock" id="headerClock">--:--:--</div>
+    </div>
+    <div class="app-header-right" aria-label="วันที่ เวลา และปุ่มปรับธีม">
       <button type="button" id="themeToggle" class="theme-toggle" aria-label="สลับโหมดมืดหรือสว่าง">🌙</button>
+      <div class="header-clock" id="headerClock">--:--:--</div>
     </div>
   </div>
 
@@ -2906,13 +3047,19 @@ body {
 
 <section class="summary-shell" aria-label="รายการสรุปเงินเดือน">
   <div class="summary-toolbar">
-    <div class="summary-toolbar-title">รายการสรุป</div>
-    <button type="button" id="summaryToggle" class="collapse-toggle summary-collapse-toggle" aria-expanded="true" aria-controls="summaryCategoryList">
+    <button type="button" id="summaryToggle" class="collapse-toggle summary-collapse-toggle" aria-expanded="true" aria-controls="result">
       <span class="collapse-icon">⌃</span>
       <span class="collapse-text">รายการสรุป</span>
     </button>
   </div>
   <div id="result" style="margin-top:10px;"></div>
+</section>
+
+<section class="standalone-disclaimer-card" aria-label="หมายเหตุการคำนวณ">
+  <div class="standalone-disclaimer-heading">⚠️ หมายเหตุ</div>
+  <div class="standalone-disclaimer-text">
+    ข้อมูลนี้เป็นเพียงการคำนวณแบบคร่าวๆ ไม่สามารถนำมาอ้างอิงจริงได้ โปรดใช้วิจารณญาณในการใช้งาน
+  </div>
 </section>
 
 <script>
@@ -3030,28 +3177,91 @@ function updateHeaderInfo() {
   }
 }
 
-function setInputCollapsed(collapsed) {
-  if (!inputDetails || !inputToggle) return;
-  inputDetails.hidden = collapsed;
-  inputToggle.setAttribute("aria-expanded", String(!collapsed));
-  inputToggle.querySelector(".collapse-icon").textContent = collapsed ? "⌄" : "⌃";
-  inputToggle.querySelector(".collapse-text").textContent = "ช่องกรอกข้อมูล";
-  inputToggle.setAttribute("aria-label", collapsed ? "แสดงช่องกรอกข้อมูล" : "ซ่อนช่องกรอกข้อมูล");
-  localStorage.setItem("payrollInputCollapsed", collapsed ? "1" : "0");
+function getSummaryCollapseTarget() {
+  return document.querySelector("#result .summary-panel");
 }
 
-function setSummaryCollapsed(collapsed) {
+function setPanelCollapsed(panel, collapsed, immediate = false) {
+  if (!panel) return Promise.resolve();
+
+  panel.style.overflow = "hidden";
+  panel.style.willChange = "max-height, opacity, transform";
+
+  if (immediate) {
+    panel.hidden = collapsed;
+    panel.style.maxHeight = collapsed ? "0px" : "none";
+    panel.style.opacity = collapsed ? "0" : "1";
+    panel.style.transform = collapsed ? "translateY(-8px)" : "translateY(0)";
+    return Promise.resolve();
+  }
+
+  const duration = collapsed ? 260 : 340;
+  const easing = collapsed ? "ease-in" : "ease-out";
+
+  if (collapsed) {
+    panel.hidden = false;
+    const startHeight = panel.scrollHeight;
+    panel.style.maxHeight = startHeight + "px";
+    panel.style.opacity = "1";
+    panel.style.transform = "translateY(0)";
+
+    const anim = panel.animate([
+      { maxHeight: startHeight + "px", opacity: 1, transform: "translateY(0)" },
+      { maxHeight: "0px", opacity: 0, transform: "translateY(-8px)" }
+    ], { duration, easing, fill: "forwards" });
+
+    return anim.finished.then(() => {
+      panel.hidden = true;
+      panel.style.maxHeight = "0px";
+      panel.style.opacity = "0";
+      panel.style.transform = "translateY(-8px)";
+    });
+  }
+
+  panel.hidden = false;
+  panel.style.maxHeight = "0px";
+  panel.style.opacity = "0";
+  panel.style.transform = "translateY(-8px)";
+  const endHeight = panel.scrollHeight;
+
+  const anim = panel.animate([
+    { maxHeight: "0px", opacity: 0, transform: "translateY(-8px)" },
+    { maxHeight: endHeight + "px", opacity: 1, transform: "translateY(0)" }
+  ], { duration, easing, fill: "forwards" });
+
+  return anim.finished.then(() => {
+    panel.hidden = false;
+    panel.style.maxHeight = "none";
+    panel.style.opacity = "1";
+    panel.style.transform = "translateY(0)";
+  });
+}
+
+function updateCollapseButton(button, collapsed, text, expandedLabel, collapsedLabel) {
+  if (!button) return;
+  button.setAttribute("aria-expanded", String(!collapsed));
+  button.querySelector(".collapse-icon").textContent = collapsed ? "⌄" : "⌃";
+  button.querySelector(".collapse-text").textContent = text;
+  button.setAttribute("aria-label", collapsed ? collapsedLabel : expandedLabel);
+}
+
+function setInputCollapsed(collapsed, immediate = false) {
+  if (!inputDetails || !inputToggle) return;
+  updateCollapseButton(inputToggle, collapsed, "ช่องกรอกข้อมูล", "ซ่อนช่องกรอกข้อมูล", "แสดงช่องกรอกข้อมูล");
+  localStorage.setItem("payrollInputCollapsed", collapsed ? "1" : "0");
+  setPanelCollapsed(inputDetails, collapsed, immediate);
+}
+
+function setSummaryCollapsed(collapsed, immediate = false) {
   if (!summaryShell || !summaryToggle) return;
   summaryShell.classList.toggle("summary-collapsed", collapsed);
-  summaryToggle.setAttribute("aria-expanded", String(!collapsed));
-  summaryToggle.querySelector(".collapse-icon").textContent = collapsed ? "⌄" : "⌃";
-  summaryToggle.querySelector(".collapse-text").textContent = "รายการสรุป";
-  summaryToggle.setAttribute("aria-label", collapsed ? "แสดงรายการสรุปเงินเดือน" : "ซ่อนรายการสรุปเงินเดือน");
+  updateCollapseButton(summaryToggle, collapsed, "รายการสรุป", "ซ่อนรายการสรุปเงินเดือน", "แสดงรายการสรุปเงินเดือน");
   localStorage.setItem("payrollSummaryCollapsed", collapsed ? "1" : "0");
+  setPanelCollapsed(getSummaryCollapseTarget(), collapsed, immediate);
 }
 
 if (inputToggle) {
-  inputToggle.onclick = () => setInputCollapsed(!inputDetails.hidden);
+  inputToggle.onclick = () => setInputCollapsed(!inputToggle.matches('[aria-expanded="false"]'));
 }
 if (summaryToggle) {
   summaryToggle.onclick = () => setSummaryCollapsed(!summaryShell.classList.contains("summary-collapsed"));
@@ -3752,12 +3962,9 @@ function calculate(){
         </div>
       </section>
     </div>
-
-    <div class="summary-note">
-      ***ข้อมูลนี้เป็นเพียงการคำนวณแบบคร่าวๆ ไม่สามารถนำมาอ้างอิงจริงได้ โปรดใช้วิจารณญาณในการใช้งาน***
-    </div>
   </div>
 `;
+  setPanelCollapsed(getSummaryCollapseTarget(), summaryShell?.classList.contains("summary-collapsed"), true);
 }
 /* ===== 1. ปรับปรุงฟังก์ชันบันทึก ให้จำทั้งการตั้งค่าและหน้าล่าสุด ===== */
 function saveSettings() {
@@ -3887,8 +4094,8 @@ document.addEventListener("click", function(event) {
 /* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
 function initApp() {
     initTheme();
-    setInputCollapsed(localStorage.getItem("payrollInputCollapsed") === "1");
-    setSummaryCollapsed(localStorage.getItem("payrollSummaryCollapsed") === "1");
+    setInputCollapsed(localStorage.getItem("payrollInputCollapsed") === "1", true);
+    setSummaryCollapsed(localStorage.getItem("payrollSummaryCollapsed") === "1", true);
     updateHeaderInfo();
     setInterval(updateHeaderInfo, 1000);
     const now = new Date();
