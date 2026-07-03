@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Payroll App Compact</title>
+<title>Payroll App Scrollable</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Payroll App">
@@ -246,14 +246,14 @@ button:active { transform: scale(0.95); }
   --text-soft: #607d8b;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; overflow: hidden; }
+html, body { min-height: 100%; overflow-x: hidden; overflow-y: auto; }
 body {
   padding: 8px;
   background: linear-gradient(180deg, #eef5ff 0%, #f8fafc 100%);
-  align-items: stretch;
+  align-items: flex-start;
 }
 .main-container {
-  height: calc(100svh - 16px);
+  min-height: calc(100svh - 16px);
   max-width: 460px;
   margin: 0 auto;
   display: flex;
@@ -354,20 +354,21 @@ select {
 }
 #cardContainer { display: none; }
 .calendar-expand {
-  position: fixed;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  z-index: 20;
-  grid-column: auto;
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: 1;
+  grid-column: 1 / -1;
   border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+  margin: 4px 0;
 }
 .card {
   padding: 10px;
   border-radius: 16px;
-  max-height: 52svh;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 .card-header {
   padding-bottom: 8px;
@@ -398,12 +399,12 @@ select {
 #result {
   margin-top: 0 !important;
   min-height: 0;
-  flex: 1;
-  overflow: hidden;
+  flex: 0 0 auto;
+  overflow: visible;
 }
 #result > div {
   width: 100% !important;
-  height: 100%;
+  height: auto;
   margin: 0 !important;
   line-height: 1.05 !important;
   font-size: 10.5px !important;
@@ -455,9 +456,21 @@ select {
   text-align: center;
 }
 button, .button-group, #fileInput { display: none !important; }
+
+/* ===== Scrollable adjustments ===== */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  -webkit-overflow-scrolling: touch;
+}
+.main-container {
+  padding-bottom: 16px;
+}
+
 @media (max-height: 720px) {
   body { padding: 5px; }
-  .main-container { height: calc(100svh - 10px); gap: 4px; }
+  .main-container { min-height: calc(100svh - 10px); gap: 4px; }
   h2 { font-size: 15px; }
   .wage-row label { padding: 3px 5px; font-size: 10px; }
   .wage-row input { height: 22px; font-size: 12px; }
@@ -465,6 +478,12 @@ button, .button-group, #fileInput { display: none !important; }
   .calendar { padding: 3px; }
   .triple-row { min-height: 17px; padding: 2px 4px !important; }
   #result > div { gap: 2px 4px; }
+}
+
+
+/* อ่านง่ายขึ้นเมื่อยอมให้เลื่อนจอ */
+.triple-row .col-1 {
+  white-space: normal;
 }
 
 </style>
