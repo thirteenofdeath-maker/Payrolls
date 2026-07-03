@@ -2893,6 +2893,178 @@ body {
   line-height: 1.55;
   text-align: left;
 }
+
+
+/* ===== Mobile header fit: keep title/range and clock/theme on one row ===== */
+.app-header {
+  grid-template-columns: minmax(0, 1fr) max-content !important;
+  align-items: start !important;
+  gap: 8px !important;
+  padding: 14px 12px !important;
+}
+.app-title-block {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.app-title-block h2,
+.app-header h2 {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(21px, 5.8vw, 28px) !important;
+  line-height: 1.05 !important;
+}
+.app-subtitle {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(10.5px, 3vw, 12px) !important;
+  line-height: 1.2 !important;
+}
+.app-title-block .header-date-range {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(9.5px, 2.8vw, 11px) !important;
+  padding: 4px 9px !important;
+}
+.app-header-right {
+  width: auto !important;
+  min-width: clamp(118px, 34vw, 168px) !important;
+  display: grid !important;
+  grid-template-columns: auto !important;
+  grid-template-areas: "theme" "clock" !important;
+  justify-items: end !important;
+  align-content: start !important;
+  gap: 7px !important;
+  text-align: right !important;
+}
+.theme-toggle {
+  width: clamp(36px, 10vw, 42px) !important;
+  min-width: clamp(36px, 10vw, 42px) !important;
+  height: clamp(36px, 10vw, 42px) !important;
+  min-height: clamp(36px, 10vw, 42px) !important;
+  padding: 0 !important;
+  font-size: clamp(18px, 5vw, 22px) !important;
+}
+.header-clock {
+  width: 100% !important;
+  justify-self: end !important;
+  justify-items: end !important;
+  text-align: right !important;
+  gap: 4px !important;
+}
+.clock-date {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(9.2px, 2.8vw, 11px) !important;
+  line-height: 1.15 !important;
+}
+.clock-time {
+  white-space: nowrap !important;
+  font-size: clamp(17px, 5.8vw, 22px) !important;
+  line-height: 1 !important;
+}
+@media (max-width: 520px) {
+  .app-header {
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+    gap: 8px !important;
+    padding: 14px 12px !important;
+  }
+  .app-header-right {
+    width: auto !important;
+    min-width: clamp(118px, 34vw, 156px) !important;
+    grid-template-columns: auto !important;
+    grid-template-areas: "theme" "clock" !important;
+    align-items: start !important;
+    justify-items: end !important;
+    text-align: right !important;
+  }
+}
+@media (max-width: 380px) {
+  .app-header {
+    padding: 12px 10px !important;
+    gap: 6px !important;
+    border-radius: 22px !important;
+  }
+  .app-title-block h2,
+  .app-header h2 {
+    font-size: 20px !important;
+  }
+  .app-subtitle {
+    font-size: 10px !important;
+  }
+  .app-title-block .header-date-range {
+    margin-top: 6px !important;
+    padding: 3px 7px !important;
+    font-size: 9px !important;
+  }
+  .app-header-right {
+    min-width: 112px !important;
+    gap: 6px !important;
+  }
+  .theme-toggle {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 17px !important;
+  }
+  .clock-date {
+    font-size: 8.8px !important;
+  }
+  .clock-time {
+    font-size: 17px !important;
+  }
+}
+
+
+/* ===== Move period range into net card and keep header compact ===== */
+.app-title-block .header-date-range {
+  display: none !important;
+}
+.app-title-block {
+  min-width: 0 !important;
+}
+.app-subtitle {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.period-summary-quick .quick-period {
+  display: inline-flex !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin-top: 6px !important;
+  padding: 4px 10px !important;
+  border: 1px solid color-mix(in srgb, var(--final-green) 28%, var(--final-line)) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--final-surface) 72%, var(--final-green-soft)) !important;
+  color: var(--final-muted) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.period-summary-quick strong {
+  margin-top: 8px !important;
+}
+html[data-theme="dark"] .period-summary-quick .quick-period {
+  background: color-mix(in srgb, var(--final-surface-2) 76%, var(--final-green-soft)) !important;
+}
+@media (max-width: 390px) {
+  .period-summary-quick .quick-period {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+}
+
 </style>
 </head>
 
@@ -2903,7 +3075,6 @@ body {
     <div class="app-title-block">
       <h2>สรุปเงินเดือน</h2>
       <div class="app-subtitle">บันทึกเวลา · คำนวณรายงวด</div>
-      <div class="header-date-range" id="headerDateRange">งวด --</div>
     </div>
     <div class="app-header-right" aria-label="วันที่ เวลา และปุ่มปรับธีม">
       <button type="button" id="themeToggle" class="theme-toggle" aria-label="สลับโหมดมืดหรือสว่าง">🌙</button>
@@ -2940,6 +3111,7 @@ body {
       <div id="periodSummaryQuick" class="period-summary-quick" aria-live="polite">
         <div>
           <span class="quick-label">ยอดสุทธิประจำงวด</span>
+          <span class="quick-period">--</span>
           <strong>0.00</strong>
         </div>
         <span class="quick-unit">บาท</span>
@@ -3836,6 +4008,7 @@ function calculate(){
     periodSummaryQuick.innerHTML = `
       <div>
         <span class="quick-label">ยอดสุทธิประจำงวด</span>
+        <span class="quick-period">${getPeriodRangeText()}</span>
         <strong>${format2(netPay)}</strong>
         <small>รวมรายได้ ${format2(totalIncome)} บาท · หักประกันสังคม ${format2(socialSecurity)} บาท (${format2(S.SOCIAL_SECURITY_PERCENT)}%)</small>
       </div>
