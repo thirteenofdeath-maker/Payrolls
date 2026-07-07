@@ -6671,6 +6671,171 @@ select:focus {
   display: none !important;
 }
 
+
+/* amount inputs: append connected บาท label to all money fields */
+.amount-input-wrap {
+  grid-template-columns: minmax(0, 1fr) 72px !important;
+  gap: 0 !important;
+}
+.amount-input-wrap input {
+  border-radius: 14px 0 0 14px !important;
+  border-right: 0 !important;
+  min-width: 0 !important;
+}
+.amount-input-wrap > span {
+  width: 72px !important;
+  border-radius: 0 14px 14px 0 !important;
+  border-left: 1px solid var(--final-line-strong) !important;
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  font-weight: 800 !important;
+}
+.readonly-amount-wrap > span {
+  background: #eceff3 !important;
+}
+@media (max-width: 420px) {
+  .amount-input-wrap {
+    grid-template-columns: minmax(0, 1fr) 64px !important;
+  }
+  .amount-input-wrap > span {
+    width: 64px !important;
+  }
+}
+
+
+/* เบี้ยขยัน: จัดช่องกรอกให้เหมือนช่องจำนวนเงินอื่น */
+.incentive-card-manual {
+  background: #ffffff !important;
+  border-color: var(--final-line) !important;
+}
+
+.incentive-controls-manual {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.incentive-input-card {
+  display: grid !important;
+  gap: 6px !important;
+  padding: 10px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 17px !important;
+  background: #f9fafb !important;
+}
+
+.incentive-input-card > span {
+  color: var(--final-muted) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+}
+
+.incentive-input-wrap {
+  grid-template-columns: minmax(0, 1fr) 72px !important;
+  gap: 0 !important;
+}
+
+.incentive-input-wrap input {
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: 14px 0 0 14px !important;
+  border-right: 0 !important;
+}
+
+.incentive-input-wrap > span {
+  width: 72px !important;
+  min-height: 38px !important;
+  border-radius: 0 14px 14px 0 !important;
+  border-left: 1px solid var(--final-line-strong) !important;
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+  font-weight: 800 !important;
+}
+
+.incentive-level-hint {
+  display: block !important;
+  margin-top: 1px !important;
+  color: var(--final-muted) !important;
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+}
+
+.incentive-reference {
+  margin-top: 8px !important;
+  padding: 8px 10px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  color: var(--final-muted) !important;
+  font-size: 10.5px !important;
+  line-height: 1.35 !important;
+}
+
+@media (max-width: 420px) {
+  .incentive-controls-manual {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .incentive-input-card {
+    padding: 8px !important;
+  }
+  .incentive-input-wrap {
+    grid-template-columns: minmax(0, 1fr) 64px !important;
+  }
+  .incentive-input-wrap > span {
+    width: 64px !important;
+  }
+}
+
+
+/* สรุป: รวมเบี้ยขยัน และทำเส้นแบ่งแถวให้ตรง ไม่มีมุมโค้ง */
+.summary-card .summary-item {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+.summary-card .summary-item:hover {
+  background: transparent !important;
+  transform: none !important;
+}
+.summary-card .summary-item + .summary-item {
+  border-top: 1px solid var(--final-line) !important;
+}
+.summary-card .summary-item:first-of-type {
+  border-top: 0 !important;
+}
+.summary-card .summary-net {
+  border-radius: 12px !important;
+  background: #ecfdf3 !important;
+}
+
+
+
+/* ปรับปุ่มวันที่: เอากรอบซ้อนออก และเปลี่ยนสีตอนกด */
+.day-cell,
+.day-cell.active {
+  box-shadow: 0 2px 6px rgba(17, 24, 39, .03) !important;
+}
+
+.day-cell.active {
+  background: #2f855a !important;
+  border-color: #2f855a !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.day-cell:hover {
+  transform: translateY(-1px) !important;
+}
+
+.day-cell:active {
+  transform: scale(.98) !important;
+  box-shadow: none !important;
+}
+
 </style>
 </head>
 
@@ -6747,11 +6912,17 @@ select:focus {
       <div class="field-grid two-cols">
         <label class="field-card field-important">
           <span>ค่าแรง/วัน</span>
-          <input type="number" id="dailyWage" value="447">
+          <div class="input-with-unit amount-input-wrap">
+            <input type="number" id="dailyWage" value="447">
+            <span>บาท</span>
+          </div>
         </label>
         <label class="field-card field-readonly">
           <span>ค่าแรง/ชม</span>
-          <input type="number" id="hourlyWage" readonly>
+          <div class="input-with-unit amount-input-wrap readonly-amount-wrap">
+            <input type="number" id="hourlyWage" readonly>
+            <span>บาท</span>
+          </div>
         </label>
       </div>
     </div>
@@ -6764,15 +6935,24 @@ select:focus {
       <div class="field-grid three-cols">
         <label class="field-card">
           <span>ค่ากะดึก</span>
-          <input type="number" id="nightShiftFee" value="140">
+          <div class="input-with-unit amount-input-wrap">
+            <input type="number" id="nightShiftFee" value="140">
+            <span>บาท</span>
+          </div>
         </label>
         <label class="field-card">
           <span>อาหารกะดึก</span>
-          <input type="number" id="nightFoodFee" value="70">
+          <div class="input-with-unit amount-input-wrap">
+            <input type="number" id="nightFoodFee" value="70">
+            <span>บาท</span>
+          </div>
         </label>
         <label class="field-card">
           <span>อาหารโอที</span>
-          <input type="number" id="otFoodFee" value="45">
+          <div class="input-with-unit amount-input-wrap">
+            <input type="number" id="otFoodFee" value="45">
+            <span>บาท</span>
+          </div>
         </label>
       </div>
     </div>
@@ -6800,27 +6980,26 @@ select:focus {
         </label>
         <div class="incentive-card incentive-card-manual">
           <div class="mini-title">เบี้ยขยัน</div>
-          <div class="mini-subtitle">กรอกยอดเองได้ทั้ง 2 ช่วง</div>
           <div class="incentive-controls incentive-controls-manual">
-            <label class="incentive-input-card">
+            <label class="field-card incentive-input-card">
               <span>ช่วง 1</span>
-              <div class="input-with-unit incentive-input-wrap">
+              <div class="input-with-unit amount-input-wrap incentive-input-wrap">
                 <input type="number" id="incentive1" value="0" min="0" step="1" inputmode="decimal" placeholder="0">
                 <span>บาท</span>
               </div>
-              <small class="incentive-level-hint">อ้างอิงเดิม: 0 / 180 / 210</small>
+              <small class="incentive-level-hint">0 / 180 / 210</small>
             </label>
-            <label class="incentive-input-card">
+            <label class="field-card incentive-input-card">
               <span>ช่วง 2</span>
-              <div class="input-with-unit incentive-input-wrap">
+              <div class="input-with-unit amount-input-wrap incentive-input-wrap">
                 <input type="number" id="incentive2" value="0" min="0" step="1" inputmode="decimal" placeholder="0">
                 <span>บาท</span>
               </div>
-              <small class="incentive-level-hint">อ้างอิงเดิม: 0 / 180 / 210</small>
+              <small class="incentive-level-hint">0 / 180 / 210</small>
             </label>
           </div>
           <div class="incentive-reference">
-            ระดับเบี้ยขยันอ้างอิงจากตัวเลือกเดิม: ไม่รับเบี้ย = 0 บาท · ระดับปกติ = 180 บาท · ระดับเต็ม = 210 บาท
+            ระดับเบี้ยขยัน: ไม่ได้รับเบี้ย = 0 บาท · ระดับปกติ = 180 บาท · ระดับเต็ม = 210 บาท
           </div>
         </div>
       </div>
@@ -7713,14 +7892,9 @@ function calculate(){
           <span class="summary-money">${format2(mentorPay)} บาท</span>
         </div>
         <div class="summary-item">
-          <span class="summary-label">เบี้ยขยันช่วง 1</span>
-          <span class="summary-qty">กรอกเอง</span>
-          <span class="summary-money">${format2(incentive1Pay)} บาท</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">เบี้ยขยันช่วง 2</span>
-          <span class="summary-qty">กรอกเอง</span>
-          <span class="summary-money">${format2(incentive2Pay)} บาท</span>
+          <span class="summary-label">เบี้ยขยัน</span>
+          <span class="summary-qty">ช่วง 1 + 2</span>
+          <span class="summary-money">${format2(incentive1Pay + incentive2Pay)} บาท</span>
         </div>
       </section>
 
