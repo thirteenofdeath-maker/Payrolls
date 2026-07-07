@@ -1,0 +1,4653 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คำนวณเงินเดือนคร่าวๆ</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="เงินเดือนคร่าวๆ">
+<meta name="description" content="เว็บแอปคำนวณเงินเดือนแบบไม่เป็นทางการ ใช้ประเมินรายงวดเท่านั้น">
+<meta name="theme-color" content="#1976d2">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<style>
+/* 1. Global Setup */
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap');
+
+body {
+    font-family: 'Kanit', sans-serif;
+    margin: 0; padding: 15px; background: #f0f2f5; color: #333;
+    display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+    
+.main-container { width: 100%; max-width: 100%; margin: auto; text-align: center; }
+
+h2 { font-weight: 700; color: #1a1a1a; margin-bottom: 20px; }
+
+/* 2. Dropdown (Select) แบบมนและสวย - ประกาศที่เดียวใช้ทั้งแอป */
+select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 8px 30px 8px 12px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 14px; color: #333; cursor: pointer;
+    transition: all 0.3s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    box-shadow: none;
+}
+
+select:focus {
+    outline: none; border-color: #1976d2;
+    box-shadow: none;
+}
+
+/* 3. Calendar & Cells */
+.calendar { margin: 12px 0; }
+.weekdays, .days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; }
+.weekdays { background: #e0e0e0; border-radius: 8px 8px 0 0; padding: 5px 0; font-weight: 600; font-size: 13px; color: #555; }
+.weekdays div:first-child { color: #e53935; }
+.weekdays div:last-child { color: #1976d2; }
+
+.day-cell {
+    background: #fff; margin: 3px; padding: 10px 0; border-radius: 10px; cursor: pointer;
+    position: relative; transition: all 0.2s ease;
+}
+.day-cell.active { background: #1976d2; color: #fff; transform: scale(1.05); }
+
+/* Indicators */
+.day-cell::after, .day-cell::before { content: ""; width: 5px; height: 5px; border-radius: 50%; position: absolute; bottom: 4px; display: none; }
+.day-cell::after { left: 35%; transform: translateX(-50%); } 
+.day-cell::before { left: 65%; transform: translateX(-50%); }
+
+.day-normal::after { background: #00000000; display: block; }
+.day-work::after { background: #4caf50; display: block; }
+.day-leave::after { background: #ff9800; display: block; }
+.day-absent::after { background: #e53935; display: block; }
+.day-holiday::after { background: #607d8b; display: block; }
+.shift-morning::before { background: #FFD700; display: block; }
+.shift-night::before { background: #000080; display: block; }
+
+/* 4. Forms & Settings */
+.wage-row, .setting-row { display: flex; justify-content: center; gap: 10px; margin-bottom: 12px; }
+.wage-row label { font-size: 13px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.wage-row input { width: 60px; text-align: center; font-weight: 600; border-radius: 8px; border: 1px solid #ccc; padding: 6px; font-family: 'Kanit';font-size: medium; }
+.fee-row { flex-wrap: wrap; }
+.fee-row label { min-width: 95px; }
+.fee-row input { width: 70px; }
+#hourlyWage { background: #eee !important; border: 1px dashed #999; }
+
+.setting-row label {
+    font-size: 14px; padding: 6px 12px; background: #fff; border-radius: 8px; border: 1px solid #ddd;
+    display: flex; align-items: center; cursor: pointer; transition: 0.2s;
+}
+.setting-row input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; accent-color: #1976d2; }
+
+/* 5. Specific Element Styles (Override เฉพาะจุด) */
+#monthSelect, #yearSelect {
+    background-color: #e3f2fd; border-color: #bbdefb; font-weight: 600; color: #1565c0;
+}
+
+.incentive-box { border: none; border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; margin: 15px 0; padding: 12px 0; }
+.incentive-box legend { font-size: 13px; font-weight: 600; color: #666; text-align: left; }
+.incentive-box .setting-row {
+    display: flex;
+    justify-content: center; /* จัดให้อยู่กลาง */
+    gap: 10px;               /* กำหนดระยะห่างที่แน่นอนระหว่าง 2 ช่อง */
+    margin-top: 5px;
+}
+.incentive-box label {
+    flex: 1;                 /* บังคับให้ทั้ง 2 ฝั่งมีขนาดเท่ากัน */
+    max-width: 135px;        /* จำกัดความกว้างไม่ให้ยืดจนน่าเกลียด */
+    justify-content: center; 
+}
+.incentive-box select { width: 90px; height: 36px; text-align: center; padding: 4px 20px 4px 4px; font-weight: 500; }
+
+.row select { height: 40px; border-radius: 10px; width: 100%; box-sizing: border-box; }
+
+/* 6. Summary & Card Expand */
+.triple-row { display: grid; grid-template-columns: 100px 80px auto; align-items: center; gap: 8px; padding: 5px 0; font-size: 14px; text-align: left; }
+.money { font-weight: bold; text-align: right; }
+.total-box { font-size: 18px; background: #2e7d32; color: #fff; border-radius: 8px; padding: 10px; margin-top: 15px; }
+
+.calendar-expand { grid-column: 1 / -1; overflow: hidden; will-change: transform, max-height; }
+.card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: none; }
+#cardContainer .card { display: none; }
+/* ปรับสไตล์แถวภายในการ์ดแก้ไขข้อมูล */
+.card-body .row {
+    display: flex;
+    justify-content: space-between; /* แยกหัวข้อไปซ้าย ช่องเลือกไปขวา */
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 15px;
+}
+
+.card-body .row label {
+    width: auto; /* ให้ความกว้างปรับตามข้อความ */
+    min-width: 60px;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: left;
+    margin-bottom: 0; /* เอา margin เดิมออก */
+}
+
+.card-body select {
+    flex: 1; /* ให้ Dropdown ขยายเต็มพื้นที่ที่เหลือ */
+    max-width: 200px; /* จำกัดความกว้างไม่ให้ยาวเกินไป */
+    height: 38px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* ปรับหัวการ์ด (วันที่) ให้เด่นชัดและอยู่กลาง */
+.card-header {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    position: relative;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+/* ย้าย Badge ไปไว้มุมขวาบนของหัวการ์ด */
+.card-actions {
+    position: absolute;
+    right: 0;
+}
+/* สีของ Badge ที่มุมขวาบน  */
+.badge-work { background-color: #a5d6a7 !important; color: #1b5e20 !important; }    /* เขียวซอฟต์ */
+.badge-holiday { background-color: #cfd8dc !important; color: #37474f !important; } /* เทาสบายตา */
+.badge-leave { background-color: #ffe0b2 !important; color: #e65100 !important; }   /* ส้มพาสเทล */
+.badge-absent { background-color: #ffcdd2 !important; color: #b71c1c !important; }  /* แดงอ่อน */
+.badge-normal { background-color: #00000000 !important; color: #000000 !important; }
+/* ตกแต่ง Badge ให้ดูเป็นปุ่มมนสวยงาม  */
+.badge {
+    padding: 4px 12px;
+    border-radius: 50px; /* ทรงมนสวย */
+    font-size: 12px;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: none;
+}
+/* ปรับแต่งปุ่มให้ดูน่ารักและมนเป็นพิเศษ */
+button {
+    font-family: 'Kanit', sans-serif;
+    border: none;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+button:active { transform: scale(0.95); }
+
+
+/* ไอคอนสถานะในการ์ดแก้ไขข้อมูล */
+/* ใส่ไอคอนปฏิทินเฉพาะ div ตัวแรก (วันที่) ที่อยู่ทางซ้าย */
+.card-header div:first-child::before {
+    content: "📅 "; 
+    display: inline-block;
+}
+
+/* ป้องกันไม่ให้ actions หรือ badge แสดงไอคอนซ้ำ */
+.card-actions::before {
+    content: none !important;
+}
+/* ปรับปรุง Label ในการ์ดให้ดูสะอาดตา */
+.card-body .row {
+    display: flex;
+    justify-content: space-between; /* ผลัก label ไปซ้ายสุด select ไปขวาสุด */
+    align-items: center;
+    margin-bottom: 12px;
+    background: #fafafa; /* เพิ่มพื้นหลังจางๆ ให้แต่ละแถวดูแยกกันชัดเจน */
+    padding: 8px 12px;
+    border-radius: 10px;
+}
+
+.card-body label {
+    font-size: 14px;
+    color: #546e7a;
+    font-weight: 500;
+    margin: 0;
+}
+
+.card-body select {
+    width: 60%; /* ปรับความกว้างช่องเลือกให้พอดี */
+    border: 1px solid #eceff1;
+    background-color: #fff;
+    height: 35px;
+}
+.badge {
+    padding: 3px 12px;
+    border-radius: 20px; /* ทรงแคปซูล */
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* เพิ่ม Icon เล็กๆ หน้าสถานะผ่าน CSS */
+.badge-work::before { content: "✅ "; }
+.badge-holiday::before { content: "🏖️ "; }
+.badge-leave::before { content: "📝 "; }
+.badge-absent::before { content: "❌ "; }
+
+
+/* ===== Compact one-screen UI: no PDF / backup / import buttons ===== */
+:root {
+  --card-bg: rgba(255,255,255,0.92);
+  --line: #e7edf3;
+  --text-soft: #607d8b;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; overflow-x: hidden; overflow-y: auto; }
+body {
+  padding: 8px;
+  background: linear-gradient(180deg, #eef5ff 0%, #f8fafc 100%);
+  align-items: flex-start;
+}
+.main-container {
+  min-height: calc(100svh - 16px);
+  max-width: 460px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+h2 {
+  margin: 0;
+  font-size: clamp(16px, 4vw, 20px);
+  line-height: 1.1;
+  text-align: center;
+}
+.wage-row, .setting-row {
+  margin-bottom: 0 !important;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.wage-row:first-of-type {
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+}
+.wage-row label {
+  flex: 1 1 78px;
+  min-width: 0;
+  padding: 5px 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 11px;
+  line-height: 1.15;
+}
+.wage-row input {
+  width: 100%;
+  min-width: 0;
+  height: 26px;
+  padding: 2px 4px;
+  font-size: 13px;
+}
+.fee-row label { min-width: 0; }
+.fee-row input { width: 100%; }
+select {
+  min-height: 30px;
+  padding: 4px 22px 4px 8px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+.setting-row label {
+  flex: 1;
+  justify-content: center;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 10px;
+}
+.setting-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+}
+.incentive-box {
+  margin: 0 !important;
+  padding: 5px 0 !important;
+  border-radius: 12px;
+  border: 1px solid var(--line) !important;
+  background: var(--card-bg);
+}
+.incentive-box legend {
+  padding: 0 6px;
+  font-size: 11px;
+}
+.incentive-box .setting-row { margin-top: 0 !important; }
+.incentive-box label { max-width: none; padding: 3px 6px; }
+.incentive-box select { width: 72px; height: 28px; font-size: 12px; }
+.calendar {
+  margin: 0 !important;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+}
+.weekdays {
+  padding: 2px 0;
+  font-size: 10.5px;
+  border-radius: 8px;
+  background: #edf2f7;
+}
+.day-cell {
+  margin: 1.5px;
+  padding: clamp(3px, 0.75svh, 7px) 0;
+  border-radius: 8px;
+  font-size: clamp(10px, 2.8vw, 12px);
+}
+.day-cell.active { transform: none; }
+.day-cell::after, .day-cell::before {
+  width: 4px;
+  height: 4px;
+  bottom: 2px;
+}
+#cardContainer { display: none; }
+.calendar-expand {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  z-index: 1;
+  grid-column: 1 / -1;
+  border-radius: 16px;
+  box-shadow: none;
+  margin: 4px 0;
+}
+.card {
+  padding: 10px;
+  border-radius: 16px;
+  max-height: none;
+  overflow: visible;
+}
+.card-header {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.badge {
+  padding: 2px 8px;
+  font-size: 9px;
+}
+.card-body .row {
+  margin-bottom: 6px !important;
+  padding: 5px 8px !important;
+  gap: 8px;
+  border-radius: 9px;
+}
+.card-body .row label {
+  font-size: 11px !important;
+  min-width: 92px;
+}
+.card-body select {
+  width: 58%;
+  max-width: none;
+  height: 30px;
+  font-size: 11px;
+}
+#summaryContainer { display: none; }
+#result {
+  margin-top: 0 !important;
+  min-height: 0;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+#result > div {
+  width: 100% !important;
+  height: auto;
+  margin: 0 !important;
+  line-height: 1.05 !important;
+  font-size: 10.5px !important;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 3px 5px;
+  align-content: start;
+}
+#result .no-print {
+  grid-column: 1 / -1;
+  margin: 0 !important;
+  font-size: 12.5px !important;
+  line-height: 1 !important;
+}
+#result hr { display: none; }
+.triple-row {
+  grid-template-columns: minmax(0, 1fr) 39px 62px !important;
+  gap: 2px !important;
+  padding: 3px 5px !important;
+  min-height: 20px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.9);
+  font-size: clamp(9px, 2.35vw, 10.5px) !important;
+}
+.triple-row .col-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.triple-row .col-2 {
+  color: var(--text-soft);
+  font-size: 0.92em;
+}
+.triple-row .col-3 {
+  white-space: nowrap;
+}
+.triple-row[style*="font-size:20px"] {
+  grid-column: 1 / -1;
+  font-size: 15px !important;
+  min-height: 28px;
+  align-items: center;
+}
+#result div[style*="font-size:8px"] {
+  grid-column: 1 / -1;
+  font-size: 8px !important;
+  line-height: 1.15 !important;
+  color: #78909c;
+  text-align: center;
+}
+.button-group, #fileInput { display: none !important; }
+
+/* ===== Scrollable adjustments ===== */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  -webkit-overflow-scrolling: touch;
+}
+.main-container {
+  padding-bottom: 16px;
+}
+
+@media (max-height: 720px) {
+  body { padding: 5px; }
+  .main-container { min-height: calc(100svh - 10px); gap: 4px; }
+  h2 { font-size: 15px; }
+  .wage-row label { padding: 3px 5px; font-size: 10px; }
+  .wage-row input { height: 22px; font-size: 12px; }
+  .incentive-box { padding: 3px 0 !important; }
+  .calendar { padding: 3px; }
+  .triple-row { min-height: 17px; padding: 2px 4px !important; }
+  #result > div { gap: 2px 4px; }
+}
+
+
+/* อ่านง่ายขึ้นเมื่อยอมให้เลื่อนจอ */
+.triple-row .col-1 {
+  white-space: normal;
+}
+
+
+/* ===== Grouped summary + light/dark theme refresh ===== */
+:root {
+  color-scheme: light;
+  --bg-top: #eef6ff;
+  --bg-bottom: #f8fafc;
+  --card-bg: rgba(255,255,255,0.94);
+  --card-bg-solid: #ffffff;
+  --input-bg: #ffffff;
+  --line: #e3ebf3;
+  --text-main: #172033;
+  --text-soft: #64748b;
+  --heading: #0f172a;
+  --accent: #1976d2;
+  --accent-soft: #e3f2fd;
+  --accent-text: #1565c0;
+  --success: #2e7d32;
+  --success-soft: #e8f5e9;
+  --shadow-soft: none;
+  --summary-main: #f8fafc;
+  --summary-row: #ffffff;
+  --summary-total-bg: linear-gradient(135deg, #2e7d32, #42a847);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-top: #0f172a;
+  --bg-bottom: #111827;
+  --card-bg: rgba(30,41,59,0.92);
+  --card-bg-solid: #1e293b;
+  --input-bg: #0f172a;
+  --line: #334155;
+  --text-main: #e5e7eb;
+  --text-soft: #94a3b8;
+  --heading: #f8fafc;
+  --accent: #60a5fa;
+  --accent-soft: rgba(96,165,250,0.16);
+  --accent-text: #bfdbfe;
+  --success: #4ade80;
+  --success-soft: rgba(74,222,128,0.14);
+  --shadow-soft: none;
+  --summary-main: #111827;
+  --summary-row: rgba(15,23,42,0.82);
+  --summary-total-bg: linear-gradient(135deg, #15803d, #22c55e);
+}
+body {
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%) !important;
+  color: var(--text-main) !important;
+}
+.main-container { color: var(--text-main); }
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card-bg);
+  box-shadow: none;
+}
+.app-header h2 {
+  text-align: left;
+  color: var(--heading) !important;
+}
+.app-subtitle {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--text-soft);
+}
+.theme-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-width: 74px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-family: 'Kanit', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: none;
+}
+.theme-toggle:active { transform: scale(0.96); }
+.period-row {
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card-bg);
+}
+select, input {
+  background-color: var(--input-bg) !important;
+  color: var(--text-main) !important;
+  border-color: var(--line) !important;
+}
+#hourlyWage { background: color-mix(in srgb, var(--input-bg) 82%, var(--line)) !important; }
+.wage-row label,
+.setting-row label,
+.incentive-box,
+.calendar,
+.card,
+.card-body .row {
+  background: var(--card-bg) !important;
+  border-color: var(--line) !important;
+  color: var(--text-main) !important;
+}
+.card-body label, .incentive-box legend, .triple-row .col-2 { color: var(--text-soft) !important; }
+.weekdays { background: var(--accent-soft) !important; color: var(--text-main) !important; }
+.day-cell { background: var(--summary-row) !important; color: var(--text-main); border: 1px solid transparent; }
+.day-cell.active { background: var(--accent) !important; color: #ffffff !important; }
+#monthSelect, #yearSelect {
+  background-color: var(--accent-soft) !important;
+  color: var(--accent-text) !important;
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--line)) !important;
+}
+.badge-normal { color: var(--text-main) !important; }
+#result { margin-top: 4px !important; }
+#result > .summary-panel {
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+  width: 100% !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+}
+.summary-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: var(--summary-total-bg);
+  color: #fff;
+  box-shadow: none;
+}
+.summary-hero-title { font-size: 12px; opacity: 0.9; }
+.summary-hero-amount { font-size: clamp(22px, 7vw, 30px); font-weight: 700; line-height: 1; text-align: right; }
+.summary-hero-sub { font-size: 11px; opacity: 0.88; text-align: right; margin-top: 4px; }
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.summary-card {
+  background: var(--card-bg);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 9px;
+  box-shadow: none;
+}
+.summary-card.full { grid-column: 1 / -1; }
+.summary-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 7px;
+  color: var(--heading);
+  font-weight: 700;
+  font-size: 12.5px;
+}
+.summary-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) auto auto;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+  color: var(--text-main);
+}
+.summary-item:first-of-type { border-top: 0; }
+.summary-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-main);
+}
+.summary-qty {
+  color: var(--text-soft);
+  font-size: 11px;
+  text-align: right;
+  white-space: nowrap;
+}
+.summary-money {
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+.summary-note {
+  padding: 8px 10px;
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  color: var(--text-soft);
+  background: color-mix(in srgb, var(--card-bg-solid) 60%, transparent);
+  text-align: center;
+  font-size: 10px;
+}
+.summary-deduct .summary-money { color: #ef4444; }
+html[data-theme="dark"] .summary-deduct .summary-money { color: #fca5a5; }
+@media (max-width: 380px) {
+  .summary-grid { grid-template-columns: 1fr; }
+  .summary-card.full { grid-column: auto; }
+  .summary-hero { grid-template-columns: 1fr; }
+  .summary-hero-amount, .summary-hero-sub { text-align: left; }
+}
+
+
+/* ===== Compact grouped summary rows: label / qty-with-unit / money ===== */
+.summary-card {
+  overflow-x: visible;
+}
+.summary-item {
+  display: grid !important;
+  grid-template-columns: minmax(112px, 1fr) minmax(72px, auto) minmax(96px, auto) !important;
+  gap: 10px !important;
+  align-items: center;
+  padding: 7px 8px !important;
+  min-height: 30px;
+}
+.summary-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+.summary-qty,
+.summary-money {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.summary-qty {
+  color: var(--text-soft);
+  font-size: 11.5px;
+}
+.summary-money {
+  min-width: 0;
+  font-weight: 700;
+  color: var(--text-main);
+}
+.summary-emphasis {
+  background: color-mix(in srgb, var(--accent-soft) 38%, transparent);
+  border-radius: 10px;
+}
+.summary-net {
+  background: var(--success-soft);
+  border-radius: 12px;
+}
+.summary-net .summary-money {
+  color: var(--success);
+  font-size: 1.08em;
+}
+.summary-deduct .summary-money { color: #ef4444 !important; }
+html[data-theme="dark"] .summary-deduct .summary-money { color: #fca5a5 !important; }
+.rate-row label input {
+  width: 70px;
+}
+@media (max-width: 720px) {
+  .summary-grid { grid-template-columns: 1fr !important; }
+  .summary-card.full { grid-column: auto !important; }
+}
+@media (max-width: 420px) {
+  .summary-card { padding: 8px; }
+  .summary-item {
+    grid-template-columns: minmax(92px, 1fr) minmax(58px, auto) minmax(82px, auto) !important;
+    gap: 7px !important;
+    font-size: 11.4px !important;
+    padding: 6px 5px !important;
+  }
+  .summary-qty { font-size: 10.7px; }
+}
+
+
+
+/* ===== Balanced input zone refresh ===== */
+.input-panel {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--card-bg-solid) 72%, transparent);
+  box-shadow: none;
+}
+.input-section {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--card-bg);
+}
+.emphasis-section {
+  background: color-mix(in srgb, var(--accent-soft) 42%, var(--card-bg));
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--heading);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.section-icon {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  font-size: 12px;
+}
+.period-controls,
+.field-grid,
+.extras-grid,
+.incentive-controls {
+  display: grid;
+  gap: 7px;
+}
+.period-controls {
+  grid-template-columns: minmax(0, 1.35fr) minmax(88px, 0.65fr);
+}
+.period-switcher {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  gap: 7px;
+  align-items: stretch;
+}
+.period-nav-btn {
+  min-width: 0;
+  min-height: 58px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 15px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 70%, var(--card-bg)), var(--summary-row));
+  color: var(--heading);
+  box-shadow: none;
+  cursor: pointer;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+.period-nav-btn:hover {
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--line));
+}
+.period-nav-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.field-grid.two-cols {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.field-grid.three-cols {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.extras-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(92px, 0.7fr);
+  align-items: stretch;
+}
+.field-card,
+.toggle-card,
+.incentive-card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--summary-row);
+  color: var(--text-main);
+}
+.field-card {
+  display: grid;
+  gap: 5px;
+  padding: 8px;
+}
+.field-card > span,
+.incentive-controls label span,
+.mini-title {
+  color: var(--text-soft);
+  font-size: 10.5px;
+  line-height: 1.1;
+}
+.field-important {
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  box-shadow: none;
+}
+.field-readonly {
+  opacity: 0.92;
+}
+.field-card input,
+.field-card select,
+.incentive-controls select {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.select-card select {
+  text-align-last: center;
+}
+.input-with-unit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+}
+.input-with-unit > span {
+  color: var(--text-soft);
+  font-weight: 700;
+  font-size: 12px;
+}
+.social-card {
+  border-color: color-mix(in srgb, #ef4444 24%, var(--line));
+  box-shadow: none;
+}
+.toggle-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  min-height: 58px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.toggle-card input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+.incentive-card {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+}
+.incentive-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.incentive-controls label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+}
+.incentive-controls label span {
+  white-space: nowrap;
+  font-weight: 600;
+}
+/* keep legacy rows from affecting the new input panel */
+.input-panel .wage-row,
+.input-panel .setting-row,
+.input-panel .incentive-box {
+  all: unset;
+}
+@media (max-width: 420px) {
+  .input-panel {
+    padding: 8px;
+    gap: 7px;
+  }
+  .input-section {
+    padding: 8px;
+  }
+  .field-grid.three-cols {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .field-card {
+    padding: 7px 6px;
+  }
+  .field-card > span,
+  .incentive-controls label span,
+  .mini-title {
+    font-size: 9.8px;
+  }
+  .field-card input,
+  .field-card select,
+  .incentive-controls select {
+    height: 31px;
+    font-size: 12.5px;
+  }
+  .period-controls {
+    grid-template-columns: minmax(0, 1.15fr) minmax(82px, 0.85fr);
+  }
+  .period-switcher {
+    grid-template-columns: 36px minmax(0, 1fr) 36px;
+    gap: 6px;
+  }
+  .period-nav-btn {
+    min-height: 54px;
+    border-radius: 13px;
+    font-size: 21px;
+  }
+  .extras-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(84px, 0.7fr);
+  }
+}
+@media (max-width: 340px) {
+  .field-grid.three-cols,
+  .field-grid.two-cols,
+  .period-controls,
+  .extras-grid,
+  .incentive-controls {
+    grid-template-columns: 1fr;
+  }
+  .period-switcher {
+    grid-template-columns: 32px minmax(0, 1fr) 32px;
+  }
+  .period-nav-btn {
+    min-height: 86px;
+    font-size: 20px;
+  }
+  .incentive-card { grid-column: auto; }
+}
+
+
+
+/* ===== Material UI Refresh: flat surfaces, no glow/shadow ===== */
+:root {
+  --md-bg: #fffbff;
+  --md-surface: #fffbff;
+  --md-surface-low: #f7f2fa;
+  --md-surface-mid: #f1ecf4;
+  --md-surface-high: #ece6f0;
+  --md-primary: #6750a4;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #eaddff;
+  --md-on-primary-container: #21005d;
+  --md-secondary-container: #e8def8;
+  --md-on-secondary-container: #1d192b;
+  --md-tertiary-container: #ffd8e4;
+  --md-on-tertiary-container: #31111d;
+  --md-error-container: #f9dedc;
+  --md-on-error-container: #410e0b;
+  --md-outline: #79747e;
+  --md-outline-variant: #cac4d0;
+  --md-text: #1d1b20;
+  --md-text-soft: #625b71;
+  --md-success-container: #d7f8dd;
+  --md-on-success-container: #0b3d16;
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --md-bg: #141218;
+  --md-surface: #141218;
+  --md-surface-low: #1d1b20;
+  --md-surface-mid: #211f26;
+  --md-surface-high: #2b2930;
+  --md-primary: #d0bcff;
+  --md-on-primary: #381e72;
+  --md-primary-container: #4f378b;
+  --md-on-primary-container: #eaddff;
+  --md-secondary-container: #4a4458;
+  --md-on-secondary-container: #e8def8;
+  --md-tertiary-container: #633b48;
+  --md-on-tertiary-container: #ffd8e4;
+  --md-error-container: #8c1d18;
+  --md-on-error-container: #f9dedc;
+  --md-outline: #938f99;
+  --md-outline-variant: #49454f;
+  --md-text: #e6e0e9;
+  --md-text-soft: #cac4d0;
+  --md-success-container: #28542f;
+  --md-on-success-container: #d7f8dd;
+  color-scheme: dark;
+}
+* {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+html, body {
+  background: var(--md-bg) !important;
+  color: var(--md-text) !important;
+  scroll-behavior: smooth;
+}
+body {
+  padding: 12px !important;
+  background-image: none !important;
+}
+.main-container {
+  max-width: 500px !important;
+  gap: 12px !important;
+  color: var(--md-text) !important;
+}
+.app-header {
+  padding: 16px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 24px !important;
+  background: var(--md-surface-low) !important;
+}
+.app-header h2 {
+  color: var(--md-text) !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+.app-subtitle,
+.section-title,
+.mini-title,
+.field-card span,
+.card-body label,
+.summary-qty {
+  color: var(--md-text-soft) !important;
+}
+.theme-toggle,
+.period-nav-btn {
+  min-height: 40px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--md-primary-container) !important;
+  color: var(--md-on-primary-container) !important;
+  font-weight: 600 !important;
+  padding: 0 16px !important;
+}
+.period-nav-btn {
+  width: 44px !important;
+  min-width: 44px !important;
+  height: 44px !important;
+  padding: 0 !important;
+  font-size: 28px !important;
+  line-height: 1 !important;
+}
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .18s ease, transform .12s ease !important;
+}
+button:active {
+  transform: scale(.97) !important;
+}
+.input-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  padding: 12px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 28px !important;
+  background: var(--md-surface) !important;
+}
+.input-section {
+  padding: 12px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 22px !important;
+  background: var(--md-surface-low) !important;
+}
+.emphasis-section {
+  border-color: transparent !important;
+  background: var(--md-primary-container) !important;
+  color: var(--md-on-primary-container) !important;
+}
+.emphasis-section .section-title,
+.emphasis-section .field-card span {
+  color: var(--md-on-primary-container) !important;
+}
+.section-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 10px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+.section-icon {
+  width: 28px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  background: var(--md-secondary-container) !important;
+  color: var(--md-on-secondary-container) !important;
+  font-size: 14px !important;
+}
+.period-switcher {
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+.period-controls,
+.field-grid,
+.extras-grid,
+.incentive-controls {
+  display: grid !important;
+  gap: 8px !important;
+}
+.period-controls,
+.two-cols {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+.three-cols {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+.extras-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, .9fr) !important;
+}
+.incentive-card {
+  grid-column: 1 / -1 !important;
+  padding: 10px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 18px !important;
+  background: var(--md-surface-mid) !important;
+}
+.incentive-controls {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  margin-top: 8px !important;
+}
+.incentive-controls label {
+  display: grid !important;
+  gap: 4px !important;
+  color: var(--md-text-soft) !important;
+  font-size: 12px !important;
+}
+.field-card,
+.toggle-card {
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 6px !important;
+  padding: 10px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 18px !important;
+  background: var(--md-surface-mid) !important;
+}
+.toggle-card {
+  grid-template-columns: auto 1fr !important;
+  align-items: center !important;
+  color: var(--md-text) !important;
+  font-weight: 600 !important;
+}
+.toggle-card input[type="checkbox"] {
+  width: 20px !important;
+  height: 20px !important;
+  accent-color: var(--md-primary) !important;
+}
+.field-important {
+  border: 2px solid var(--md-primary) !important;
+  background: color-mix(in srgb, var(--md-primary-container) 58%, var(--md-surface) 42%) !important;
+}
+.field-readonly {
+  background: color-mix(in srgb, var(--md-surface-mid) 72%, var(--md-outline-variant) 28%) !important;
+}
+.input-with-unit {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  gap: 6px !important;
+  align-items: end !important;
+}
+input,
+select {
+  width: 100% !important;
+  min-height: 42px !important;
+  padding: 8px 10px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--md-outline) !important;
+  border-radius: 8px 8px 0 0 !important;
+  background-color: var(--md-surface-high) !important;
+  color: var(--md-text) !important;
+  font-family: 'Kanit', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+select {
+  padding-right: 30px !important;
+}
+input:focus,
+select:focus {
+  outline: 2px solid var(--md-primary) !important;
+  outline-offset: 2px !important;
+  border-bottom-color: var(--md-primary) !important;
+}
+#monthSelect,
+#yearSelect {
+  background-color: var(--md-surface-high) !important;
+  color: var(--md-text) !important;
+  border-color: var(--md-outline) !important;
+}
+#hourlyWage {
+  background: var(--md-surface-mid) !important;
+  border: 0 !important;
+  border-bottom: 1px dashed var(--md-outline) !important;
+}
+.calendar {
+  margin: 0 !important;
+  padding: 12px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 28px !important;
+  background: var(--md-surface) !important;
+}
+.weekdays {
+  padding: 0 0 8px !important;
+  border-bottom: 1px solid var(--md-outline-variant) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--md-text-soft) !important;
+  font-size: 12px !important;
+}
+.days {
+  gap: 4px !important;
+  padding-top: 8px !important;
+}
+.day-cell,
+.day-cell-blank {
+  min-height: 40px !important;
+}
+.day-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 14px !important;
+  background: var(--md-surface-low) !important;
+  color: var(--md-text) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+.day-cell.active {
+  background: var(--md-primary) !important;
+  color: var(--md-on-primary) !important;
+  transform: none !important;
+}
+.day-cell::after,
+.day-cell::before {
+  width: 5px !important;
+  height: 5px !important;
+  bottom: 5px !important;
+}
+.day-work::after { background: #34a853 !important; }
+.day-leave::after { background: #f9ab00 !important; }
+.day-absent::after { background: #ea4335 !important; }
+.day-holiday::after { background: var(--md-text-soft) !important; }
+.shift-morning::before { background: #fbbc04 !important; }
+.shift-night::before { background: #5f6caf !important; }
+.calendar-expand {
+  grid-column: 1 / -1 !important;
+  margin: 8px 0 2px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 22px !important;
+  background: var(--md-surface-low) !important;
+  overflow: hidden !important;
+}
+.card {
+  padding: 14px !important;
+  border-radius: 22px !important;
+  border: 0 !important;
+  background: var(--md-surface-low) !important;
+}
+.card-header {
+  padding-bottom: 10px !important;
+  margin-bottom: 10px !important;
+  border-bottom: 1px solid var(--md-outline-variant) !important;
+  color: var(--md-text) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+.card-body .row {
+  padding: 10px !important;
+  margin-bottom: 8px !important;
+  gap: 10px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 18px !important;
+  background: var(--md-surface) !important;
+}
+.card-body .row label {
+  min-width: 108px !important;
+  font-size: 13px !important;
+}
+.card-body select {
+  max-width: none !important;
+  width: 58% !important;
+  height: auto !important;
+  font-size: 13px !important;
+}
+.badge {
+  border-radius: 999px !important;
+  padding: 4px 10px !important;
+  font-size: 10px !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.badge-work { background-color: var(--md-success-container) !important; color: var(--md-on-success-container) !important; }
+.badge-holiday { background-color: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; }
+.badge-leave { background-color: var(--md-tertiary-container) !important; color: var(--md-on-tertiary-container) !important; }
+.badge-absent { background-color: var(--md-error-container) !important; color: var(--md-on-error-container) !important; }
+.badge-normal { background-color: var(--md-surface-high) !important; color: var(--md-text-soft) !important; }
+#summaryContainer { display: none !important; }
+#result {
+  margin-top: 0 !important;
+}
+#result > .summary-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  font-size: 13px !important;
+  line-height: 1.28 !important;
+}
+.summary-hero {
+  display: grid !important;
+  grid-template-columns: 1fr auto !important;
+  gap: 10px !important;
+  padding: 16px !important;
+  border: 1px solid transparent !important;
+  border-radius: 26px !important;
+  background: var(--md-primary-container) !important;
+  color: var(--md-on-primary-container) !important;
+}
+.summary-hero-title,
+.summary-hero-sub {
+  color: var(--md-on-primary-container) !important;
+  opacity: .78 !important;
+}
+.summary-hero-amount {
+  color: var(--md-on-primary-container) !important;
+  font-size: clamp(24px, 7vw, 32px) !important;
+  font-weight: 700 !important;
+}
+.summary-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+.summary-card {
+  padding: 12px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 22px !important;
+  background: var(--md-surface-low) !important;
+}
+.summary-card.full { grid-column: 1 / -1 !important; }
+.summary-heading {
+  margin-bottom: 8px !important;
+  color: var(--md-text) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+.summary-item {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(74px, auto) minmax(98px, auto) !important;
+  gap: 10px !important;
+  align-items: center !important;
+  min-height: 34px !important;
+  padding: 8px 0 !important;
+  border-top: 1px solid var(--md-outline-variant) !important;
+  color: var(--md-text) !important;
+}
+.summary-item:first-of-type { border-top: 0 !important; }
+.summary-label {
+  color: var(--md-text) !important;
+  overflow-wrap: anywhere !important;
+}
+.summary-qty {
+  text-align: right !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+}
+.summary-money {
+  text-align: right !important;
+  white-space: nowrap !important;
+  color: var(--md-text) !important;
+  font-weight: 700 !important;
+}
+.summary-deduct .summary-money {
+  color: var(--md-on-error-container) !important;
+  background: var(--md-error-container) !important;
+  border-radius: 999px !important;
+  padding: 2px 8px !important;
+}
+.summary-note {
+  padding: 10px 12px !important;
+  border: 1px solid var(--md-outline-variant) !important;
+  border-radius: 18px !important;
+  background: var(--md-surface-low) !important;
+  color: var(--md-text-soft) !important;
+  text-align: center !important;
+  font-size: 10px !important;
+}
+@media (max-width: 430px) {
+  body { padding: 8px !important; }
+  .main-container { gap: 10px !important; }
+  .input-panel { padding: 10px !important; border-radius: 24px !important; }
+  .period-switcher { gap: 6px !important; }
+  .period-nav-btn { width: 40px !important; min-width: 40px !important; height: 40px !important; }
+  .three-cols { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .three-cols .field-card:last-child { grid-column: 1 / -1 !important; }
+  .extras-grid { grid-template-columns: 1fr !important; }
+  .summary-grid { grid-template-columns: 1fr !important; }
+  .summary-card.full { grid-column: auto !important; }
+  .summary-item { grid-template-columns: minmax(0, 1fr) minmax(68px, auto) minmax(92px, auto) !important; gap: 8px !important; }
+}
+@media (max-width: 360px) {
+  .period-controls, .two-cols { grid-template-columns: 1fr !important; }
+  .summary-hero { grid-template-columns: 1fr !important; }
+  .summary-hero-amount, .summary-hero-sub { text-align: left !important; }
+  .card-body .row { align-items: stretch !important; flex-direction: column !important; }
+  .card-body select { width: 100% !important; }
+}
+
+
+
+/* ===== Soft Dashboard UI Refresh: friendlier, balanced, no harsh Material look ===== */
+:root {
+  --ui-bg-1: #f4f8ff;
+  --ui-bg-2: #fff7ed;
+  --ui-surface: #ffffff;
+  --ui-surface-2: #f8fbff;
+  --ui-surface-3: #eef6ff;
+  --ui-line: #dbe7f3;
+  --ui-line-strong: #b9cce0;
+  --ui-text: #172033;
+  --ui-muted: #667085;
+  --ui-primary: #2563eb;
+  --ui-primary-soft: #dbeafe;
+  --ui-primary-text: #1e3a8a;
+  --ui-green: #16a34a;
+  --ui-green-soft: #dcfce7;
+  --ui-amber: #f59e0b;
+  --ui-amber-soft: #fef3c7;
+  --ui-red: #ef4444;
+  --ui-red-soft: #fee2e2;
+  --ui-purple: #7c3aed;
+  --ui-purple-soft: #ede9fe;
+  --ui-radius-lg: 24px;
+  --ui-radius-md: 18px;
+  --ui-radius-sm: 13px;
+  color-scheme: light;
+}
+html[data-theme="dark"] {
+  --ui-bg-1: #0f172a;
+  --ui-bg-2: #111827;
+  --ui-surface: #182235;
+  --ui-surface-2: #111827;
+  --ui-surface-3: #1f2a44;
+  --ui-line: #31425d;
+  --ui-line-strong: #475569;
+  --ui-text: #f8fafc;
+  --ui-muted: #a8b3c7;
+  --ui-primary: #60a5fa;
+  --ui-primary-soft: rgba(96,165,250,.18);
+  --ui-primary-text: #dbeafe;
+  --ui-green: #4ade80;
+  --ui-green-soft: rgba(74,222,128,.16);
+  --ui-amber: #fbbf24;
+  --ui-amber-soft: rgba(251,191,36,.16);
+  --ui-red: #f87171;
+  --ui-red-soft: rgba(248,113,113,.16);
+  --ui-purple: #c084fc;
+  --ui-purple-soft: rgba(192,132,252,.16);
+  color-scheme: dark;
+}
+html, body {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--ui-primary-soft) 62%, transparent) 0, transparent 34%),
+    linear-gradient(150deg, var(--ui-bg-1) 0%, var(--ui-bg-2) 100%) !important;
+  color: var(--ui-text) !important;
+}
+body {
+  padding: 12px !important;
+  font-size: 14px !important;
+}
+* {
+  box-shadow: none !important;
+}
+.main-container {
+  max-width: 540px !important;
+  gap: 14px !important;
+  color: var(--ui-text) !important;
+}
+.app-header {
+  padding: 16px !important;
+  border: 1px solid color-mix(in srgb, var(--ui-primary) 20%, var(--ui-line)) !important;
+  border-radius: 28px !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ui-primary-soft) 82%, var(--ui-surface)) 0%, var(--ui-surface) 62%) !important;
+}
+.app-header h2 {
+  margin: 0 !important;
+  color: var(--ui-text) !important;
+  font-size: clamp(21px, 5.2vw, 26px) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.3px !important;
+}
+.app-subtitle {
+  margin-top: 5px !important;
+  color: var(--ui-muted) !important;
+  font-size: 12.5px !important;
+}
+.theme-toggle {
+  min-width: 82px !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 999px !important;
+  background: var(--ui-surface) !important;
+  color: var(--ui-primary-text) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+.input-panel {
+  gap: 10px !important;
+  padding: 10px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 28px !important;
+  background: color-mix(in srgb, var(--ui-surface) 84%, transparent) !important;
+}
+.input-section {
+  padding: 12px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 22px !important;
+  background: var(--ui-surface) !important;
+}
+.emphasis-section {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ui-primary-soft) 82%, var(--ui-surface)) 0%, var(--ui-surface) 78%) !important;
+  border-color: color-mix(in srgb, var(--ui-primary) 28%, var(--ui-line)) !important;
+  color: var(--ui-text) !important;
+}
+.section-title {
+  margin-bottom: 9px !important;
+  color: var(--ui-text) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+}
+.section-icon {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 11px !important;
+  background: var(--ui-primary-soft) !important;
+  color: var(--ui-primary-text) !important;
+  font-size: 14px !important;
+}
+.period-switcher {
+  grid-template-columns: 42px minmax(0,1fr) 42px !important;
+  gap: 8px !important;
+}
+.period-nav-btn {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: auto !important;
+  min-height: 62px !important;
+  padding: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--ui-primary) 22%, var(--ui-line)) !important;
+  border-radius: 17px !important;
+  background: var(--ui-primary-soft) !important;
+  color: var(--ui-primary-text) !important;
+  font-size: 25px !important;
+  font-weight: 900 !important;
+}
+.period-controls,
+.field-grid,
+.extras-grid,
+.incentive-controls {
+  gap: 8px !important;
+}
+.period-controls { grid-template-columns: minmax(0,1.2fr) minmax(88px,.8fr) !important; }
+.two-cols { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+.three-cols { grid-template-columns: repeat(3,minmax(0,1fr)) !important; }
+.extras-grid { grid-template-columns: minmax(0,1fr) minmax(112px,.6fr) !important; }
+.field-card,
+.toggle-card,
+.incentive-card {
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 17px !important;
+  background: var(--ui-surface-2) !important;
+}
+.field-card {
+  gap: 6px !important;
+  padding: 10px !important;
+}
+.field-card > span,
+.incentive-controls label span,
+.mini-title {
+  color: var(--ui-muted) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+.field-important {
+  background: color-mix(in srgb, var(--ui-primary-soft) 55%, var(--ui-surface)) !important;
+  border: 1px solid color-mix(in srgb, var(--ui-primary) 38%, var(--ui-line)) !important;
+}
+.field-readonly {
+  opacity: .96 !important;
+  background: var(--ui-surface-3) !important;
+}
+.social-card {
+  background: color-mix(in srgb, var(--ui-red-soft) 54%, var(--ui-surface)) !important;
+  border-color: color-mix(in srgb, var(--ui-red) 22%, var(--ui-line)) !important;
+}
+.input-with-unit {
+  align-items: center !important;
+}
+.input-with-unit > span {
+  color: var(--ui-muted) !important;
+  font-weight: 800 !important;
+}
+input,
+select,
+.field-card input,
+.field-card select,
+.incentive-controls select,
+.card-body select {
+  min-height: 38px !important;
+  height: 38px !important;
+  padding: 7px 10px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 12px !important;
+  background: var(--ui-surface) !important;
+  color: var(--ui-text) !important;
+  font-family: 'Kanit', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  border-bottom: 1px solid var(--ui-line) !important;
+}
+select {
+  padding-right: 28px !important;
+}
+input:focus,
+select:focus {
+  outline: 2px solid color-mix(in srgb, var(--ui-primary) 32%, transparent) !important;
+  outline-offset: 1px !important;
+  border-color: var(--ui-primary) !important;
+}
+#hourlyWage {
+  background: var(--ui-surface-3) !important;
+  border: 1px dashed var(--ui-line-strong) !important;
+}
+.toggle-card {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  min-height: 62px !important;
+  padding: 10px !important;
+  color: var(--ui-text) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+.toggle-card input[type="checkbox"] {
+  width: 20px !important;
+  height: 20px !important;
+  accent-color: var(--ui-primary) !important;
+}
+.incentive-card {
+  padding: 10px !important;
+  background: color-mix(in srgb, var(--ui-purple-soft) 45%, var(--ui-surface)) !important;
+  border-color: color-mix(in srgb, var(--ui-purple) 20%, var(--ui-line)) !important;
+}
+.incentive-controls {
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  margin-top: 7px !important;
+}
+.incentive-controls label {
+  display: grid !important;
+  gap: 5px !important;
+}
+.calendar {
+  padding: 12px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 28px !important;
+  background: var(--ui-surface) !important;
+}
+.weekdays {
+  padding: 7px 3px !important;
+  border: 0 !important;
+  border-radius: 16px !important;
+  background: var(--ui-surface-3) !important;
+  color: var(--ui-muted) !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+.days {
+  gap: 5px !important;
+  padding-top: 10px !important;
+}
+.day-cell,
+.day-cell-blank {
+  min-height: 42px !important;
+}
+.day-cell {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 15px !important;
+  background: var(--ui-surface-2) !important;
+  color: var(--ui-text) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+.day-cell.active {
+  background: var(--ui-primary) !important;
+  border-color: var(--ui-primary) !important;
+  color: #ffffff !important;
+  transform: none !important;
+}
+.day-cell::after,
+.day-cell::before {
+  width: 6px !important;
+  height: 6px !important;
+  bottom: 5px !important;
+}
+.day-work::after { background: var(--ui-green) !important; }
+.day-leave::after { background: var(--ui-amber) !important; }
+.day-absent::after { background: var(--ui-red) !important; }
+.day-holiday::after { background: var(--ui-muted) !important; }
+.shift-morning::before { background: #facc15 !important; }
+.shift-night::before { background: var(--ui-purple) !important; }
+.calendar-expand {
+  margin: 10px 0 2px !important;
+  border: 1px solid color-mix(in srgb, var(--ui-primary) 20%, var(--ui-line)) !important;
+  border-radius: 24px !important;
+  background: var(--ui-surface-2) !important;
+}
+.card {
+  padding: 12px !important;
+  border-radius: 24px !important;
+  background: var(--ui-surface-2) !important;
+}
+.card-header {
+  padding-bottom: 10px !important;
+  margin-bottom: 10px !important;
+  border-bottom: 1px solid var(--ui-line) !important;
+  color: var(--ui-text) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+.card-body .row {
+  display: grid !important;
+  grid-template-columns: minmax(105px,.75fr) minmax(0,1fr) !important;
+  gap: 10px !important;
+  align-items: center !important;
+  padding: 9px !important;
+  margin-bottom: 8px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 17px !important;
+  background: var(--ui-surface) !important;
+}
+.card-body .row label {
+  min-width: 0 !important;
+  color: var(--ui-muted) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+.card-body select {
+  width: 100% !important;
+  max-width: none !important;
+  font-size: 13px !important;
+}
+.badge {
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.badge-work { background-color: var(--ui-green-soft) !important; color: color-mix(in srgb, var(--ui-green) 72%, #064e3b) !important; }
+.badge-holiday { background-color: var(--ui-surface-3) !important; color: var(--ui-muted) !important; }
+.badge-leave { background-color: var(--ui-amber-soft) !important; color: #92400e !important; }
+.badge-absent { background-color: var(--ui-red-soft) !important; color: #991b1b !important; }
+.badge-normal { background-color: var(--ui-surface-3) !important; color: var(--ui-muted) !important; }
+#result > .summary-panel {
+  gap: 10px !important;
+  font-size: 13px !important;
+}
+.summary-hero {
+  padding: 16px !important;
+  border: 1px solid color-mix(in srgb, var(--ui-green) 24%, var(--ui-line)) !important;
+  border-radius: 28px !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ui-green-soft) 85%, var(--ui-surface)) 0%, var(--ui-surface) 78%) !important;
+  color: var(--ui-text) !important;
+}
+.summary-hero-title,
+.summary-hero-sub {
+  color: var(--ui-muted) !important;
+  opacity: 1 !important;
+}
+.summary-hero-amount {
+  color: var(--ui-green) !important;
+  font-size: clamp(26px, 7.5vw, 34px) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.5px !important;
+}
+.summary-grid {
+  grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  gap: 10px !important;
+}
+.summary-card {
+  padding: 12px !important;
+  border: 1px solid var(--ui-line) !important;
+  border-radius: 23px !important;
+  background: var(--ui-surface) !important;
+}
+.summary-heading {
+  margin-bottom: 8px !important;
+  color: var(--ui-text) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+.summary-item {
+  grid-template-columns: minmax(0, 1fr) minmax(72px, auto) minmax(98px, auto) !important;
+  gap: 9px !important;
+  min-height: 34px !important;
+  padding: 8px 0 !important;
+  border-top: 1px solid var(--ui-line) !important;
+}
+.summary-label {
+  color: var(--ui-text) !important;
+  font-weight: 650 !important;
+}
+.summary-qty {
+  color: var(--ui-muted) !important;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.summary-money {
+  color: var(--ui-text) !important;
+  font-weight: 900 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.summary-emphasis {
+  background: color-mix(in srgb, var(--ui-primary-soft) 52%, transparent) !important;
+  border-radius: 13px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+.summary-net {
+  background: var(--ui-green-soft) !important;
+  border-radius: 14px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+.summary-net .summary-money { color: var(--ui-green) !important; }
+.summary-deduct .summary-money {
+  color: var(--ui-red) !important;
+  background: var(--ui-red-soft) !important;
+  border-radius: 999px !important;
+  padding: 3px 8px !important;
+}
+.summary-note {
+  padding: 10px 12px !important;
+  border: 1px dashed var(--ui-line-strong) !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--ui-surface-2) 70%, transparent) !important;
+  color: var(--ui-muted) !important;
+  font-size: 10.5px !important;
+}
+@media (max-width: 430px) {
+  body { padding: 8px !important; }
+  .main-container { gap: 10px !important; }
+  .app-header { border-radius: 24px !important; padding: 14px !important; }
+  .input-panel { border-radius: 24px !important; padding: 8px !important; }
+  .input-section { border-radius: 20px !important; padding: 10px !important; }
+  .period-switcher { grid-template-columns: 38px minmax(0,1fr) 38px !important; gap: 6px !important; }
+  .period-nav-btn { width: 38px !important; min-width: 38px !important; min-height: 58px !important; border-radius: 15px !important; }
+  .period-controls { grid-template-columns: minmax(0,1.1fr) minmax(78px,.9fr) !important; }
+  .three-cols { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  .three-cols .field-card:last-child { grid-column: 1 / -1 !important; }
+  .extras-grid { grid-template-columns: 1fr !important; }
+  .summary-grid { grid-template-columns: 1fr !important; }
+  .summary-card.full { grid-column: auto !important; }
+  .summary-item { grid-template-columns: minmax(0,1fr) minmax(66px,auto) minmax(90px,auto) !important; gap: 7px !important; }
+  .calendar { padding: 10px !important; }
+  .day-cell, .day-cell-blank { min-height: 38px !important; }
+}
+@media (max-width: 360px) {
+  .period-controls, .two-cols { grid-template-columns: 1fr !important; }
+  .summary-hero { grid-template-columns: 1fr !important; }
+  .summary-hero-amount, .summary-hero-sub { text-align: left !important; }
+  .card-body .row { grid-template-columns: 1fr !important; }
+}
+
+
+
+/* ===== Final layout requested: clean soft UI, no gradients/shadows, collapsible blocks ===== */
+* { box-shadow: none !important; }
+:root {
+  --final-bg: #f4f7fb;
+  --final-surface: #ffffff;
+  --final-surface-2: #f8fafc;
+  --final-surface-3: #eef4fb;
+  --final-line: #dfe7f0;
+  --final-line-strong: #cbd7e4;
+  --final-text: #152033;
+  --final-muted: #65758a;
+  --final-primary: #2563eb;
+  --final-primary-soft: #eaf2ff;
+  --final-green: #16a34a;
+  --final-green-soft: #eaf8ef;
+  --final-red: #dc2626;
+  --final-red-soft: #fff0f0;
+  --final-amber: #d97706;
+  --final-purple: #7c3aed;
+}
+html[data-theme="dark"] {
+  --final-bg: #0e1624;
+  --final-surface: #162033;
+  --final-surface-2: #111a2b;
+  --final-surface-3: #1d2a40;
+  --final-line: #2d3b51;
+  --final-line-strong: #41516a;
+  --final-text: #e8eef7;
+  --final-muted: #9daabe;
+  --final-primary: #7db4ff;
+  --final-primary-soft: #1b2c46;
+  --final-green: #5ee084;
+  --final-green-soft: #143422;
+  --final-red: #ff7b7b;
+  --final-red-soft: #3a1e24;
+  --final-amber: #fbbf24;
+  --final-purple: #b794f4;
+}
+body {
+  background: var(--final-bg) !important;
+  color: var(--final-text) !important;
+}
+.main-container {
+  max-width: 760px !important;
+  display: grid !important;
+  gap: 12px !important;
+}
+.app-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 14px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 24px !important;
+  background: var(--final-surface) !important;
+}
+.app-title-block h2,
+.app-header h2 {
+  margin: 0 !important;
+  color: var(--final-text) !important;
+  font-size: clamp(20px, 5vw, 28px) !important;
+  line-height: 1.1 !important;
+}
+.app-subtitle {
+  margin-top: 5px !important;
+  color: var(--final-muted) !important;
+  font-size: 12px !important;
+}
+.app-header-right {
+  display: grid !important;
+  grid-template-columns: auto 38px !important;
+  grid-template-areas: "range theme" "clock theme" !important;
+  align-items: center !important;
+  justify-items: end !important;
+  gap: 4px 8px !important;
+  text-align: right !important;
+}
+.header-date-range {
+  grid-area: range !important;
+  color: var(--final-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+}
+.header-clock {
+  grid-area: clock !important;
+  color: var(--final-text) !important;
+  font-size: 16px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.theme-toggle {
+  grid-area: theme !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 999px !important;
+  background: var(--final-surface-3) !important;
+  color: var(--final-text) !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+.input-panel,
+.input-section,
+.summary-shell,
+.summary-card,
+.calendar,
+.card,
+.field-card,
+.toggle-card,
+.incentive-card,
+.period-summary-quick {
+  background: var(--final-surface) !important;
+  border-color: var(--final-line) !important;
+  color: var(--final-text) !important;
+}
+.input-panel {
+  padding: 10px !important;
+  gap: 10px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 26px !important;
+}
+.input-section {
+  border-radius: 22px !important;
+  padding: 10px !important;
+  gap: 10px !important;
+}
+.input-details {
+  display: grid !important;
+  gap: 10px !important;
+}
+.input-details[hidden] {
+  display: none !important;
+}
+.section-title,
+.summary-toolbar-title,
+.summary-heading {
+  color: var(--final-text) !important;
+}
+.section-icon {
+  background: var(--final-primary-soft) !important;
+}
+.period-section {
+  background: var(--final-surface-2) !important;
+}
+.period-switcher {
+  grid-template-columns: 40px minmax(0,1fr) 40px !important;
+}
+.period-nav-btn {
+  min-height: 58px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 16px !important;
+  background: var(--final-surface) !important;
+  color: var(--final-primary) !important;
+}
+.period-controls {
+  grid-template-columns: minmax(0,1.2fr) minmax(82px,.8fr) !important;
+}
+.period-summary-quick {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+  border: 1px solid color-mix(in srgb, var(--final-green) 22%, var(--final-line)) !important;
+  border-radius: 22px !important;
+  background: var(--final-green-soft) !important;
+}
+.period-summary-quick .quick-label {
+  display: block !important;
+  color: var(--final-muted) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+}
+.period-summary-quick strong {
+  display: block !important;
+  margin-top: 4px !important;
+  color: var(--final-green) !important;
+  font-size: clamp(26px, 8vw, 38px) !important;
+  line-height: .95 !important;
+  font-weight: 950 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.period-summary-quick small {
+  display: block !important;
+  margin-top: 6px !important;
+  color: var(--final-muted) !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+}
+.period-summary-quick .quick-unit {
+  align-self: end !important;
+  margin-bottom: 3px !important;
+  color: var(--final-green) !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+}
+.period-calendar-wrap {
+  display: grid !important;
+  gap: 8px !important;
+}
+.calendar {
+  margin: 0 !important;
+  padding: 10px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 22px !important;
+  background: var(--final-surface) !important;
+}
+.weekdays {
+  background: var(--final-surface-3) !important;
+  color: var(--final-muted) !important;
+  border-radius: 14px !important;
+}
+.days { gap: 5px !important; }
+.day-cell {
+  border: 1px solid var(--final-line) !important;
+  background: var(--final-surface-2) !important;
+  color: var(--final-text) !important;
+}
+.day-cell.active {
+  background: var(--final-primary) !important;
+  color: #ffffff !important;
+}
+.collapse-toggle {
+  width: 100% !important;
+  min-height: 42px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 999px !important;
+  background: var(--final-surface-3) !important;
+  color: var(--final-text) !important;
+  font-family: 'Kanit', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+}
+.collapse-icon {
+  width: 22px !important;
+  height: 22px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  background: var(--final-surface) !important;
+  color: var(--final-primary) !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+.summary-shell {
+  padding: 10px !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 26px !important;
+}
+.summary-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+.summary-toolbar-title {
+  font-size: 14px !important;
+  font-weight: 900 !important;
+}
+.summary-collapse-toggle {
+  width: auto !important;
+  min-height: 38px !important;
+  padding: 0 14px !important;
+}
+.summary-collapsed #summaryCategoryList {
+  display: none !important;
+}
+#result > .summary-panel {
+  gap: 10px !important;
+}
+.summary-grid {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+.summary-card,
+.summary-card.full {
+  grid-column: auto !important;
+  border: 1px solid var(--final-line) !important;
+  border-radius: 20px !important;
+  background: var(--final-surface) !important;
+}
+.summary-item {
+  grid-template-columns: minmax(0,1fr) minmax(82px,auto) minmax(110px,auto) !important;
+  border-top: 1px solid var(--final-line) !important;
+}
+.summary-label,
+.summary-money { color: var(--final-text) !important; }
+.summary-qty,
+.summary-note { color: var(--final-muted) !important; }
+.summary-emphasis {
+  background: var(--final-primary-soft) !important;
+}
+.summary-net {
+  background: var(--final-green-soft) !important;
+}
+.summary-net .summary-money {
+  color: var(--final-green) !important;
+}
+.summary-deduct .summary-money {
+  color: var(--final-red) !important;
+  background: var(--final-red-soft) !important;
+}
+select,
+input,
+.field-card input,
+.input-with-unit {
+  background: var(--final-surface) !important;
+  color: var(--final-text) !important;
+  border-color: var(--final-line) !important;
+}
+.field-important {
+  background: var(--final-primary-soft) !important;
+  border-color: color-mix(in srgb, var(--final-primary) 24%, var(--final-line)) !important;
+}
+.card-body .row {
+  background: var(--final-surface) !important;
+  border-color: var(--final-line) !important;
+}
+.summary-hero { display: none !important; }
+@media (max-width: 520px) {
+  .app-header {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .app-header-right {
+    width: 100% !important;
+    grid-template-columns: minmax(0,1fr) 38px !important;
+    justify-items: stretch !important;
+    text-align: left !important;
+  }
+  .header-date-range,
+  .header-clock { justify-self: start !important; }
+  .theme-toggle { justify-self: end !important; }
+  .summary-toolbar {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+  .summary-collapse-toggle { width: 100% !important; }
+  .summary-item {
+    grid-template-columns: minmax(0,1fr) minmax(66px,auto) minmax(88px,auto) !important;
+    gap: 7px !important;
+  }
+}
+@media (max-width: 380px) {
+  .period-controls { grid-template-columns: 1fr !important; }
+  .period-summary-quick { grid-template-columns: 1fr !important; }
+  .period-summary-quick .quick-unit { align-self: auto !important; }
+  .summary-item { font-size: 11.4px !important; }
+}
+
+
+
+/* ===== Final polish: friendlier period arrows, Buddhist year display, richer realtime header ===== */
+body {
+  background-image: none !important;
+}
+.app-header,
+.input-panel,
+.input-section,
+.calendar,
+.summary-shell,
+.summary-card,
+.card,
+.field-card,
+.toggle-card,
+.incentive-card,
+.period-summary-quick {
+  box-shadow: none !important;
+}
+.app-header-right {
+  grid-template-columns: minmax(0, auto) 42px !important;
+  grid-template-areas: "range theme" "clock theme" !important;
+  gap: 6px 10px !important;
+}
+.header-date-range {
+  padding: 4px 9px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 18%, var(--final-line)) !important;
+  border-radius: 999px !important;
+  background: var(--final-primary-soft) !important;
+  color: var(--final-primary) !important;
+  font-size: 10.8px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+}
+.header-clock {
+  display: grid !important;
+  justify-items: end !important;
+  gap: 3px !important;
+  color: var(--final-text) !important;
+  line-height: 1.1 !important;
+}
+.clock-date {
+  display: block !important;
+  color: var(--final-muted) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+.clock-time {
+  display: block !important;
+  color: var(--final-text) !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  letter-spacing: .2px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.theme-toggle {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--final-line) !important;
+  background: var(--final-surface-3) !important;
+  font-size: 19px !important;
+}
+.period-switcher {
+  grid-template-columns: 46px minmax(0,1fr) 46px !important;
+  gap: 9px !important;
+  align-items: stretch !important;
+}
+.period-nav-btn {
+  position: relative !important;
+  min-width: 46px !important;
+  width: 46px !important;
+  min-height: 66px !important;
+  border-radius: 20px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 28%, var(--final-line)) !important;
+  background: var(--final-primary-soft) !important;
+  color: var(--final-primary) !important;
+  font-size: 0 !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+  transition: transform .14s ease, background-color .14s ease, border-color .14s ease !important;
+}
+.period-nav-btn::before {
+  content: attr(data-icon) !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 999px !important;
+  background: var(--final-surface) !important;
+  color: var(--final-primary) !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+}
+.period-nav-btn:hover {
+  border-color: color-mix(in srgb, var(--final-primary) 52%, var(--final-line)) !important;
+  background: color-mix(in srgb, var(--final-primary-soft) 82%, var(--final-surface)) !important;
+}
+.period-nav-btn:active {
+  transform: scale(.96) !important;
+}
+.period-controls .select-card {
+  background: color-mix(in srgb, var(--final-surface) 72%, var(--final-primary-soft)) !important;
+  border-color: color-mix(in srgb, var(--final-primary) 20%, var(--final-line)) !important;
+}
+.period-controls .select-card > span {
+  color: var(--final-primary) !important;
+  font-weight: 900 !important;
+  letter-spacing: .1px !important;
+}
+#monthSelect,
+#yearSelect {
+  min-height: 42px !important;
+  height: 42px !important;
+  border-radius: 14px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 24%, var(--final-line)) !important;
+  background: var(--final-surface) !important;
+  color: var(--final-text) !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  text-align-last: center !important;
+}
+#monthSelect:focus,
+#yearSelect:focus {
+  outline: 2px solid color-mix(in srgb, var(--final-primary) 32%, transparent) !important;
+  outline-offset: 2px !important;
+  border-color: var(--final-primary) !important;
+}
+@media (max-width: 520px) {
+  .app-header {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .app-header-right {
+    width: 100% !important;
+    grid-template-columns: minmax(0,1fr) 42px !important;
+    justify-items: end !important;
+  }
+  .header-date-range,
+  .header-clock {
+    justify-self: end !important;
+  }
+}
+@media (max-width: 380px) {
+  .period-switcher {
+    grid-template-columns: 40px minmax(0,1fr) 40px !important;
+    gap: 7px !important;
+  }
+  .period-nav-btn {
+    min-width: 40px !important;
+    width: 40px !important;
+    min-height: 62px !important;
+    border-radius: 17px !important;
+  }
+  .period-nav-btn::before {
+    width: 25px !important;
+    height: 25px !important;
+    font-size: 19px !important;
+  }
+  .clock-date {
+    font-size: 10.2px !important;
+  }
+  .clock-time {
+    font-size: 16px !important;
+  }
+}
+
+
+/* ===== Friendlier period controls + soft hide/show buttons ===== */
+.period-switcher {
+  grid-template-columns: minmax(74px, .35fr) minmax(0, 1fr) minmax(74px, .35fr) !important;
+  gap: 10px !important;
+}
+.period-nav-btn {
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 64px !important;
+  padding: 7px 6px !important;
+  display: grid !important;
+  place-items: center !important;
+  gap: 3px !important;
+  border-radius: 22px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 24%, var(--final-line)) !important;
+  background: color-mix(in srgb, var(--final-primary-soft) 74%, var(--final-surface)) !important;
+  color: var(--final-primary) !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+}
+.period-nav-btn::before { content: none !important; }
+.period-nav-btn .nav-symbol {
+  width: 31px !important;
+  height: 31px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  background: var(--final-surface) !important;
+  color: var(--final-primary) !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 16%, var(--final-line)) !important;
+  font-size: 24px !important;
+  font-weight: 950 !important;
+  line-height: .85 !important;
+}
+.period-nav-btn .nav-label {
+  display: block !important;
+  color: var(--final-primary) !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+}
+.period-nav-btn:hover {
+  transform: translateY(-1px) !important;
+  background: color-mix(in srgb, var(--final-primary-soft) 88%, var(--final-surface)) !important;
+  border-color: color-mix(in srgb, var(--final-primary) 42%, var(--final-line)) !important;
+}
+.period-nav-btn:active {
+  transform: scale(.97) !important;
+}
+.period-controls .select-card {
+  border-radius: 20px !important;
+  padding: 9px !important;
+  background: color-mix(in srgb, var(--final-surface) 64%, var(--final-primary-soft)) !important;
+}
+.period-controls .select-card > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  color: var(--final-muted) !important;
+  font-size: 11.5px !important;
+  font-weight: 900 !important;
+}
+.period-controls .select-card:first-child > span::before { content: "🗓️"; }
+.period-controls .select-card:last-child > span::before { content: "พ.ศ."; font-size: 10px; }
+#monthSelect,
+#yearSelect {
+  min-height: 44px !important;
+  height: 44px !important;
+  border-radius: 15px !important;
+  background: var(--final-surface) !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 22%, var(--final-line)) !important;
+  color: var(--final-text) !important;
+  font-size: 15.5px !important;
+  font-weight: 950 !important;
+}
+#monthSelect {
+  color: var(--final-primary) !important;
+}
+#yearSelect {
+  color: color-mix(in srgb, var(--final-primary) 82%, var(--final-text)) !important;
+}
+.collapse-toggle {
+  min-height: 46px !important;
+  justify-content: flex-start !important;
+  padding: 6px 10px !important;
+  border-radius: 18px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 16%, var(--final-line)) !important;
+  background: color-mix(in srgb, var(--final-surface) 72%, var(--final-primary-soft)) !important;
+  color: var(--final-text) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+.collapse-icon {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 12px !important;
+  background: var(--final-surface) !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 14%, var(--final-line)) !important;
+  font-size: 15px !important;
+}
+.collapse-text {
+  flex: 1 !important;
+  text-align: left !important;
+}
+.collapse-toggle::after {
+  content: "แตะเพื่อปรับมุมมอง" !important;
+  margin-left: auto !important;
+  color: var(--final-muted) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+}
+.summary-collapse-toggle {
+  width: auto !important;
+  min-width: 168px !important;
+}
+.input-collapse-toggle {
+  width: 100% !important;
+}
+@media (max-width: 430px) {
+  .period-switcher {
+    grid-template-columns: 58px minmax(0, 1fr) 58px !important;
+    gap: 7px !important;
+  }
+  .period-nav-btn {
+    min-height: 62px !important;
+    border-radius: 19px !important;
+    padding: 6px 3px !important;
+  }
+  .period-nav-btn .nav-symbol {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 22px !important;
+  }
+  .period-nav-btn .nav-label {
+    font-size: 9.5px !important;
+  }
+  .collapse-toggle::after {
+    display: none !important;
+  }
+  .summary-collapse-toggle {
+    min-width: 0 !important;
+  }
+}
+
+
+/* ===== Final tweaks: ±2 years + cleaner arrow controls ===== */
+.period-switcher {
+  grid-template-columns: 50px minmax(0, 1fr) 50px !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+.period-nav-btn {
+  width: 50px !important;
+  min-width: 50px !important;
+  min-height: 58px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  border-radius: 18px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 26%, var(--final-line)) !important;
+  background: color-mix(in srgb, var(--final-primary-soft) 76%, var(--final-surface)) !important;
+  color: var(--final-primary) !important;
+}
+.period-nav-btn .nav-symbol {
+  width: 34px !important;
+  height: 34px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+  color: var(--final-primary) !important;
+  font-size: 34px !important;
+  font-weight: 850 !important;
+  line-height: .75 !important;
+}
+.period-nav-btn .nav-label {
+  display: none !important;
+}
+.period-nav-btn:hover,
+.period-nav-btn:focus-visible {
+  background: color-mix(in srgb, var(--final-primary-soft) 92%, var(--final-surface)) !important;
+  border-color: color-mix(in srgb, var(--final-primary) 44%, var(--final-line)) !important;
+  transform: none !important;
+  outline: none !important;
+}
+.period-nav-btn:active {
+  transform: scale(.96) !important;
+}
+.collapse-toggle {
+  min-height: 42px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 7px 10px 7px 14px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--final-line) !important;
+  background: var(--final-surface) !important;
+  color: var(--final-text) !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+}
+.collapse-toggle::after {
+  content: none !important;
+}
+.collapse-text {
+  flex: 1 !important;
+  text-align: left !important;
+  color: var(--final-text) !important;
+}
+.collapse-icon {
+  order: 2 !important;
+  margin-left: 10px !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  border-radius: 999px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 18%, var(--final-line)) !important;
+  background: color-mix(in srgb, var(--final-primary-soft) 68%, var(--final-surface)) !important;
+  color: var(--final-primary) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  line-height: .75 !important;
+}
+.summary-collapse-toggle {
+  min-width: 0 !important;
+  width: auto !important;
+}
+.input-collapse-toggle {
+  width: 100% !important;
+}
+@media (max-width: 430px) {
+  .period-switcher {
+    grid-template-columns: 44px minmax(0, 1fr) 44px !important;
+    gap: 7px !important;
+  }
+  .period-nav-btn {
+    width: 44px !important;
+    min-width: 44px !important;
+    min-height: 54px !important;
+    border-radius: 16px !important;
+  }
+  .period-nav-btn .nav-symbol {
+    font-size: 31px !important;
+  }
+  .collapse-toggle {
+    min-height: 40px !important;
+    border-radius: 13px !important;
+  }
+}
+
+
+
+/* ===== Requested cleanup: header, smoother collapse, cleaner summary toggle ===== */
+.app-header {
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: start !important;
+}
+.app-title-block .header-date-range {
+  display: inline-flex !important;
+  width: fit-content !important;
+  margin-top: 8px !important;
+  padding: 4px 10px !important;
+  border: 1px solid color-mix(in srgb, var(--final-primary) 18%, var(--final-line)) !important;
+  border-radius: 999px !important;
+  background: var(--final-primary-soft) !important;
+  color: var(--final-primary) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+}
+.app-header-right {
+  display: grid !important;
+  grid-template-columns: auto !important;
+  grid-template-areas: "theme" "clock" !important;
+  justify-items: end !important;
+  align-content: start !important;
+  gap: 7px !important;
+  text-align: right !important;
+}
+.theme-toggle {
+  grid-area: theme !important;
+  justify-self: end !important;
+}
+.header-clock {
+  grid-area: clock !important;
+  justify-items: end !important;
+}
+.period-controls .select-card:first-child > span::before,
+.period-controls .select-card:last-child > span::before {
+  content: none !important;
+  display: none !important;
+}
+.input-details,
+#result .summary-panel {
+  overflow: hidden;
+  will-change: max-height, opacity, transform;
+}
+.input-details[hidden],
+#result .summary-panel[hidden] {
+  display: none !important;
+}
+.summary-collapsed #summaryCategoryList {
+  display: grid !important;
+}
+.summary-shell {
+  display: grid !important;
+  gap: 10px !important;
+}
+.summary-toolbar {
+  display: block !important;
+}
+.summary-toolbar-title {
+  display: none !important;
+}
+.summary-collapse-toggle {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+#result {
+  margin-top: 0 !important;
+}
+@media (max-width: 520px) {
+  .app-header {
+    grid-template-columns: 1fr !important;
+  }
+  .app-header-right {
+    width: 100% !important;
+    grid-template-columns: auto !important;
+    grid-template-areas: "theme" "clock" !important;
+    align-items: start !important;
+    justify-items: end !important;
+    text-align: right !important;
+  }
+  .theme-toggle {
+    justify-self: end !important;
+  }
+  .header-clock {
+    justify-self: end !important;
+    justify-items: end !important;
+    text-align: right !important;
+  }
+}
+
+
+
+/* ===== Separate disclaimer card ===== */
+.summary-disclaimer-card {
+  border: 1px solid color-mix(in srgb, var(--final-amber) 34%, var(--final-line)) !important;
+  border-radius: 20px !important;
+  background: color-mix(in srgb, var(--final-amber) 9%, var(--final-surface)) !important;
+}
+.summary-disclaimer-card .summary-heading {
+  color: var(--final-text) !important;
+  margin-bottom: 8px !important;
+}
+.summary-disclaimer-text {
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--final-amber) 24%, var(--final-line));
+  color: var(--final-muted) !important;
+  font-size: 11.5px;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.standalone-disclaimer-card {
+  margin-top: 0;
+  padding: 13px 14px;
+  border: 1px solid color-mix(in srgb, var(--final-amber) 34%, var(--final-line));
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--final-amber) 9%, var(--final-surface));
+  color: var(--final-text);
+  box-shadow: none !important;
+}
+.standalone-disclaimer-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--final-text);
+}
+.standalone-disclaimer-text {
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--final-amber) 24%, var(--final-line));
+  color: var(--final-muted);
+  font-size: 11.5px;
+  line-height: 1.55;
+  text-align: left;
+}
+
+
+/* ===== Mobile header fit: keep title/range and clock/theme on one row ===== */
+.app-header {
+  grid-template-columns: minmax(0, 1fr) max-content !important;
+  align-items: start !important;
+  gap: 8px !important;
+  padding: 14px 12px !important;
+}
+.app-title-block {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.app-title-block h2,
+.app-header h2 {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(21px, 5.8vw, 28px) !important;
+  line-height: 1.05 !important;
+}
+.app-subtitle {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(10.5px, 3vw, 12px) !important;
+  line-height: 1.2 !important;
+}
+.app-title-block .header-date-range {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(9.5px, 2.8vw, 11px) !important;
+  padding: 4px 9px !important;
+}
+.app-header-right {
+  width: auto !important;
+  min-width: clamp(118px, 34vw, 168px) !important;
+  display: grid !important;
+  grid-template-columns: auto !important;
+  grid-template-areas: "theme" "clock" !important;
+  justify-items: end !important;
+  align-content: start !important;
+  gap: 7px !important;
+  text-align: right !important;
+}
+.theme-toggle {
+  width: clamp(36px, 10vw, 42px) !important;
+  min-width: clamp(36px, 10vw, 42px) !important;
+  height: clamp(36px, 10vw, 42px) !important;
+  min-height: clamp(36px, 10vw, 42px) !important;
+  padding: 0 !important;
+  font-size: clamp(18px, 5vw, 22px) !important;
+}
+.header-clock {
+  width: 100% !important;
+  justify-self: end !important;
+  justify-items: end !important;
+  text-align: right !important;
+  gap: 4px !important;
+}
+.clock-date {
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: clamp(9.2px, 2.8vw, 11px) !important;
+  line-height: 1.15 !important;
+}
+.clock-time {
+  white-space: nowrap !important;
+  font-size: clamp(17px, 5.8vw, 22px) !important;
+  line-height: 1 !important;
+}
+@media (max-width: 520px) {
+  .app-header {
+    grid-template-columns: minmax(0, 1fr) max-content !important;
+    gap: 8px !important;
+    padding: 14px 12px !important;
+  }
+  .app-header-right {
+    width: auto !important;
+    min-width: clamp(118px, 34vw, 156px) !important;
+    grid-template-columns: auto !important;
+    grid-template-areas: "theme" "clock" !important;
+    align-items: start !important;
+    justify-items: end !important;
+    text-align: right !important;
+  }
+}
+@media (max-width: 380px) {
+  .app-header {
+    padding: 12px 10px !important;
+    gap: 6px !important;
+    border-radius: 22px !important;
+  }
+  .app-title-block h2,
+  .app-header h2 {
+    font-size: 20px !important;
+  }
+  .app-subtitle {
+    font-size: 10px !important;
+  }
+  .app-title-block .header-date-range {
+    margin-top: 6px !important;
+    padding: 3px 7px !important;
+    font-size: 9px !important;
+  }
+  .app-header-right {
+    min-width: 112px !important;
+    gap: 6px !important;
+  }
+  .theme-toggle {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 17px !important;
+  }
+  .clock-date {
+    font-size: 8.8px !important;
+  }
+  .clock-time {
+    font-size: 17px !important;
+  }
+}
+
+
+/* ===== Move period range into net card and keep header compact ===== */
+.app-title-block .header-date-range {
+  display: none !important;
+}
+.app-title-block {
+  min-width: 0 !important;
+}
+.app-subtitle {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.period-summary-quick .quick-period {
+  display: inline-flex !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  margin-top: 6px !important;
+  padding: 4px 10px !important;
+  border: 1px solid color-mix(in srgb, var(--final-green) 28%, var(--final-line)) !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--final-surface) 72%, var(--final-green-soft)) !important;
+  color: var(--final-muted) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.period-summary-quick strong {
+  margin-top: 8px !important;
+}
+html[data-theme="dark"] .period-summary-quick .quick-period {
+  background: color-mix(in srgb, var(--final-surface-2) 76%, var(--final-green-soft)) !important;
+}
+@media (max-width: 390px) {
+  .period-summary-quick .quick-period {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+}
+
+
+
+/* =========================================================
+   Marshmallow Soft-Bouncy Theme Override
+   Layout เดิม — ปรับเฉพาะผิวสัมผัส สี เงา ความนุ่ม และ micro interaction
+   ========================================================= */
+:root {
+  color-scheme: light;
+  --mm-bg-1: #fff7fb;
+  --mm-bg-2: #eef8ff;
+  --mm-bg-3: #f7fff4;
+  --mm-card: rgba(255,255,255,.78);
+  --mm-card-solid: #ffffff;
+  --mm-card-soft: rgba(255,255,255,.56);
+  --mm-line: rgba(194, 211, 235, .72);
+  --mm-line-strong: rgba(132, 169, 220, .46);
+  --mm-text: #273246;
+  --mm-soft: #718197;
+  --mm-heading: #182235;
+  --mm-blue: #69a8ff;
+  --mm-blue-2: #92c3ff;
+  --mm-pink: #ff9fca;
+  --mm-pink-2: #ffd2e5;
+  --mm-mint: #8de7c5;
+  --mm-cream: #fff1bd;
+  --mm-lavender: #cab8ff;
+  --mm-success: #34b67a;
+  --mm-danger: #ff6f91;
+  --mm-radius-xl: 26px;
+  --mm-radius-lg: 20px;
+  --mm-radius-md: 16px;
+  --mm-shadow: 0 14px 34px rgba(75, 117, 169, .16), inset 0 1px 0 rgba(255,255,255,.82);
+  --mm-shadow-small: 0 8px 18px rgba(75, 117, 169, .12), inset 0 1px 0 rgba(255,255,255,.8);
+  --mm-shadow-press: 0 5px 12px rgba(75, 117, 169, .12), inset 0 2px 5px rgba(95, 122, 160, .12);
+
+  --bg-top: var(--mm-bg-1) !important;
+  --bg-bottom: var(--mm-bg-2) !important;
+  --card-bg: var(--mm-card) !important;
+  --card-bg-solid: var(--mm-card-solid) !important;
+  --input-bg: rgba(255,255,255,.86) !important;
+  --line: var(--mm-line) !important;
+  --text-main: var(--mm-text) !important;
+  --text-soft: var(--mm-soft) !important;
+  --heading: var(--mm-heading) !important;
+  --accent: var(--mm-blue) !important;
+  --accent-soft: rgba(146,195,255,.24) !important;
+  --accent-text: #2e6fb9 !important;
+  --success: var(--mm-success) !important;
+  --success-soft: rgba(141,231,197,.24) !important;
+  --summary-row: rgba(255,255,255,.76) !important;
+  --summary-total-bg: linear-gradient(135deg, #75d6ae 0%, #74b9ff 48%, #ffaad3 100%) !important;
+}
+
+html[data-theme="dark"] {
+  --mm-bg-1: #15172a;
+  --mm-bg-2: #1d2337;
+  --mm-bg-3: #182b31;
+  --mm-card: rgba(36,44,68,.72);
+  --mm-card-solid: #242c44;
+  --mm-card-soft: rgba(36,44,68,.48);
+  --mm-line: rgba(159, 188, 230, .22);
+  --mm-line-strong: rgba(163, 197, 246, .34);
+  --mm-text: #edf4ff;
+  --mm-soft: #a9b8cf;
+  --mm-heading: #ffffff;
+  --mm-blue: #8bc2ff;
+  --mm-blue-2: #5d9bea;
+  --mm-pink: #ffaad3;
+  --mm-pink-2: rgba(255,170,211,.22);
+  --mm-mint: #7ee0c1;
+  --mm-cream: #f5df8a;
+  --mm-lavender: #b9a7ff;
+  --mm-success: #74e0ac;
+  --mm-danger: #ff91ad;
+  --mm-shadow: 0 16px 34px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.12);
+  --mm-shadow-small: 0 9px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.1);
+  --mm-shadow-press: 0 5px 12px rgba(0,0,0,.20), inset 0 2px 8px rgba(0,0,0,.14);
+  --summary-total-bg: linear-gradient(135deg, #2eb67d 0%, #4088dc 52%, #e879b0 100%) !important;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+html, body { scroll-behavior: smooth; }
+body {
+  background:
+    radial-gradient(circle at 12% 6%, rgba(255,210,229,.82) 0 130px, transparent 240px),
+    radial-gradient(circle at 88% 16%, rgba(146,195,255,.72) 0 145px, transparent 255px),
+    radial-gradient(circle at 28% 92%, rgba(141,231,197,.58) 0 150px, transparent 285px),
+    linear-gradient(160deg, var(--mm-bg-1) 0%, var(--mm-bg-2) 52%, var(--mm-bg-3) 100%) !important;
+  color: var(--mm-text) !important;
+}
+
+.main-container { gap: 10px !important; }
+
+.app-header,
+.input-panel,
+.input-section,
+.calendar,
+.card,
+.summary-card,
+.summary-hero,
+.summary-note,
+.period-row,
+.field-card,
+.toggle-card,
+.incentive-card,
+.wage-row label,
+.setting-row label,
+.card-body .row {
+  border: 1px solid var(--mm-line) !important;
+  background: var(--mm-card) !important;
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  box-shadow: var(--mm-shadow-small) !important;
+}
+
+.app-header,
+.input-panel,
+.summary-hero {
+  border-radius: var(--mm-radius-xl) !important;
+  box-shadow: var(--mm-shadow) !important;
+}
+
+.input-section,
+.calendar,
+.summary-card,
+.card {
+  border-radius: var(--mm-radius-lg) !important;
+}
+
+.app-header {
+  position: relative;
+  overflow: hidden;
+}
+.app-header::before {
+  content: "";
+  position: absolute;
+  inset: -45% auto auto -25%;
+  width: 190px;
+  height: 190px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,159,202,.52), transparent 68%);
+  pointer-events: none;
+}
+.app-header::after {
+  content: "";
+  position: absolute;
+  right: -44px;
+  bottom: -62px;
+  width: 170px;
+  height: 170px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(141,231,197,.42), transparent 70%);
+  pointer-events: none;
+}
+.app-header > * { position: relative; z-index: 1; }
+.app-header h2 {
+  letter-spacing: -.02em;
+  color: var(--mm-heading) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.64);
+}
+.app-subtitle { color: var(--mm-soft) !important; }
+
+.theme-toggle,
+.input-toggle,
+.period-nav-btn,
+button {
+  border-radius: 999px !important;
+  border: 1px solid var(--mm-line-strong) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.62)) !important;
+  color: var(--accent-text) !important;
+  box-shadow: var(--mm-shadow-small) !important;
+  transform: translateY(0) scale(1);
+  transition: transform .18s cubic-bezier(.2,1.6,.35,1), box-shadow .18s ease, filter .18s ease, background .18s ease !important;
+}
+.theme-toggle:hover,
+.input-toggle:hover,
+.period-nav-btn:hover,
+button:hover { transform: translateY(-1px) scale(1.015); filter: saturate(1.04); }
+.theme-toggle:active,
+.input-toggle:active,
+.period-nav-btn:active,
+button:active {
+  transform: translateY(1px) scale(.965) !important;
+  box-shadow: var(--mm-shadow-press) !important;
+}
+
+.period-nav-btn {
+  min-height: 58px;
+  background: linear-gradient(180deg, rgba(255,210,229,.74), rgba(146,195,255,.42)) !important;
+  color: var(--mm-heading) !important;
+  font-weight: 900 !important;
+}
+
+.section-title,
+.summary-heading,
+.mini-title { color: var(--mm-heading) !important; }
+.section-icon {
+  background: linear-gradient(135deg, var(--mm-pink-2), rgba(146,195,255,.38)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 6px 12px rgba(105,168,255,.14);
+}
+
+select,
+input {
+  border-radius: 999px !important;
+  border: 1px solid var(--mm-line) !important;
+  background-color: rgba(255,255,255,.78) !important;
+  color: var(--mm-text) !important;
+  box-shadow: inset 0 2px 6px rgba(98,121,160,.08), 0 1px 0 rgba(255,255,255,.78) !important;
+  transition: transform .16s cubic-bezier(.2,1.45,.35,1), border-color .16s ease, box-shadow .16s ease !important;
+}
+select:focus,
+input:focus {
+  border-color: rgba(105,168,255,.84) !important;
+  box-shadow: 0 0 0 4px rgba(146,195,255,.24), inset 0 2px 6px rgba(98,121,160,.06) !important;
+  transform: scale(1.012);
+}
+#monthSelect,
+#yearSelect {
+  background: linear-gradient(180deg, rgba(238,248,255,.94), rgba(255,255,255,.74)) !important;
+  color: #3174bd !important;
+  border-color: rgba(105,168,255,.34) !important;
+}
+
+.field-important,
+.emphasis-section {
+  background: linear-gradient(145deg, rgba(255,210,229,.36), rgba(238,248,255,.62)) !important;
+  border-color: rgba(255,159,202,.38) !important;
+}
+.social-card { border-color: rgba(255,111,145,.36) !important; }
+
+.calendar {
+  padding: 7px !important;
+  overflow: hidden;
+}
+.weekdays {
+  border-radius: 15px !important;
+  background: linear-gradient(90deg, rgba(255,210,229,.38), rgba(146,195,255,.32), rgba(141,231,197,.28)) !important;
+  color: var(--mm-heading) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+.day-cell {
+  border-radius: 15px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.66)) !important;
+  border: 1px solid rgba(215,226,241,.72) !important;
+  box-shadow: 0 5px 12px rgba(75,117,169,.10), inset 0 1px 0 rgba(255,255,255,.86) !important;
+  transition: transform .18s cubic-bezier(.2,1.75,.35,1), box-shadow .18s ease, background .18s ease !important;
+}
+.day-cell:hover { transform: translateY(-1px) scale(1.035); }
+.day-cell:active { transform: scale(.94); box-shadow: var(--mm-shadow-press) !important; }
+.day-cell.active {
+  background: linear-gradient(135deg, #67a9ff, #ff9fca) !important;
+  color: #fff !important;
+  box-shadow: 0 10px 20px rgba(105,168,255,.26), inset 0 1px 0 rgba(255,255,255,.42) !important;
+  transform: scale(1.07) !important;
+}
+.day-cell::after,
+.day-cell::before { box-shadow: 0 1px 3px rgba(0,0,0,.16); }
+.day-work::after { background: var(--mm-mint) !important; }
+.day-leave::after { background: var(--mm-cream) !important; }
+.day-absent::after { background: var(--mm-danger) !important; }
+.day-holiday::after { background: var(--mm-lavender) !important; }
+.shift-morning::before { background: #ffd66b !important; }
+.shift-night::before { background: #6e76ff !important; }
+
+.card-header { border-bottom-color: var(--mm-line) !important; }
+.badge {
+  border: 1px solid rgba(255,255,255,.44) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 5px 10px rgba(75,117,169,.11), inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+.badge-work { background: rgba(141,231,197,.72) !important; color: #106447 !important; }
+.badge-holiday { background: rgba(202,184,255,.58) !important; color: #51428d !important; }
+.badge-leave { background: rgba(255,241,189,.92) !important; color: #8a6413 !important; }
+.badge-absent { background: rgba(255,111,145,.34) !important; color: #a82647 !important; }
+.badge-normal { background: rgba(255,255,255,.55) !important; color: var(--mm-text) !important; }
+
+.summary-hero {
+  background: var(--summary-total-bg) !important;
+  position: relative;
+  overflow: hidden;
+}
+.summary-hero::before {
+  content: "";
+  position: absolute;
+  inset: -50% -20% auto auto;
+  width: 220px;
+  height: 220px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,.38), transparent 66%);
+}
+.summary-hero > * { position: relative; z-index: 1; }
+.summary-hero-amount { text-shadow: 0 3px 12px rgba(46,74,110,.20); }
+.summary-card { background: rgba(255,255,255,.70) !important; }
+.summary-item {
+  border-top-color: rgba(207,221,240,.72) !important;
+  border-radius: 13px;
+  transition: transform .16s cubic-bezier(.2,1.5,.35,1), background .16s ease;
+}
+.summary-item:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.48);
+}
+.summary-emphasis { background: rgba(146,195,255,.20) !important; }
+.summary-net { background: rgba(141,231,197,.26) !important; }
+.summary-net .summary-money { color: #159566 !important; }
+.summary-deduct .summary-money { color: var(--mm-danger) !important; }
+.summary-note {
+  border-style: solid !important;
+  background: rgba(255,255,255,.58) !important;
+  color: var(--mm-soft) !important;
+}
+
+.input-collapsed .input-panel,
+.summary-collapsed .summary-body,
+.calendar-expand { transition-timing-function: cubic-bezier(.2,1.45,.35,1) !important; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .summary-hero-amount,
+  .day-cell.active,
+  .theme-toggle,
+  .period-nav-btn {
+    animation: marshmallowPop .34s cubic-bezier(.2,1.55,.35,1) both;
+  }
+  @keyframes marshmallowPop {
+    0% { transform: scale(.985); }
+    55% { transform: scale(1.025); }
+    100% { transform: scale(1); }
+  }
+}
+
+@media (max-width: 420px) {
+  .main-container { gap: 8px !important; }
+  .app-header, .input-panel, .summary-hero { border-radius: 22px !important; }
+  .input-section, .calendar, .summary-card, .card { border-radius: 18px !important; }
+  .calendar { padding: 5px !important; }
+  .day-cell { border-radius: 13px !important; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="main-container">
+  <div class="app-header">
+    <div class="app-title-block">
+      <h2>คำนวณเงินเดือน</h2>
+      <div class="app-subtitle">ประเมินรายงวดแบบคร่าวๆ · ไม่ใช่สลิปจริง</div>
+    </div>
+    <div class="app-header-right" aria-label="วันที่ เวลา และปุ่มปรับธีม">
+      <button type="button" id="themeToggle" class="theme-toggle" aria-label="สลับโหมดมืดหรือสว่าง">🌙</button>
+      <div class="header-clock" id="headerClock">--:--:--</div>
+    </div>
+  </div>
+
+  <section class="input-panel" aria-label="ตั้งค่าข้อมูลเงินเดือน">
+    <div class="input-section period-section">
+      <div class="section-title">
+        <span class="section-icon">📅</span>
+        <span>งวดจ่าย</span>
+      </div>
+      <div class="period-switcher">
+        <button type="button" id="prevPeriodBtn" class="period-nav-btn period-nav-prev" data-icon="‹" aria-label="งวดก่อนหน้า">
+          <span class="nav-symbol">‹</span>
+          <span class="nav-label">ก่อนหน้า</span>
+        </button>
+        <div class="period-controls">
+          <label class="field-card select-card">
+            <span>เดือน</span>
+            <select id="monthSelect"></select>
+          </label>
+          <label class="field-card select-card">
+            <span>ปี</span>
+            <select id="yearSelect"></select>
+          </label>
+        </div>
+        <button type="button" id="nextPeriodBtn" class="period-nav-btn period-nav-next" data-icon="›" aria-label="งวดถัดไป">
+          <span class="nav-symbol">›</span>
+          <span class="nav-label">ถัดไป</span>
+        </button>
+      </div>
+      <div id="periodSummaryQuick" class="period-summary-quick" aria-live="polite">
+        <div>
+          <span class="quick-label">ยอดสุทธิประจำงวด</span>
+          <span class="quick-period">--</span>
+          <strong>0.00</strong>
+        </div>
+        <span class="quick-unit">บาท</span>
+      </div>
+      <div class="period-calendar-wrap">
+        <div class="calendar">
+          <div class="weekdays">
+            <div>อา</div><div>จ</div><div>อ</div>
+            <div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
+          </div>
+          <div class="days" id="calendarDays"></div>
+        </div>
+        <div id="cardContainer"></div>
+      </div>
+    </div>
+
+    <button type="button" id="inputToggle" class="collapse-toggle input-collapse-toggle" aria-expanded="true" aria-controls="inputDetails">
+      <span class="collapse-icon">⌃</span>
+      <span class="collapse-text">ช่องกรอกข้อมูล</span>
+    </button>
+
+    <div id="inputDetails" class="input-details">
+    <div class="input-section primary-section emphasis-section">
+      <div class="section-title">
+        <span class="section-icon">💰</span>
+        <span>ค่าแรงหลัก</span>
+      </div>
+      <div class="field-grid two-cols">
+        <label class="field-card field-important">
+          <span>ค่าแรง/วัน</span>
+          <input type="number" id="dailyWage" value="447">
+        </label>
+        <label class="field-card field-readonly">
+          <span>ค่าแรง/ชม</span>
+          <input type="number" id="hourlyWage" readonly>
+        </label>
+      </div>
+    </div>
+
+    <div class="input-section fee-section">
+      <div class="section-title">
+        <span class="section-icon">🌙</span>
+        <span>ค่ากะและค่าอาหาร</span>
+      </div>
+      <div class="field-grid three-cols">
+        <label class="field-card">
+          <span>ค่ากะดึก</span>
+          <input type="number" id="nightShiftFee" value="140">
+        </label>
+        <label class="field-card">
+          <span>อาหารกะดึก</span>
+          <input type="number" id="nightFoodFee" value="70">
+        </label>
+        <label class="field-card">
+          <span>อาหารโอที</span>
+          <input type="number" id="otFoodFee" value="45">
+        </label>
+      </div>
+    </div>
+
+    <div class="input-section extra-section">
+      <div class="section-title">
+        <span class="section-icon">🧾</span>
+        <span>รายการเสริม / รายการหัก</span>
+      </div>
+      <div class="extras-grid">
+        <label class="field-card social-card">
+          <span>ประกันสังคม</span>
+          <div class="input-with-unit">
+            <input type="number" id="socialSecurityPercent" value="5" min="0" step="0.01">
+            <span>%</span>
+          </div>
+        </label>
+        <label class="toggle-card">
+          <input type="checkbox" id="mentorCheck">
+          <span>พี่เลี้ยง</span>
+        </label>
+        <div class="incentive-card">
+          <div class="mini-title">เบี้ยขยัน</div>
+          <div class="incentive-controls">
+            <label>
+              <span>รอบ 1</span>
+              <select id="incentive1">
+                <option value="0">-</option>
+                <option value="180">180</option>
+                <option value="210">210</option>
+              </select>
+            </label>
+            <label>
+              <span>รอบ 2</span>
+              <select id="incentive2">
+                <option value="0">-</option>
+                <option value="180">180</option>
+                <option value="210">210</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+<div id="summaryContainer" style="margin-top: 20px;"></div>
+
+<section class="summary-shell" aria-label="รายการสรุปเงินเดือน">
+  <div class="summary-toolbar">
+    <button type="button" id="summaryToggle" class="collapse-toggle summary-collapse-toggle" aria-expanded="true" aria-controls="result">
+      <span class="collapse-icon">⌃</span>
+      <span class="collapse-text">รายการสรุป</span>
+    </button>
+  </div>
+  <div id="result" style="margin-top:10px;"></div>
+</section>
+
+<section class="standalone-disclaimer-card" aria-label="หมายเหตุการคำนวณ">
+  <div class="standalone-disclaimer-heading">⚠️ หมายเหตุ</div>
+  <div class="standalone-disclaimer-text">
+    ข้อมูลนี้เป็นเพียงการคำนวณแบบคร่าวๆ ไม่สามารถนำมาอ้างอิงจริงได้ โปรดใช้วิจารณญาณในการใช้งาน
+  </div>
+</section>
+
+<script>
+
+function num(v){
+  return Number(v) || 0;
+}
+
+/* ===== SETUP ===== */
+const daysTH=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
+const container=document.getElementById("cardContainer");
+const calendarEl=document.getElementById("calendarDays");
+const monthSelect=document.getElementById("monthSelect");
+const yearSelect=document.getElementById("yearSelect");
+const prevPeriodBtn=document.getElementById("prevPeriodBtn");
+const nextPeriodBtn=document.getElementById("nextPeriodBtn");
+
+const monthNames=[
+  "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
+  "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
+];
+
+monthNames.forEach((m,i)=>{
+  const o=document.createElement("option");
+  o.value=i;o.textContent=m;
+  monthSelect.appendChild(o);
+});
+
+const dailyInput  = document.getElementById("dailyWage");
+const hourlyInput = document.getElementById("hourlyWage");
+const nightShiftFeeInput = document.getElementById("nightShiftFee");
+const nightFoodFeeInput = document.getElementById("nightFoodFee");
+const otFoodFeeInput = document.getElementById("otFoodFee");
+const socialSecurityPercentInput = document.getElementById("socialSecurityPercent");
+const themeToggle = document.getElementById("themeToggle");
+const headerClock = document.getElementById("headerClock");
+const headerDateRange = document.getElementById("headerDateRange");
+const periodSummaryQuick = document.getElementById("periodSummaryQuick");
+const inputToggle = document.getElementById("inputToggle");
+const inputDetails = document.getElementById("inputDetails");
+const summaryToggle = document.getElementById("summaryToggle");
+const summaryShell = document.querySelector(".summary-shell");
+
+function applyTheme(theme) {
+  const nextTheme = theme === "dark" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", nextTheme);
+  localStorage.setItem("payrollTheme", nextTheme);
+  if (themeToggle) {
+    themeToggle.textContent = nextTheme === "dark" ? "☀️" : "🌙";
+    themeToggle.setAttribute("aria-label", nextTheme === "dark" ? "เปลี่ยนเป็นโหมดสว่าง" : "เปลี่ยนเป็นโหมดมืด");
+  }
+}
+
+function initTheme() {
+  const savedTheme = localStorage.getItem("payrollTheme");
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(savedTheme || (prefersDark ? "dark" : "light"));
+}
+
+if (themeToggle) {
+  themeToggle.onclick = () => {
+    const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    applyTheme(current === "dark" ? "light" : "dark");
+  };
+}
+
+function toBuddhistYear(year) {
+  return Number(year) + 543;
+}
+
+function normalizeYearValue(year) {
+  const n = Number(year);
+  if (!Number.isFinite(n)) return new Date().getFullYear();
+  return n > 2400 ? n - 543 : n;
+}
+
+function formatThaiShortDate(d) {
+  return d.toLocaleDateString("th-TH-u-ca-buddhist", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
+function formatThaiFullDate(d) {
+  return d.toLocaleDateString("th-TH-u-ca-buddhist", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+function getPeriodRangeText() {
+  if (!yearSelect.value || monthSelect.value === "") return "--";
+  const y = Number(yearSelect.value);
+  const m = Number(monthSelect.value);
+  const start = new Date(y, m - 1, 16);
+  const end = new Date(y, m, 15);
+  return `${formatThaiShortDate(start)} - ${formatThaiShortDate(end)}`;
+}
+
+function updateHeaderInfo() {
+  const now = new Date();
+  if (headerClock) {
+    const timeText = now.toLocaleTimeString("th-TH", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+    headerClock.innerHTML = `<span class="clock-date">${formatThaiFullDate(now)}</span><span class="clock-time">${timeText}</span>`;
+  }
+  if (headerDateRange) {
+    headerDateRange.textContent = getPeriodRangeText();
+  }
+}
+
+function getSummaryCollapseTarget() {
+  return document.querySelector("#result .summary-panel");
+}
+
+function setPanelCollapsed(panel, collapsed, immediate = false) {
+  if (!panel) return Promise.resolve();
+
+  panel.style.overflow = "hidden";
+  panel.style.willChange = "max-height, opacity, transform";
+
+  if (immediate) {
+    panel.hidden = collapsed;
+    panel.style.maxHeight = collapsed ? "0px" : "none";
+    panel.style.opacity = collapsed ? "0" : "1";
+    panel.style.transform = collapsed ? "translateY(-8px)" : "translateY(0)";
+    return Promise.resolve();
+  }
+
+  const duration = collapsed ? 260 : 340;
+  const easing = collapsed ? "ease-in" : "ease-out";
+
+  if (collapsed) {
+    panel.hidden = false;
+    const startHeight = panel.scrollHeight;
+    panel.style.maxHeight = startHeight + "px";
+    panel.style.opacity = "1";
+    panel.style.transform = "translateY(0)";
+
+    const anim = panel.animate([
+      { maxHeight: startHeight + "px", opacity: 1, transform: "translateY(0)" },
+      { maxHeight: "0px", opacity: 0, transform: "translateY(-8px)" }
+    ], { duration, easing, fill: "forwards" });
+
+    return anim.finished.then(() => {
+      panel.hidden = true;
+      panel.style.maxHeight = "0px";
+      panel.style.opacity = "0";
+      panel.style.transform = "translateY(-8px)";
+    });
+  }
+
+  panel.hidden = false;
+  panel.style.maxHeight = "0px";
+  panel.style.opacity = "0";
+  panel.style.transform = "translateY(-8px)";
+  const endHeight = panel.scrollHeight;
+
+  const anim = panel.animate([
+    { maxHeight: "0px", opacity: 0, transform: "translateY(-8px)" },
+    { maxHeight: endHeight + "px", opacity: 1, transform: "translateY(0)" }
+  ], { duration, easing, fill: "forwards" });
+
+  return anim.finished.then(() => {
+    panel.hidden = false;
+    panel.style.maxHeight = "none";
+    panel.style.opacity = "1";
+    panel.style.transform = "translateY(0)";
+  });
+}
+
+function updateCollapseButton(button, collapsed, text, expandedLabel, collapsedLabel) {
+  if (!button) return;
+  button.setAttribute("aria-expanded", String(!collapsed));
+  button.querySelector(".collapse-icon").textContent = collapsed ? "⌄" : "⌃";
+  button.querySelector(".collapse-text").textContent = text;
+  button.setAttribute("aria-label", collapsed ? collapsedLabel : expandedLabel);
+}
+
+function setInputCollapsed(collapsed, immediate = false) {
+  if (!inputDetails || !inputToggle) return;
+  updateCollapseButton(inputToggle, collapsed, "ช่องกรอกข้อมูล", "ซ่อนช่องกรอกข้อมูล", "แสดงช่องกรอกข้อมูล");
+  localStorage.setItem("payrollInputCollapsed", collapsed ? "1" : "0");
+  setPanelCollapsed(inputDetails, collapsed, immediate);
+}
+
+function setSummaryCollapsed(collapsed, immediate = false) {
+  if (!summaryShell || !summaryToggle) return;
+  summaryShell.classList.toggle("summary-collapsed", collapsed);
+  updateCollapseButton(summaryToggle, collapsed, "รายการสรุป", "ซ่อนรายการสรุปเงินเดือน", "แสดงรายการสรุปเงินเดือน");
+  localStorage.setItem("payrollSummaryCollapsed", collapsed ? "1" : "0");
+  setPanelCollapsed(getSummaryCollapseTarget(), collapsed, immediate);
+}
+
+if (inputToggle) {
+  inputToggle.onclick = () => setInputCollapsed(!inputToggle.matches('[aria-expanded="false"]'));
+}
+if (summaryToggle) {
+  summaryToggle.onclick = () => setSummaryCollapsed(!summaryShell.classList.contains("summary-collapsed"));
+}
+
+function syncHourly(){
+  const daily = num(dailyInput.value);
+  hourlyInput.value = (daily / 8).toFixed(2);
+}
+
+// initial
+syncHourly();
+
+// change
+// Events for these inputs are registered once in the settings section below
+// to avoid duplicate renderSummary() calls.
+
+let selectedDate=null;
+let expandRow=null;
+let activeCell = null; // ⭐ cell ที่เปิดอยู่จริง
+let lastTapTime = 0;
+
+/* ===== UTIL ===== */
+function formatLocalDate(d){
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function getMonthKey(){
+  return `payroll-${yearSelect.value}-${monthSelect.value}`;
+}
+
+/* ===== STORAGE ===== */
+function saveCards(){
+  const data = [...document.querySelectorAll(".card")].map(c => ({
+    date: c.dataset.date,
+    status: c.querySelector(".status").value,
+    shift: c.querySelector(".shift").value,    // เพิ่ม
+    normal: c.querySelector(".normal").value,  // เพิ่ม
+    ot: c.querySelector(".ot").value,          // เพิ่ม
+    skill: c.querySelector(".skillDaily").value // บันทึกค่าทักษะรายวัน
+  }));
+  localStorage.setItem(getMonthKey(), JSON.stringify(data));
+}
+function loadCards(){
+  return JSON.parse(localStorage.getItem(getMonthKey())||"[]");
+}
+
+function updateBadge(card) {
+    const b = card.querySelector(".badge");
+    const statusEl = card.querySelector(".status");
+    if (!b || !statusEl) return;
+
+    const s = statusEl.value.trim();
+
+    // 1. ล้างคลาสสีเดิมออกให้หมดก่อน 
+    b.classList.remove("badge-normal","badge-work", "badge-holiday", "badge-leave", "badge-absent");
+
+    if (!s) {
+        b.classList.add("badge-normal");
+        b.textContent = "--เลือกวัน--";
+        return;
+    }
+
+    // 2. ตรวจสอบเงื่อนไขและใส่สีตามที่กำหนดไว้ใน CSS 
+    if (s === "ขาดงาน") {
+        b.classList.add("badge-absent"); // สีแดง 
+    } 
+    else if (s.includes("หยุด")) {
+        b.classList.add("badge-holiday"); // สีเทา 
+    } 
+    else if (s.includes("ลา") || s.includes("ป่วย")) {
+        b.classList.add("badge-leave"); // สีส้ม 
+    } 
+    else if (s === "วันทำงาน") {
+        b.classList.add("badge-work"); // สีเขียวสำหรับ "วันทำงาน" 
+    }
+    else {
+        b.classList.add("badge-normal");
+    }
+    b.textContent = s; // อัปเดตข้อความในป้าย 
+}
+
+function createCard(date, saved) {
+  const dateStr = formatLocalDate(date);
+  const card = document.createElement("div");
+  card.className = "card";
+  card.dataset.date = dateStr;
+  card.innerHTML = `
+    <div class="card-header">
+      <div>${dateStr} (${daysTH[date.getDay()]})</div>
+      <div class="card-actions">
+        <span class="badge"></span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row"><label>📌 สถานะ</label>
+        <select class="status">
+          <option value="">--เลือกวัน--</option>
+          <option>วันทำงาน</option>
+          <option>วันหยุด</option>
+          <option>วันหยุดพิเศษ</option>
+          <option>ลาพักร้อน</option>
+          <option>ลาป่วยแพทย์(เขียนใบสอบสวน)</option>
+          <option>ลากิจพิเศษ</option>
+          <option>ลาป่วย</option>
+          <option>ลากิจ</option>
+          <option>ขาดงาน</option>
+        </select>
+      </div>
+      <div class="row"><label>⏰ กะ</label>
+        <select class="shift">
+          <option value="">--เลือกกะ--</option>
+          <option value="เช้า">☀️ กะเช้า</option>
+          <option value="ดึก">🌙 กะดึก</option>
+        </select>
+      </div>
+      <div class="row"><label>⚙️ ช่วงเวลาปกติ</label>
+        <select class="normal">
+          <option value="0">-</option>
+          <option value="4">4 ชม.(ลาครึ่งวัน)</option>
+          <option value="6">6 ชม.(มาสาย)</option>
+          <option value="8">8 ชม.</option>
+        </select>
+      </div>
+      <div class="row"><label>🚀 ช่วงเวลาโอที</label>
+        <select class="ot">
+          <option value="0">-</option>
+          <option value="0.17">0.17 ชม.</option>
+          <option value="2.51">2.51 ชม.</option>
+          <option value="4.51">4.51 ชม.</option>
+        </select>
+      </div>
+      <div class="row"><label>⭐ ทักษะ</label>
+        <select class="skillDaily">
+          <option value="0">ไม่ได้รับ</option>
+          <option value="1">ได้รับ</option>
+        </select>
+      </div>
+    </div>
+    
+    
+  `;
+  
+  container.appendChild(card);
+
+  // --- กำหนดค่าเริ่มต้น (Load Saved Data) ---
+  const statusSelect = card.querySelector(".status");
+  const shiftSelect = card.querySelector(".shift");
+  const normalSelect = card.querySelector(".normal");
+  const otSelect = card.querySelector(".ot");
+  const skillDailySelect = card.querySelector(".skillDaily");
+
+  statusSelect.value = saved?.status || "";
+  shiftSelect.value = saved?.shift || "";
+  normalSelect.value = saved?.normal || "0";
+  otSelect.value = saved?.ot || "0";
+  skillDailySelect.value = saved?.skill || "0";
+
+  updateBadge(card);
+
+  // ค้นหาส่วนนี้ในฟังก์ชัน createCard
+  [statusSelect, shiftSelect, normalSelect, otSelect, skillDailySelect].forEach(el => {
+      el.onchange = () => {
+          updateBadge(card);
+          saveCards();      
+        
+          // อัปเดตสีบนปฏิทินทันที
+          const cell = document.querySelector(`.day-cell[data-date="${card.dataset.date}"]`);
+          if (cell) {
+              // ล้างคลาสทั้งหมดก่อน
+              cell.classList.remove("day-normal","day-work", "day-holiday", "day-leave", "day-absent", "shift-morning", "shift-night");
+            
+              //  ใส่คลาสสถานะ (จุดซ้าย)
+              const sClass = getStatusClass(statusSelect.value);
+              if (sClass) cell.classList.add(sClass);
+            
+              // ใส่คลาสประจำกะ (จุดขวา)
+              const shClass = getShiftClass(shiftSelect.value);
+              if (shClass) cell.classList.add(shClass);
+          }
+
+          renderSummary(); 
+      };
+  });
+}
+/* ===== CALENDAR ===== */
+function getStatusClass(status) {
+    if (!status || status === "--เลือกวัน--") return "";
+    if (status.includes("หยุด")) return "day-holiday";
+    if (status.includes("ลา")) return "day-leave";
+    if (status === "ขาดงาน") return "day-absent";
+    if (status === "วันทำงาน") return "day-work";
+    return "";
+}
+
+// เพิ่มฟังก์ชันใหม่สำหรับกะ
+function getShiftClass(shift) {
+    if (shift === "เช้า") return "shift-morning";
+    if (shift === "ดึก") return "shift-night";
+    return "";
+}
+
+function renderCalendar() {
+    calendarEl.innerHTML = "";
+    selectedDate = null;
+    removeExpand(true);
+
+    const y = +yearSelect.value;
+    const m = +monthSelect.value;
+    
+    // ขอบเขตวันที่: 16 เดือนที่แล้ว ถึง 15 เดือนนี้
+    const start = new Date(y, m - 1, 16);
+    const end = new Date(y, m, 15);
+
+    // 1. สร้างช่องว่าง (Blank) ของแถวแรก
+    // หาว่าวันที่ 16 (วันเริ่มวิก) ตรงกับวันอะไร (0=อาทิตย์, 6=เสาร์)
+    const firstDayType = start.getDay(); 
+    for (let i = 0; i < firstDayType; i++) {
+        const blank = document.createElement("div");
+        blank.className = "day-cell-blank"; 
+        calendarEl.appendChild(blank);
+    }
+
+    // 2. ดึงข้อมูลที่บันทึกไว้
+    const savedDataList = loadCards();
+
+    // 3. วนลูปสร้างวันที่ตั้งแต่วันที่ 16 ถึง 15
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const key = formatLocalDate(d);
+        const dayOfWeek = d.getDay();
+
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        cell.textContent = d.getDate(); // แสดงเลขวันที่ (16, 17, ... 1, 2, ... 15)
+        cell.dataset.date = key;
+
+        // แสดงจุดสี Status และ Shift
+        const dayData = savedDataList.find(x => x.date === key);
+        if (dayData) {
+            const sClass = getStatusClass(dayData.status);
+            if (sClass) cell.classList.add(sClass);
+            
+            const shClass = getShiftClass(dayData.shift);
+            if (shClass) cell.classList.add(shClass);
+        }
+
+        cell.onclick = () => toggleInline(cell);
+        calendarEl.appendChild(cell);
+    }
+}
+
+function slideOpen(element) {
+  element.animate([
+    {
+      maxHeight: "0px",
+      opacity: 0,
+      transform: "translateY(-10px)" // เริ่มจากขยับขึ้นไปนิดนึง
+    },
+    {
+      maxHeight: "500px", // ค่าที่พอดีกับความสูงการ์ด
+      opacity: 1,
+      transform: "translateY(0)"
+    }
+  ], {
+    duration: 350, // ปรับความช้า-เร็วที่ตรงนี้ (350ms กำลังนุ่ม)
+    easing: "ease-out", // ค่อยๆ ผ่อนตอนจบ
+    fill: "forwards"
+  });
+}
+
+function slideClose(element) {
+  return element.animate([
+    {
+      maxHeight: "500px",
+      opacity: 1,
+      transform: "translateY(0)"
+    },
+    {
+      maxHeight: "0px",
+      opacity: 0,
+      transform: "translateY(-10px)"
+    }
+  ], {
+    duration: 250,
+    easing: "ease-in",
+    fill: "forwards"
+  }).finished; // คืนค่า promise เมื่อจบ animation
+}
+
+function toggleInline(cell) {
+    const dateKey = cell.dataset.date;
+    // ใช้เฉพาะ cell ของปฏิทินจริง ๆ ไม่รวมแถวการ์ดที่ถูกแทรกเข้ามา
+    const cells = [...calendarEl.children].filter(el =>
+        el.classList.contains("day-cell") || el.classList.contains("day-cell-blank")
+    );
+    const index = cells.indexOf(cell);
+    if (index === -1) return;
+    const rowIndex = Math.floor(index / 7);
+    const rowEnd = rowIndex * 7 + 6;
+
+    /* 1. กรณีเลือกซ้ำวันเดิม -> ปิดการ์ด */
+    if (selectedDate === dateKey && activeCell === cell && expandRow) {
+        slideClose(expandRow).then(() => {
+            removeExpand(true);
+            cell.classList.remove("active"); // ลบไฮไลท์เมื่อปิด
+            selectedDate = null;
+            activeCell = null;
+        });
+        return;
+    }
+
+    /* 2. กรณีเลือกวันใหม่ (ไม่ว่าจะแถวเดิมหรือคนละแถว) */
+    
+    // เก็บสถานะว่าเป็นการเปลี่ยนในแถวเดิมหรือไม่ก่อนจะลบอะไร
+    const isSameRow = expandRow && expandRow.dataset.rowIndex == rowIndex;
+
+    // ลบไฮไลท์จากทุกช่องก่อน
+    document.querySelectorAll(".day-cell").forEach(c => c.classList.remove("active"));
+    // เพิ่มไฮไลท์ให้ช่องที่กดใหม่
+    cell.classList.add("active");
+    
+    selectedDate = dateKey;
+    activeCell = cell;
+
+    if (isSameRow) {
+        /* --- กรณีแถวเดิม: สลับเนื้อหาการ์ดทันที --- */
+        const card = document.querySelector(`.card[data-date="${dateKey}"]`);
+        if (card) {
+            const oldCard = expandRow.querySelector(".card");
+            if (oldCard) {
+                document.getElementById("cardContainer").appendChild(oldCard);
+                oldCard.style.display = "none";
+            }
+            expandRow.appendChild(card);
+            card.style.display = "block";
+            updateBadge(card);
+        }
+    } else {
+        /* --- กรณีคนละแถว: ปิดของเก่า (ทันที) แล้วเปิดของใหม่ (สไลด์ลง) --- */
+        removeExpand(true); 
+
+        expandRow = document.createElement("div");
+        expandRow.className = "calendar-expand";
+        expandRow.dataset.rowIndex = rowIndex;
+
+        const card = document.querySelector(`.card[data-date="${dateKey}"]`);
+        if (card) {
+            expandRow.appendChild(card);
+            card.style.display = "block";
+            updateBadge(card);
+        }
+
+        // แทรก expandRow เข้าไปหลังจบแถวนั้นๆ
+        if (cells[rowEnd + 1]) {
+            calendarEl.insertBefore(expandRow, cells[rowEnd + 1]);
+        } else {
+            calendarEl.appendChild(expandRow);
+        }
+
+        slideOpen(expandRow);
+    }
+}
+
+function removeExpand(immediate = false) {
+    if (!expandRow) return;
+
+    const cleanupLogic = () => {
+        const cardInExpand = expandRow.querySelector(".card");
+        if (cardInExpand) {
+            document.getElementById("cardContainer").appendChild(cardInExpand);
+            cardInExpand.style.display = "none";
+        }
+        expandRow.remove();
+        expandRow = null;
+    };
+
+    if (immediate) {
+        cleanupLogic();
+    } else {
+        // หากต้องการสไลด์ปิดให้ใช้ slideClose ที่ส่งให้ก่อนหน้า
+        slideClose(expandRow).then(cleanupLogic);
+    }
+    
+    // ลบบรรทัดที่สั่งลบ .active ทิ้งไป (เราจะไปลบใน toggleInline แทน)
+}
+// Settings
+function getSettings(){
+  const DAILY_WAGE = num(dailyInput.value);
+  return {
+    DAILY_WAGE, HOURLY_WAGE: DAILY_WAGE/8,
+    OT_RATE_1:1,OT_RATE_15:1.5, OT_RATE_2:2, OT_RATE_3:3,
+    NIGHT_SHIFT_FEE:num(nightShiftFeeInput.value), FOOD_NIGHT_FEE:num(nightFoodFeeInput.value), FOOD_OT_FEE:num(otFoodFeeInput.value), SKILL_FEE:20,MENTOR_FEE:200,
+    SOCIAL_SECURITY_PERCENT:num(socialSecurityPercentInput.value),
+    SOCIAL_SECURITY_RATE:num(socialSecurityPercentInput.value)/100
+  };
+}
+
+/* ===== RENDER MONTH ===== */
+function renderMonth(){
+  container.innerHTML="";
+  const y=+yearSelect.value;
+  const m=+monthSelect.value;
+  const start=new Date(y,m-1,16);
+  const end=new Date(y,m,15);
+
+  const saved=loadCards();
+  const map={};
+  saved.forEach(d=>map[d.date]=d);
+
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    createCard(d,map[formatLocalDate(d)]);
+  }
+
+  document.querySelectorAll(".card").forEach(card=>{
+  updateBadge(card);
+  });
+
+  renderCalendar();
+
+  renderSummary();
+}
+
+function buildWorkTableFromCards(){
+
+  // ลบ table เก่าถ้ามี
+  let table = document.getElementById("workTable");
+  if (table) table.remove();
+
+  table = document.createElement("table");
+  table.id = "workTable";
+  table.style.display = "none";
+  document.body.appendChild(table);
+
+  document.querySelectorAll(".card").forEach(card => {
+
+    const tr = document.createElement("tr");
+    tr.className = "data-row";
+
+    tr.innerHTML = `
+      <td>
+        <select class="statusSelect">
+          <option selected>${card.querySelector(".status").value}</option>
+        </select>
+      </td>
+      <td>
+        <select class="shiftSelect">
+          <option selected>${card.querySelector(".shift").value}</option>
+        </select>
+      </td>
+      <td>
+        <input class="normalHour" value="${card.querySelector(".normal").value}">
+      </td>
+      <td>
+        <input class="otHour" value="${card.querySelector(".ot").value}">
+      </td>
+      <td>
+        <input class="skillDailyValue" value="${card.querySelector(".skillDaily").value}">
+      </td>
+    `;
+
+    table.appendChild(tr);
+  });
+}
+
+function renderSummary(){
+  buildWorkTableFromCards(); // ⭐ แปลงข้อมูลจากการ์ด
+  calculate();               // ⭐ ใช้สูตรเดิม 100%
+}
+function round(v, n = 0){
+  const p = Math.pow(10, n);
+  return Math.round(v * p) / p;
+}
+
+function format2(v){
+  return Number(v || 0).toLocaleString("th-TH", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+function countIncludeStatusNormal(statusList, normalHour = null) {
+  return [...document.querySelectorAll("#workTable tr.data-row")]
+    .filter(row => {
+      const status = row.querySelector(".statusSelect").value;
+      const normal = row.querySelector(".normalHour").value;
+
+      if (!statusList.includes(status)) return false;
+      if (normalHour === null) return true;
+
+      return normal === String(normalHour);
+    }).length;
+}
+
+// Calculation
+function calculate(){
+  const S=getSettings();
+  const rows=document.querySelectorAll("#workTable tr.data-row");
+  let workDays=0,workHours=0,ot1Hour=0,ot15Hours=0,ot2Hours=0,ot3Hours=0,nightShiftDays=0,otFoodDays=0;
+
+  rows.forEach(row => {
+    const status = row.querySelector(".statusSelect").value;
+    const shift = row.querySelector(".shiftSelect").value;
+    const normal = num(row.querySelector(".normalHour").value);
+    const ot = num(row.querySelector(".otHour").value);
+    const hasNormalOT = ot > 0.17; // ตรวจสอบว่าทำ OT เกิน 10 นาทีหรือไม่ เพื่อให้ค่าอาหาร OT
+
+    // 1. จัดการแยกตามสถานะ (Status Logic)
+    if (status === "วันทำงาน") {
+      workHours += normal;
+      workDays += normal / 8;
+      if (ot > 0) { ot15Hours += ot; }
+      if (shift === "ดึก") nightShiftDays++;
+    } 
+    else if (status === "วันหยุด") { 
+      ot2Hours += normal; 
+      ot3Hours += ot; 
+      if (shift === "ดึก") nightShiftDays++; 
+    } 
+    else if (status === "วันหยุดพิเศษ") {
+      ot1Hour += normal; 
+      ot3Hours += ot;
+      // ให้ค่ากะด้วยหากเป็นกะดึกในวันหยุดพิเศษ
+      if (shift === "ดึก") nightShiftDays++; 
+    }
+    // สำหรับสถานะการลาต่างๆ ที่คุณต้องการให้ได้ค่ากะดึกด้วย
+    else if (["ลาพักร้อน", "ขาดงาน", "ลาป่วย", "ลาป่วยแพทย์(เขียนใบสอบสวน)", "ลากิจ", "ลากิจพิเศษ"].includes(status)) {
+      if (shift === "ดึก") {
+        nightShiftDays++;
+      }
+    }
+
+    // 2. จัดการเรื่องค่าอาหาร OT (แยกออกมาอิสระ)
+    if (hasNormalOT) {
+      otFoodDays++;
+    }
+  });
+  const cNormalday      = countIncludeStatusNormal(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์(เขียนใบสอบสวน)","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+countIncludeStatusNormal(["วันทำงาน"],"8")*1+countIncludeStatusNormal(["วันทำงาน"],"6")*0.75;
+  const cHolidaySpecial = countIncludeStatusNormal(["วันหยุดพิเศษ"]);
+  const cVacation       = countIncludeStatusNormal(["ลาพักร้อน"],"4")*0.5+countIncludeStatusNormal(["ลาพักร้อน"],"0")*1;
+  const cSickDoctor     = countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"4")*0.5+countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"0")*1;
+  const cBusinessExtra  = countIncludeStatusNormal(["ลากิจพิเศษ"],"4")*0.5+countIncludeStatusNormal(["ลากิจพิเศษ"],"0")*1;
+  const cSick           = countIncludeStatusNormal(["ลาป่วย"],"4")*0.5+countIncludeStatusNormal(["ลาป่วย"],"0")*1;
+  const cBusiness       = countIncludeStatusNormal(["ลากิจ"],"4")*0.5+countIncludeStatusNormal(["ลากิจ"],"0")*1;
+  const cAbsent         = countIncludeStatusNormal(["ขาดงาน"]);
+  const cHoliday        = countIncludeStatusNormal(["วันหยุด"]);
+  const salaryPay=cNormalday * S.DAILY_WAGE;
+  const ot1Pay=S.HOURLY_WAGE*S.OT_RATE_1*ot1Hour;
+  const ot15Pay=S.HOURLY_WAGE*S.OT_RATE_15*ot15Hours;
+  const ot2Pay=S.HOURLY_WAGE*S.OT_RATE_2*ot2Hours;
+  const ot3Pay=S.HOURLY_WAGE*S.OT_RATE_3*ot3Hours;
+  const totalOtHours = ot1Hour + ot15Hours + ot2Hours + ot3Hours;
+  const nightShiftPay=nightShiftDays*S.NIGHT_SHIFT_FEE;
+  const nightFoodPay=nightShiftDays*S.FOOD_NIGHT_FEE;
+  const otFoodPay=otFoodDays*S.FOOD_OT_FEE;
+  const forcedOtPay=Math.floor((S.HOURLY_WAGE * S.OT_RATE_15)*0.17);
+  const skillDays = [...rows].filter(row => num(row.querySelector(".skillDailyValue")?.value) === 1).length;
+  const skillPay  = skillDays * S.SKILL_FEE;
+  const mentorPay=document.getElementById("mentorCheck").checked ? S.MENTOR_FEE : 0 ;
+  const holidayspecialPay=cHolidaySpecial*(S.DAILY_WAGE+forcedOtPay)
+  const vacationPay=cVacation*(S.DAILY_WAGE+forcedOtPay)
+  const sickdocterPay=cSickDoctor*(S.DAILY_WAGE+forcedOtPay)
+  const businessextraPay=cBusinessExtra*(S.DAILY_WAGE+forcedOtPay)
+  const incentive1Pay = num(document.getElementById("incentive1").value);
+  const incentive2Pay = num(document.getElementById("incentive2").value);
+  const totalIncome=salaryPay+ot1Pay+ot15Pay+ot2Pay+ot3Pay+
+    nightShiftPay+nightFoodPay+otFoodPay+skillPay+mentorPay+
+    holidayspecialPay+vacationPay+sickdocterPay+businessextraPay+
+    incentive1Pay+incentive2Pay;
+  const socialSecurity = round((salaryPay + holidayspecialPay + vacationPay + sickdocterPay + businessextraPay) * S.SOCIAL_SECURITY_RATE,0);
+  const netPay=totalIncome-socialSecurity;
+  
+
+  if (periodSummaryQuick) {
+    periodSummaryQuick.innerHTML = `
+      <div>
+        <span class="quick-label">ยอดสุทธิประจำงวด</span>
+        <span class="quick-period">${getPeriodRangeText()}</span>
+        <strong>${format2(netPay)}</strong>
+        <small>รวมรายได้ ${format2(totalIncome)} บาท · หักประกันสังคม ${format2(socialSecurity)} บาท (${format2(S.SOCIAL_SECURITY_PERCENT)}%)</small>
+      </div>
+      <span class="quick-unit">บาท</span>
+    `;
+  }
+  updateHeaderInfo();
+
+  document.getElementById("result").innerHTML = `
+  <div class="summary-panel">
+    <div id="summaryCategoryList" class="summary-grid">
+      <section class="summary-card">
+        <div class="summary-heading">💼 รายได้หลัก</div>
+        <div class="summary-item">
+          <span class="summary-label">วันทำงาน</span>
+          <span class="summary-qty">${format2(cNormalday)} วัน</span>
+          <span class="summary-money">${format2(salaryPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">วันหยุดพิเศษ</span>
+          <span class="summary-qty">${format2(cHolidaySpecial)} วัน</span>
+          <span class="summary-money">${format2(holidayspecialPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">ลาพักร้อน</span>
+          <span class="summary-qty">${format2(cVacation)} วัน</span>
+          <span class="summary-money">${format2(vacationPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">ลาป่วยแพทย์</span>
+          <span class="summary-qty">${format2(cSickDoctor)} วัน</span>
+          <span class="summary-money">${format2(sickdocterPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">ลากิจพิเศษ</span>
+          <span class="summary-qty">${format2(cBusinessExtra)} วัน</span>
+          <span class="summary-money">${format2(businessextraPay)} บาท</span>
+        </div>
+      </section>
+
+      <section class="summary-card">
+        <div class="summary-heading">⏱️ โอที</div>
+        <div class="summary-item summary-emphasis">
+          <span class="summary-label"><b>รวมชั่วโมงโอที</b></span>
+          <span class="summary-qty"><b>${format2(totalOtHours)} ชม.</b></span>
+          <span class="summary-money">-</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">โอที 1 แรง</span>
+          <span class="summary-qty">${format2(ot1Hour)} ชม.</span>
+          <span class="summary-money">${format2(ot1Pay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">โอที 1.5 แรง</span>
+          <span class="summary-qty">${format2(ot15Hours)} ชม.</span>
+          <span class="summary-money">${format2(ot15Pay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">โอที 2 แรง</span>
+          <span class="summary-qty">${format2(ot2Hours)} ชม.</span>
+          <span class="summary-money">${format2(ot2Pay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">โอที 3 แรง</span>
+          <span class="summary-qty">${format2(ot3Hours)} ชม.</span>
+          <span class="summary-money">${format2(ot3Pay)} บาท</span>
+        </div>
+      </section>
+
+      <section class="summary-card">
+        <div class="summary-heading">🌙 ค่ากะ / ค่าอาหาร</div>
+        <div class="summary-item">
+          <span class="summary-label">ค่ากะดึก</span>
+          <span class="summary-qty">${format2(nightShiftDays)} วัน</span>
+          <span class="summary-money">${format2(nightShiftPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">ค่าอาหารกะดึก</span>
+          <span class="summary-qty">${format2(nightShiftDays)} วัน</span>
+          <span class="summary-money">${format2(nightFoodPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">ค่าอาหารโอที</span>
+          <span class="summary-qty">${format2(otFoodDays)} วัน</span>
+          <span class="summary-money">${format2(otFoodPay)} บาท</span>
+        </div>
+      </section>
+
+      <section class="summary-card">
+        <div class="summary-heading">⭐ ค่าพิเศษ</div>
+        <div class="summary-item">
+          <span class="summary-label">ค่าทักษะ</span>
+          <span class="summary-qty">${format2(skillDays)} วัน</span>
+          <span class="summary-money">${format2(skillPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">ค่าพี่เลี้ยง</span>
+          <span class="summary-qty">-</span>
+          <span class="summary-money">${format2(mentorPay)} บาท</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">เบี้ยขยัน</span>
+          <span class="summary-qty">2 รอบ</span>
+          <span class="summary-money">${format2(incentive1Pay+incentive2Pay)} บาท</span>
+        </div>
+      </section>
+
+      <section class="summary-card full">
+        <div class="summary-heading">🧾 รวมและรายการหัก</div>
+        <div class="summary-item summary-emphasis">
+          <span class="summary-label"><b>รวมรายได้</b></span>
+          <span class="summary-qty">-</span>
+          <span class="summary-money">${format2(totalIncome)} บาท</span>
+        </div>
+        <div class="summary-item summary-deduct">
+          <span class="summary-label">ประกันสังคม</span>
+          <span class="summary-qty">${format2(S.SOCIAL_SECURITY_PERCENT)}%</span>
+          <span class="summary-money">-${format2(socialSecurity)} บาท</span>
+        </div>
+        <div class="summary-item summary-net">
+          <span class="summary-label"><b>สุทธิ</b></span>
+          <span class="summary-qty">-</span>
+          <span class="summary-money">${format2(netPay)} บาท</span>
+        </div>
+      </section>
+    </div>
+  </div>
+`;
+  setPanelCollapsed(getSummaryCollapseTarget(), summaryShell?.classList.contains("summary-collapsed"), true);
+}
+/* ===== 1. ปรับปรุงฟังก์ชันบันทึก ให้จำทั้งการตั้งค่าและหน้าล่าสุด ===== */
+function saveSettings() {
+    const y = yearSelect.value;
+    const m = monthSelect.value;
+    
+    const settings = {
+        mentor: document.getElementById("mentorCheck").checked,
+        dailyWage: dailyInput.value,
+        nightShiftFee: nightShiftFeeInput.value,
+        nightFoodFee: nightFoodFeeInput.value,
+        otFoodFee: otFoodFeeInput.value,
+        socialSecurityPercent: socialSecurityPercentInput.value,
+        incentive1: document.getElementById("incentive1").value,
+        incentive2: document.getElementById("incentive2").value
+    };
+    
+    // บันทึกแยกรายเดือน
+    localStorage.setItem(`settings-${y}-${m}`, JSON.stringify(settings));
+    // บันทึกว่าเปิดหน้าไหนล่าสุด
+    localStorage.setItem('lastViewedMonth', m);
+    localStorage.setItem('lastViewedYear', y);
+}
+
+/* ===== 2. ฟังก์ชันโหลด ต้องทำงานหลังจากระบุเดือน/ปีแล้วเท่านั้น ===== */
+function loadSettings() {
+    const y = yearSelect.value;
+    const m = monthSelect.value;
+    let saved = null;
+    try {
+        saved = JSON.parse(localStorage.getItem(`settings-${y}-${m}`));
+    } catch (e) {
+        saved = null;
+    }
+
+    document.getElementById("mentorCheck").checked = saved?.mentor || false;
+    dailyInput.value = saved?.dailyWage || 447;
+    nightShiftFeeInput.value = saved?.nightShiftFee || 140;
+    nightFoodFeeInput.value = saved?.nightFoodFee || 70;
+    otFoodFeeInput.value = saved?.otFoodFee || 45;
+    socialSecurityPercentInput.value = saved?.socialSecurityPercent ?? 5;
+    document.getElementById("incentive1").value = saved?.incentive1 || "0";
+    document.getElementById("incentive2").value = saved?.incentive2 || "0";
+    syncHourly();
+}
+
+function rebuildYearOptions(centerYear) {
+    const normalizedCenter = normalizeYearValue(centerYear);
+    const selectedYear = yearSelect.value ? normalizeYearValue(yearSelect.value) : normalizedCenter;
+    const minYear = normalizedCenter - 2;
+    const maxYear = normalizedCenter + 2;
+
+    yearSelect.innerHTML = "";
+    for (let y = minYear; y <= maxYear; y++) {
+        const option = document.createElement("option");
+        option.value = String(y);
+        option.textContent = toBuddhistYear(y);
+        yearSelect.appendChild(option);
+    }
+
+    const yearToSelect = selectedYear >= minYear && selectedYear <= maxYear ? selectedYear : normalizedCenter;
+    yearSelect.value = String(yearToSelect);
+}
+
+function ensureYearOption(year) {
+    // คงชื่อฟังก์ชันเดิมไว้เพื่อความเข้ากันได้ แต่ปรับให้ dropdown ขยับแบบ ±2 ปีจากปีที่ต้องการ
+    rebuildYearOptions(year);
+}
+
+function applyPeriodChange() {
+    const selectedYear = normalizeYearValue(yearSelect.value);
+    rebuildYearOptions(selectedYear);
+    yearSelect.value = String(selectedYear);
+    loadSettings();
+    renderMonth();
+    updateHeaderInfo();
+    localStorage.setItem('lastViewedMonth', monthSelect.value);
+    localStorage.setItem('lastViewedYear', yearSelect.value);
+}
+
+function movePeriod(offset) {
+    const currentYear = Number(yearSelect.value);
+    const currentMonth = Number(monthSelect.value);
+    const target = new Date(currentYear, currentMonth + offset, 1);
+    const nextYear = target.getFullYear();
+    const nextMonth = target.getMonth();
+
+    rebuildYearOptions(nextYear);
+    yearSelect.value = String(nextYear);
+    monthSelect.value = String(nextMonth);
+    applyPeriodChange();
+}
+
+/* ===== 3. จัดระเบียบเหตุการณ์ (Events) ให้มีการบันทึกที่ถูกต้อง ===== */
+monthSelect.onchange = applyPeriodChange;
+yearSelect.onchange = applyPeriodChange;
+prevPeriodBtn.onclick = () => movePeriod(-1);
+nextPeriodBtn.onclick = () => movePeriod(1);
+
+// ส่วน Input อื่นๆ ให้บันทึกทันทีเมื่อเปลี่ยนค่า
+dailyInput.oninput = () => { syncHourly(); saveSettings(); renderSummary(); };
+[nightShiftFeeInput, nightFoodFeeInput, otFoodFeeInput, socialSecurityPercentInput].forEach(input => {
+    input.oninput = () => { saveSettings(); renderSummary(); };
+});
+document.getElementById("mentorCheck").onchange = () => { saveSettings(); renderSummary(); };
+document.getElementById("incentive1").onchange = () => { saveSettings(); renderSummary(); };
+document.getElementById("incentive2").onchange = () => { saveSettings(); renderSummary(); };
+/* ===== ปรับปรุงระบบหุบการ์ดเมื่อคลิกด้านนอก ===== */
+document.addEventListener("click", function(event) {
+    if (!expandRow) return; // ถ้าไม่มีการ์ดเปิดอยู่ ไม่ต้องทำอะไร
+    
+    // ตรวจสอบว่าจุดที่คลิก อยู่นอกปฏิทิน และ อยู่นอกการ์ดที่กำลังกางอยู่หรือไม่
+    const isClickInsideCalendar = calendarEl.contains(event.target);
+    const isClickInsideCard = expandRow.contains(event.target);
+    
+    if (!isClickInsideCalendar && !isClickInsideCard) {
+        slideClose(expandRow).then(() => {
+            removeExpand(true);
+            if (activeCell) activeCell.classList.remove("active");
+            selectedDate = null;
+            activeCell = null;
+        });
+    }
+});
+// --- Removed PDF / Export / Import tools for compact version ---
+
+/* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
+function initApp() {
+    initTheme();
+    setInputCollapsed(localStorage.getItem("payrollInputCollapsed") === "1", true);
+    setSummaryCollapsed(localStorage.getItem("payrollSummaryCollapsed") === "1", true);
+    updateHeaderInfo();
+    setInterval(updateHeaderInfo, 1000);
+    const now = new Date();
+
+    // 1. ดึงค่าหน้าล่าสุด แล้วสร้างตัวเลือก "ปี" แบบปีที่เลือก ±2 ปี
+    const savedMonth = localStorage.getItem('lastViewedMonth');
+    const savedYear = localStorage.getItem('lastViewedYear');
+    const initialYear = savedYear !== null ? normalizeYearValue(savedYear) : now.getFullYear();
+
+    rebuildYearOptions(initialYear);
+
+    // 2. กำหนดค่าให้ Dropdown (ป้องกันค่าว่าง)
+    if (savedMonth !== null) {
+        monthSelect.value = savedMonth;
+    } else {
+        monthSelect.value = now.getMonth();
+    }
+    yearSelect.value = String(initialYear);
+
+    // 4. โหลดข้อมูลและแสดงผล
+    loadSettings(); 
+    renderMonth(); 
+}
+
+// เรียกใช้เพียงครั้งเดียวที่บรรทัดสุดท้าย
+initApp();
+
+/* ===== PWA: register service worker for GitHub Pages ===== */
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+      console.warn("Service worker registration failed:", error);
+    });
+  });
+}
+</script>
+
+</body>
+</html>
