@@ -6836,6 +6836,60 @@ select:focus {
   box-shadow: none !important;
 }
 
+
+/* ===== Requested: formal blue selected calendar + green mentor toggle ===== */
+
+/* วันที่ที่ถูกเลือกในปฏิทิน: ฟ้าทางการ */
+.day-cell.active {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.day-cell.active::after,
+.day-cell.active::before {
+  box-shadow: none !important;
+}
+
+.day-cell:active {
+  transform: scale(.98) !important;
+  box-shadow: none !important;
+}
+
+/* Toggle พี่เลี้ยง: ปิด = เทา / เปิด = เขียว */
+.mentor-toggle-card .switch-visual {
+  background: #e5e7eb !important;
+  box-shadow: inset 0 2px 6px rgba(17, 24, 39, .12) !important;
+}
+
+.mentor-toggle-card .switch-visual > span {
+  background: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(17, 24, 39, .16), inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+
+.mentor-toggle-card .toggle-input:checked + .switch-visual {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important;
+}
+
+.mentor-toggle-card .toggle-input:checked + .switch-visual > span {
+  transform: translateX(20px) !important;
+}
+
+.mentor-toggle-card:has(.toggle-input:checked) {
+  border-color: rgba(22, 163, 74, .32) !important;
+  background: #ffffff !important;
+}
+
+.mentor-toggle-card:has(.toggle-input:checked) .toggle-copy b {
+  color: #166534 !important;
+}
+
+.mentor-toggle-card:has(.toggle-input:checked) .toggle-copy small {
+  color: #15803d !important;
+}
+
 </style>
 </head>
 
@@ -6980,6 +7034,7 @@ select:focus {
         </label>
         <div class="incentive-card incentive-card-manual">
           <div class="mini-title">เบี้ยขยัน</div>
+          <div class="mini-subtitle">กรอกยอดเองได้ทั้ง 2 ช่วง</div>
           <div class="incentive-controls incentive-controls-manual">
             <label class="field-card incentive-input-card">
               <span>ช่วง 1</span>
@@ -6987,7 +7042,7 @@ select:focus {
                 <input type="number" id="incentive1" value="0" min="0" step="1" inputmode="decimal" placeholder="0">
                 <span>บาท</span>
               </div>
-              <small class="incentive-level-hint">0 / 180 / 210</small>
+              <small class="incentive-level-hint">อ้างอิงเดิม: 0 / 180 / 210</small>
             </label>
             <label class="field-card incentive-input-card">
               <span>ช่วง 2</span>
@@ -6995,11 +7050,11 @@ select:focus {
                 <input type="number" id="incentive2" value="0" min="0" step="1" inputmode="decimal" placeholder="0">
                 <span>บาท</span>
               </div>
-              <small class="incentive-level-hint">0 / 180 / 210</small>
+              <small class="incentive-level-hint">อ้างอิงเดิม: 0 / 180 / 210</small>
             </label>
           </div>
           <div class="incentive-reference">
-            ระดับเบี้ยขยัน: ไม่ได้รับเบี้ย = 0 บาท · ระดับปกติ = 180 บาท · ระดับเต็ม = 210 บาท
+            ระดับเบี้ยขยันอ้างอิงจากตัวเลือกเดิม: ไม่รับเบี้ย = 0 บาท · ระดับปกติ = 180 บาท · ระดับเต็ม = 210 บาท
           </div>
         </div>
       </div>
