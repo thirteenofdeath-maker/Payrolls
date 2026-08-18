@@ -6890,6 +6890,84 @@ select:focus {
   color: #15803d !important;
 }
 
+/* ===== Reference palette themes ===== */
+:root {
+  --theme-primary: #166534;
+  --theme-on-primary: #ffffff;
+  --theme-soft: #f3f4f6;
+  --theme-on-soft: #1f2937;
+  --theme-tint: #f8fafc;
+  --theme-ring: rgba(22,101,52,.22);
+}
+html[data-palette="quantum"] { --theme-primary:#2457FF; --theme-on-primary:#fff; --theme-soft:#DFF7FF; --theme-on-soft:#163790; --theme-tint:#f3fbff; --theme-ring:rgba(36,87,255,.25); }
+html[data-palette="prompt"] { --theme-primary:#0B132B; --theme-on-primary:#39FF88; --theme-soft:#39FF88; --theme-on-soft:#0B132B; --theme-tint:#effff6; --theme-ring:rgba(57,255,136,.26); }
+html[data-palette="forest"] { --theme-primary:#18251D; --theme-on-primary:#B7FF72; --theme-soft:#B7FF72; --theme-on-soft:#18251D; --theme-tint:#f5ffe9; --theme-ring:rgba(183,255,114,.30); }
+html[data-palette="blueberry"] { --theme-primary:#243B8F; --theme-on-primary:#FFF0C9; --theme-soft:#FFF0C9; --theme-on-soft:#243B8F; --theme-tint:#fffbef; --theme-ring:rgba(36,59,143,.22); }
+html[data-palette="cyber-teal"] { --theme-primary:#03313A; --theme-on-primary:#8FFFE0; --theme-soft:#8FFFE0; --theme-on-soft:#03313A; --theme-tint:#effffb; --theme-ring:rgba(3,49,58,.24); }
+html[data-palette="lime-compute"] { --theme-primary:#1F2329; --theme-on-primary:#B6FF2E; --theme-soft:#B6FF2E; --theme-on-soft:#1F2329; --theme-tint:#f8ffe9; --theme-ring:rgba(182,255,46,.30); }
+html[data-palette="inkberry"] { --theme-primary:#1A0B2E; --theme-on-primary:#FFB7A5; --theme-soft:#FFB7A5; --theme-on-soft:#1A0B2E; --theme-tint:#fff5f2; --theme-ring:rgba(255,183,165,.30); }
+html[data-palette="signal-violet"] { --theme-primary:#7A35FF; --theme-on-primary:#fff; --theme-soft:#F0F2F5; --theme-on-soft:#5921c6; --theme-tint:#faf9ff; --theme-ring:rgba(122,53,255,.24); }
+html[data-palette="lime-spark"] { --theme-primary:#B6FF2E; --theme-on-primary:#23262F; --theme-soft:#23262F; --theme-on-soft:#B6FF2E; --theme-tint:#f8ffe8; --theme-ring:rgba(182,255,46,.32); }
+html[data-palette="emerald"] { --theme-primary:#064E3B; --theme-on-primary:#F8E7C9; --theme-soft:#F8E7C9; --theme-on-soft:#064E3B; --theme-tint:#fffaf0; --theme-ring:rgba(6,78,59,.24); }
+html[data-palette="signal-blue"] { --theme-primary:#0057FF; --theme-on-primary:#fff; --theme-soft:#F8F7F4; --theme-on-soft:#0044c8; --theme-tint:#f6f9ff; --theme-ring:rgba(0,87,255,.24); }
+html[data-palette="ultra-violet"] { --theme-primary:#6A00F4; --theme-on-primary:#FFD6A5; --theme-soft:#FFD6A5; --theme-on-soft:#5100bc; --theme-tint:#fff7ed; --theme-ring:rgba(106,0,244,.24); }
+html[data-palette="butter-iris"] { --theme-primary:#FFF275; --theme-on-primary:#3A0CA3; --theme-soft:#3A0CA3; --theme-on-soft:#FFF275; --theme-tint:#fffdec; --theme-ring:rgba(58,12,163,.22); }
+html[data-palette="neon-orange"] { --theme-primary:#FF6115; --theme-on-primary:#fff; --theme-soft:#FFFCF4; --theme-on-soft:#b93400; --theme-tint:#fff8f2; --theme-ring:rgba(255,97,21,.24); }
+html[data-palette="clay-butter"] { --theme-primary:#6B352A; --theme-on-primary:#FFF1A6; --theme-soft:#FFF1A6; --theme-on-soft:#6B352A; --theme-tint:#fffbed; --theme-ring:rgba(107,53,42,.22); }
+html[data-palette="dragonfruit"] { --theme-primary:#FF4696; --theme-on-primary:#1E1033; --theme-soft:#1E1033; --theme-on-soft:#FF77b2; --theme-tint:#fff2f8; --theme-ring:rgba(255,70,150,.24); }
+html[data-palette="cyber-grape"] { --theme-primary:#6D28D9; --theme-on-primary:#D7FF00; --theme-soft:#D7FF00; --theme-on-soft:#4d169e; --theme-tint:#fbffe8; --theme-ring:rgba(109,40,217,.24); }
+html[data-palette="raspberry"] { --theme-primary:#C2185B; --theme-on-primary:#fff; --theme-soft:#E0F2FE; --theme-on-soft:#9b1248; --theme-tint:#f5fbff; --theme-ring:rgba(194,24,91,.22); }
+
+html[data-palette] body {
+  background: linear-gradient(150deg, #ffffff 0%, var(--theme-tint) 52%, var(--theme-soft) 160%) !important;
+}
+html[data-palette] .app-header,
+html[data-palette] .input-panel,
+html[data-palette] .summary-shell {
+  border-color: color-mix(in srgb, var(--theme-primary) 22%, #e5e7eb) !important;
+}
+html[data-palette] .section-icon,
+html[data-palette] .period-nav-btn,
+html[data-palette] .collapse-toggle {
+  color: var(--theme-on-soft) !important;
+  background: var(--theme-soft) !important;
+  border-color: color-mix(in srgb, var(--theme-primary) 24%, transparent) !important;
+}
+html[data-palette] .day-cell.active,
+html[data-palette] .period-summary-quick,
+html[data-palette] .summary-net {
+  background: var(--theme-primary) !important;
+  border-color: var(--theme-primary) !important;
+  color: var(--theme-on-primary) !important;
+}
+html[data-palette] .period-summary-quick *,
+html[data-palette] .summary-net * { color: var(--theme-on-primary) !important; }
+html[data-palette] .summary-heading,
+html[data-palette] .app-header h2 { color: var(--theme-primary) !important; }
+html[data-palette] input:focus,
+html[data-palette] select:focus {
+  border-color: var(--theme-primary) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px var(--theme-ring) !important;
+}
+.palette-picker {
+  position:relative; display:inline-flex; align-items:center; justify-content:center;
+  width:44px; min-width:44px; height:44px; min-height:44px; padding:0;
+  border:1px solid color-mix(in srgb, var(--theme-primary) 24%, var(--final-line)) !important;
+  border-radius:12px; background:var(--theme-soft); color:var(--theme-on-soft);
+  cursor:pointer; overflow:hidden;
+}
+.palette-picker > span { display:block; font-size:18px; line-height:1; pointer-events:none; }
+.palette-picker select {
+  position:absolute; inset:0; width:100%; height:100%; min-height:44px;
+  padding:0 !important; opacity:0; cursor:pointer;
+}
+.palette-picker:focus-within { box-shadow:0 0 0 3px var(--theme-ring) !important; }
+.period-section > .section-title { display:flex; align-items:center; width:100%; }
+.period-section > .section-title .palette-picker { margin-left:auto; }
+@media (max-width: 420px) {
+  .app-header-right { display:flex !important; }
+}
 </style>
 </head>
 
@@ -6911,6 +6989,30 @@ select:focus {
       <div class="section-title">
         <span class="section-icon">📅</span>
         <span>งวดจ่าย</span>
+        <label class="palette-picker" for="paletteSelect" title="เลือกชุดสี">
+          <span aria-hidden="true">🎨</span>
+          <select id="paletteSelect" aria-label="เลือกชุดสี">
+            <option value="default">ขาวเดิม</option>
+            <option value="quantum">Quantum Blue · Ice Glass</option>
+            <option value="prompt">Prompt Blue · AI Green</option>
+            <option value="forest">Forest Graphite · Acid Mint</option>
+            <option value="blueberry">Blueberry · Cream Soda</option>
+            <option value="cyber-teal">Cyber Teal · Aqua Foam</option>
+            <option value="lime-compute">Deep Graphite · Lime Compute</option>
+            <option value="inkberry">Inkberry · Peach</option>
+            <option value="signal-violet">Signal Violet · Mist Gray</option>
+            <option value="lime-spark">Lime Spark · Graphite</option>
+            <option value="emerald">Emerald Ink · Champagne</option>
+            <option value="signal-blue">Signal Blue · Porcelain</option>
+            <option value="ultra-violet">Ultra Violet · Soft Apricot</option>
+            <option value="butter-iris">Butter Yellow · Royal Iris</option>
+            <option value="neon-orange">Neon Orange · Porcelain</option>
+            <option value="clay-butter">Clay Brown · Soft Butter</option>
+            <option value="dragonfruit">Dragonfruit · Night Violet</option>
+            <option value="cyber-grape">Cyber Grape · Acid Lime</option>
+            <option value="raspberry">Raspberry · Pale Sky</option>
+          </select>
+        </label>
       </div>
       <div class="period-switcher">
         <button type="button" id="prevPeriodBtn" class="period-nav-btn period-nav-prev" data-icon="‹" aria-label="งวดก่อนหน้า">
@@ -7113,6 +7215,7 @@ const nightFoodFeeInput = document.getElementById("nightFoodFee");
 const otFoodFeeInput = document.getElementById("otFoodFee");
 const socialSecurityPercentInput = document.getElementById("socialSecurityPercent");
 const themeToggle = document.getElementById("themeToggle");
+const paletteSelect = document.getElementById("paletteSelect");
 const headerClock = document.getElementById("headerClock");
 const headerDateRange = document.getElementById("headerDateRange");
 const periodSummaryQuick = document.getElementById("periodSummaryQuick");
@@ -7122,14 +7225,21 @@ const summaryToggle = document.getElementById("summaryToggle");
 const summaryShell = document.querySelector(".summary-shell");
 
 function applyTheme(theme) {
-  // ยกเลิกโหมดมืด: บังคับใช้ธีมครีมโหมดเดียว
+  const palettes=["default","quantum","prompt","forest","blueberry","cyber-teal","lime-compute","inkberry","signal-violet","lime-spark","emerald","signal-blue","ultra-violet","butter-iris","neon-orange","clay-butter","dragonfruit","cyber-grape","raspberry"];
+  const selected=palettes.includes(theme)?theme:"default";
   document.documentElement.setAttribute("data-theme", "light");
-  localStorage.setItem("payrollTheme", "light");
+  if(selected==="default") document.documentElement.removeAttribute("data-palette");
+  else document.documentElement.setAttribute("data-palette",selected);
+  if(paletteSelect) paletteSelect.value=selected;
+  localStorage.setItem("payrollTheme",selected);
 }
 
 function initTheme() {
-  applyTheme("light");
+  const saved=localStorage.getItem("payrollTheme");
+  applyTheme(saved && saved!=="light" ? saved : "default");
 }
+
+paletteSelect?.addEventListener("change",event=>applyTheme(event.target.value));
 
 function toBuddhistYear(year) {
   return Number(year) + 543;
@@ -7691,51 +7801,29 @@ function renderMonth(){
   renderSummary();
 }
 
-function buildWorkTableFromCards(){
-
-  // ลบ table เก่าถ้ามี
-  let table = document.getElementById("workTable");
-  if (table) table.remove();
-
-  table = document.createElement("table");
-  table.id = "workTable";
-  table.style.display = "none";
-  document.body.appendChild(table);
-
-  document.querySelectorAll(".card").forEach(card => {
-
-    const tr = document.createElement("tr");
-    tr.className = "data-row";
-
-    tr.innerHTML = `
-      <td>
-        <select class="statusSelect">
-          <option selected>${card.querySelector(".status").value}</option>
-        </select>
-      </td>
-      <td>
-        <select class="shiftSelect">
-          <option selected>${card.querySelector(".shift").value}</option>
-        </select>
-      </td>
-      <td>
-        <input class="normalHour" value="${card.querySelector(".normal").value}">
-      </td>
-      <td>
-        <input class="otHour" value="${card.querySelector(".ot").value}">
-      </td>
-      <td>
-        <input class="skillDailyValue" value="${card.querySelector(".skillDaily").value}">
-      </td>
-    `;
-
-    table.appendChild(tr);
-  });
+function getPayrollData(){
+  const S = getSettings();
+  return {
+    settings: {
+      ...S,
+      mentor: document.getElementById("mentorCheck").checked,
+      incentive1: num(document.getElementById("incentive1").value),
+      incentive2: num(document.getElementById("incentive2").value)
+    },
+    days: [...document.querySelectorAll(".card")].map(card => ({
+      date: card.dataset.date,
+      status: card.querySelector(".status").value,
+      shift: card.querySelector(".shift").value,
+      normalHours: num(card.querySelector(".normal").value),
+      normalHoursRaw: card.querySelector(".normal").value,
+      otHours: num(card.querySelector(".ot").value),
+      skill: num(card.querySelector(".skillDaily").value) === 1
+    }))
+  };
 }
 
 function renderSummary(){
-  buildWorkTableFromCards(); // ⭐ แปลงข้อมูลจากการ์ด
-  calculate();               // ⭐ ใช้สูตรเดิม 100%
+  calculate(getPayrollData());
 }
 function round(v, n = 0){
   const p = Math.pow(10, n);
@@ -7748,30 +7836,25 @@ function format2(v){
     maximumFractionDigits: 2
   });
 }
-function countIncludeStatusNormal(statusList, normalHour = null) {
-  return [...document.querySelectorAll("#workTable tr.data-row")]
-    .filter(row => {
-      const status = row.querySelector(".statusSelect").value;
-      const normal = row.querySelector(".normalHour").value;
-
-      if (!statusList.includes(status)) return false;
-      if (normalHour === null) return true;
-
-      return normal === String(normalHour);
-    }).length;
+function countIncludeStatusNormal(days, statusList, normalHour = null) {
+  return days.filter(day => {
+    if (!statusList.includes(day.status)) return false;
+    if (normalHour === null) return true;
+    return day.normalHoursRaw === String(normalHour);
+  }).length;
 }
 
-// Calculation
-function calculate(){
-  const S=getSettings();
-  const rows=document.querySelectorAll("#workTable tr.data-row");
+// Pure calculation layer: receives data and never reads or writes the DOM.
+function calculatePayroll(data){
+  const S=data.settings;
+  const days=data.days;
   let workDays=0,workHours=0,ot1Hour=0,ot15Hours=0,ot2Hours=0,ot3Hours=0,nightShiftDays=0,otFoodDays=0;
 
-  rows.forEach(row => {
-    const status = row.querySelector(".statusSelect").value;
-    const shift = row.querySelector(".shiftSelect").value;
-    const normal = num(row.querySelector(".normalHour").value);
-    const ot = num(row.querySelector(".otHour").value);
+  days.forEach(day => {
+    const status = day.status;
+    const shift = day.shift;
+    const normal = day.normalHours;
+    const ot = day.otHours;
     const hasNormalOT = ot > 0.17; // ตรวจสอบว่าทำ OT เกิน 10 นาทีหรือไม่ เพื่อให้ค่าอาหาร OT
 
     // 1. จัดการแยกตามสถานะ (Status Logic)
@@ -7804,15 +7887,16 @@ function calculate(){
       otFoodDays++;
     }
   });
-  const cNormalday      = countIncludeStatusNormal(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์(เขียนใบสอบสวน)","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+countIncludeStatusNormal(["วันทำงาน"],"8")*1+countIncludeStatusNormal(["วันทำงาน"],"6")*0.75;
-  const cHolidaySpecial = countIncludeStatusNormal(["วันหยุดพิเศษ"]);
-  const cVacation       = countIncludeStatusNormal(["ลาพักร้อน"],"4")*0.5+countIncludeStatusNormal(["ลาพักร้อน"],"0")*1;
-  const cSickDoctor     = countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"4")*0.5+countIncludeStatusNormal(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"0")*1;
-  const cBusinessExtra  = countIncludeStatusNormal(["ลากิจพิเศษ"],"4")*0.5+countIncludeStatusNormal(["ลากิจพิเศษ"],"0")*1;
-  const cSick           = countIncludeStatusNormal(["ลาป่วย"],"4")*0.5+countIncludeStatusNormal(["ลาป่วย"],"0")*1;
-  const cBusiness       = countIncludeStatusNormal(["ลากิจ"],"4")*0.5+countIncludeStatusNormal(["ลากิจ"],"0")*1;
-  const cAbsent         = countIncludeStatusNormal(["ขาดงาน"]);
-  const cHoliday        = countIncludeStatusNormal(["วันหยุด"]);
+  const count=(statuses,normalHour=null)=>countIncludeStatusNormal(days,statuses,normalHour);
+  const cNormalday      = count(["ลาพักร้อน","ขาดงาน","ลาป่วย","ลาป่วยแพทย์(เขียนใบสอบสวน)","ลากิจ","ลากิจพิเศษ"],"4") * 0.5+count(["วันทำงาน"],"8")*1+count(["วันทำงาน"],"6")*0.75;
+  const cHolidaySpecial = count(["วันหยุดพิเศษ"]);
+  const cVacation       = count(["ลาพักร้อน"],"4")*0.5+count(["ลาพักร้อน"],"0")*1;
+  const cSickDoctor     = count(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"4")*0.5+count(["ลาป่วยแพทย์(เขียนใบสอบสวน)"],"0")*1;
+  const cBusinessExtra  = count(["ลากิจพิเศษ"],"4")*0.5+count(["ลากิจพิเศษ"],"0")*1;
+  const cSick           = count(["ลาป่วย"],"4")*0.5+count(["ลาป่วย"],"0")*1;
+  const cBusiness       = count(["ลากิจ"],"4")*0.5+count(["ลากิจ"],"0")*1;
+  const cAbsent         = count(["ขาดงาน"]);
+  const cHoliday        = count(["วันหยุด"]);
   const salaryPay=cNormalday * S.DAILY_WAGE;
   const ot1Pay=S.HOURLY_WAGE*S.OT_RATE_1*ot1Hour;
   const ot15Pay=S.HOURLY_WAGE*S.OT_RATE_15*ot15Hours;
@@ -7823,21 +7907,104 @@ function calculate(){
   const nightFoodPay=nightShiftDays*S.FOOD_NIGHT_FEE;
   const otFoodPay=otFoodDays*S.FOOD_OT_FEE;
   const forcedOtPay=Math.floor((S.HOURLY_WAGE * S.OT_RATE_15)*0.17);
-  const skillDays = [...rows].filter(row => num(row.querySelector(".skillDailyValue")?.value) === 1).length;
+  const skillDays = days.filter(day => day.skill).length;
   const skillPay  = skillDays * S.SKILL_FEE;
-  const mentorPay=document.getElementById("mentorCheck").checked ? S.MENTOR_FEE : 0 ;
+  const mentorPay=S.mentor ? S.MENTOR_FEE : 0 ;
   const holidayspecialPay=cHolidaySpecial*(S.DAILY_WAGE+forcedOtPay)
   const vacationPay=cVacation*(S.DAILY_WAGE+forcedOtPay)
   const sickdocterPay=cSickDoctor*(S.DAILY_WAGE+forcedOtPay)
   const businessextraPay=cBusinessExtra*(S.DAILY_WAGE+forcedOtPay)
-  const incentive1Pay = num(document.getElementById("incentive1").value);
-  const incentive2Pay = num(document.getElementById("incentive2").value);
+  const incentive1Pay = S.incentive1;
+  const incentive2Pay = S.incentive2;
   const totalIncome=salaryPay+ot1Pay+ot15Pay+ot2Pay+ot3Pay+
     nightShiftPay+nightFoodPay+otFoodPay+skillPay+mentorPay+
     holidayspecialPay+vacationPay+sickdocterPay+businessextraPay+
     incentive1Pay+incentive2Pay;
   const socialSecurity = round((salaryPay + holidayspecialPay + vacationPay + sickdocterPay + businessextraPay) * S.SOCIAL_SECURITY_RATE,0);
   const netPay=totalIncome-socialSecurity;
+
+  return {
+    settings: S,
+    counts: { workDays, cNormalday, cHolidaySpecial, cVacation, cSickDoctor, cBusinessExtra, cSick, cBusiness, cAbsent, cHoliday, nightShiftDays, otFoodDays, skillDays },
+    hours: { workHours, ot1Hour, ot15Hours, ot2Hours, ot3Hours, totalOtHours },
+    income: { salaryPay, ot1Pay, ot15Pay, ot2Pay, ot3Pay, nightShiftPay, nightFoodPay, otFoodPay, forcedOtPay, skillPay, mentorPay, holidayspecialPay, vacationPay, sickdocterPay, businessextraPay, incentive1Pay, incentive2Pay },
+    deductions: { socialSecurity },
+    totals: { totalIncome, netPay }
+  };
+}
+
+function runPayrollRegressionTests(){
+  const baseSettings={
+    DAILY_WAGE:447, HOURLY_WAGE:55.875,
+    OT_RATE_1:1, OT_RATE_15:1.5, OT_RATE_2:2, OT_RATE_3:3,
+    NIGHT_SHIFT_FEE:140, FOOD_NIGHT_FEE:70, FOOD_OT_FEE:45,
+    SKILL_FEE:20, MENTOR_FEE:200,
+    SOCIAL_SECURITY_PERCENT:5, SOCIAL_SECURITY_RATE:0.05,
+    mentor:false, incentive1:0, incentive2:0
+  };
+  const day=(status,normalHours=0,otHours=0,shift="เช้า",skill=false)=>({
+    date:"2026-08-01", status, shift, normalHours,
+    normalHoursRaw:String(normalHours), otHours, skill
+  });
+  const data=(days,settings={})=>({settings:{...baseSettings,...settings},days});
+  const cases=[
+    ["วันทำงาน 8 ชั่วโมง ไม่มี OT",data([day("วันทำงาน",8)]),{"counts.cNormalday":1,"income.salaryPay":447,"deductions.socialSecurity":22,"totals.netPay":425}],
+    ["วันทำงาน + OT 0.17",data([day("วันทำงาน",8,0.17)]),{"hours.ot15Hours":0.17,"counts.otFoodDays":0,"income.ot15Pay":14.248125,"totals.netPay":439.248125}],
+    ["วันทำงาน + OT 2.51",data([day("วันทำงาน",8,2.51)]),{"hours.ot15Hours":2.51,"counts.otFoodDays":1,"income.ot15Pay":210.369375,"totals.netPay":680.369375}],
+    ["วันทำงาน + OT 4.51",data([day("วันทำงาน",8,4.51)]),{"hours.ot15Hours":4.51,"counts.otFoodDays":1,"income.ot15Pay":377.994375,"totals.netPay":847.994375}],
+    ["วันทำงานกะดึก",data([day("วันทำงาน",8,0,"ดึก")]),{"counts.nightShiftDays":1,"income.nightShiftPay":140,"income.nightFoodPay":70,"totals.netPay":635}],
+    ["วันหยุด Normal + OT",data([day("วันหยุด",8,2.51)]),{"hours.ot2Hours":8,"hours.ot3Hours":2.51,"income.ot2Pay":894,"income.ot3Pay":420.73875,"totals.netPay":1359.73875}],
+    ["วันหยุดพิเศษ",data([day("วันหยุดพิเศษ",8)]),{"counts.cHolidaySpecial":1,"hours.ot1Hour":8,"income.holidayspecialPay":461,"deductions.socialSecurity":23,"totals.netPay":885}],
+    ["ลาพักร้อนเต็มวัน",data([day("ลาพักร้อน",0)]),{"counts.cVacation":1,"income.vacationPay":461,"deductions.socialSecurity":23,"totals.netPay":438}],
+    ["ลาพักร้อนครึ่งวัน",data([day("ลาพักร้อน",4)]),{"counts.cNormalday":0.5,"counts.cVacation":0.5,"income.salaryPay":223.5,"income.vacationPay":230.5,"totals.netPay":431}],
+    ["ลาป่วย",data([day("ลาป่วย",0)]),{"counts.cSick":1,"totals.totalIncome":0,"totals.netPay":0}],
+    ["ลาป่วยแพทย์",data([day("ลาป่วยแพทย์(เขียนใบสอบสวน)",0)]),{"counts.cSickDoctor":1,"income.sickdocterPay":461,"deductions.socialSecurity":23,"totals.netPay":438}],
+    ["ลากิจ",data([day("ลากิจ",0)]),{"counts.cBusiness":1,"totals.totalIncome":0,"totals.netPay":0}],
+    ["ลากิจพิเศษ",data([day("ลากิจพิเศษ",0)]),{"counts.cBusinessExtra":1,"income.businessextraPay":461,"deductions.socialSecurity":23,"totals.netPay":438}],
+    ["ขาดงาน",data([day("ขาดงาน",0)]),{"counts.cAbsent":1,"totals.totalIncome":0,"totals.netPay":0}],
+    ["Skill",data([day("วันทำงาน",8,0,"เช้า",true)]),{"counts.skillDays":1,"income.skillPay":20,"totals.netPay":445}],
+    ["Mentor",data([],{mentor:true}),{"income.mentorPay":200,"totals.totalIncome":200,"totals.netPay":200}],
+    ["Incentive 1",data([],{incentive1:123.45}),{"income.incentive1Pay":123.45,"totals.totalIncome":123.45,"totals.netPay":123.45}],
+    ["Incentive 2",data([],{incentive2:67.89}),{"income.incentive2Pay":67.89,"totals.totalIncome":67.89,"totals.netPay":67.89}],
+    ["Social Security",data([day("วันทำงาน",8)],{SOCIAL_SECURITY_PERCENT:7.25,SOCIAL_SECURITY_RATE:0.0725}),{"deductions.socialSecurity":32,"totals.totalIncome":447,"totals.netPay":415}],
+    ["Combination หลายวันในหนึ่งงวด",data([
+      day("วันทำงาน",8,2.51,"ดึก",true), day("วันหยุด",8,4.51),
+      day("วันหยุดพิเศษ",8,0.17,"ดึก"), day("ลาพักร้อน",4),
+      day("ลาป่วยแพทย์(เขียนใบสอบสวน)",0), day("ลากิจพิเศษ",0),
+      day("ขาดงาน",0)
+    ],{mentor:true,incentive1:100,incentive2:200}),{"counts.nightShiftDays":2,"counts.otFoodDays":2,"hours.totalOtHours":23.19,"income.forcedOtPay":14,"deductions.socialSecurity":114,"totals.netPay":5535.854375}]
+  ];
+  const read=(object,path)=>path.split(".").reduce((value,key)=>value[key],object);
+  const equal=(actual,expected)=>typeof expected==="number"
+    ? Math.abs(actual-expected)<1e-9
+    : actual===expected;
+  let passed=0;
+  console.group("Payroll Regression Tests");
+  cases.forEach(([name,input,expected],index)=>{
+    const actual=calculatePayroll(input);
+    const failures=Object.entries(expected).filter(([path,value])=>!equal(read(actual,path),value));
+    if(failures.length===0){
+      passed++;
+      return;
+    }
+    console.error(`Test ${index+1} failed: ${name}`,failures.map(([path,value])=>({path,expected:value,actual:read(actual,path)})));
+  });
+  console.log(`${passed}/${cases.length} passed`);
+  console.groupEnd();
+  return {passed,total:cases.length};
+}
+
+runPayrollRegressionTests();
+
+// UI adapter: renders only the result returned by the payroll engine.
+function calculate(data=getPayrollData()){
+  const result=calculatePayroll(data);
+  const S=result.settings;
+  const { cNormalday, cHolidaySpecial, cVacation, cSickDoctor, cBusinessExtra, nightShiftDays, otFoodDays, skillDays }=result.counts;
+  const { ot1Hour, ot15Hours, ot2Hours, ot3Hours, totalOtHours }=result.hours;
+  const { salaryPay, ot1Pay, ot15Pay, ot2Pay, ot3Pay, nightShiftPay, nightFoodPay, otFoodPay, skillPay, mentorPay, holidayspecialPay, vacationPay, sickdocterPay, businessextraPay, incentive1Pay, incentive2Pay }=result.income;
+  const { socialSecurity }=result.deductions;
+  const { totalIncome, netPay }=result.totals;
   
 
   if (periodSummaryQuick) {
