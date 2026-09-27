@@ -271,7 +271,7 @@ function updateBadge(card) {
 
     const s = statusEl.value.trim();
 
-    // 1. ล้างคลาสสีเดิมออกให้หมดก่อน 
+    // 1. ล้างคลาสสีเดิมออกให้หมดก่อน
     b.classList.remove("badge-normal","badge-work", "badge-holiday", "badge-leave", "badge-absent");
 
     if (!s) {
@@ -280,23 +280,23 @@ function updateBadge(card) {
         return;
     }
 
-    // 2. ตรวจสอบเงื่อนไขและใส่สีตามที่กำหนดไว้ใน CSS 
+    // 2. ตรวจสอบเงื่อนไขและใส่สีตามที่กำหนดไว้ใน CSS
     if (s === "ขาดงาน") {
-        b.classList.add("badge-absent"); // สีแดง 
-    } 
+        b.classList.add("badge-absent"); // สีแดง
+    }
     else if (s.includes("หยุด")) {
-        b.classList.add("badge-holiday"); // สีเทา 
-    } 
+        b.classList.add("badge-holiday"); // สีเทา
+    }
     else if (s.includes("ลา") || s.includes("ป่วย")) {
-        b.classList.add("badge-leave"); // สีส้ม 
-    } 
+        b.classList.add("badge-leave"); // สีส้ม
+    }
     else if (s === "วันทำงาน") {
-        b.classList.add("badge-work"); // สีเขียวสำหรับ "วันทำงาน" 
+        b.classList.add("badge-work"); // สีเขียวสำหรับ "วันทำงาน"
     }
     else {
         b.classList.add("badge-normal");
     }
-    b.textContent = s; // อัปเดตข้อความในป้าย 
+    b.textContent = s; // อัปเดตข้อความในป้าย
 }
 
 function createCard(date, saved) {
@@ -357,10 +357,10 @@ function createCard(date, saved) {
         </select>
       </div>
     </div>
-    
-    
+
+
   `;
-  
+
   container.appendChild(card);
 
   // --- กำหนดค่าเริ่มต้น (Load Saved Data) ---
@@ -384,8 +384,8 @@ function createCard(date, saved) {
       el.onchange = () => {
           if (el === statusSelect) syncCardControls(card, true);
           updateBadge(card);
-          saveCards();      
-        
+          saveCards();
+
           // อัปเดตสีบนปฏิทินทันที
           const cell = document.querySelector(`.day-cell[data-date="${card.dataset.date}"]`);
           if (cell) {
@@ -396,17 +396,17 @@ function createCard(date, saved) {
               }));
               // ล้างคลาสทั้งหมดก่อน
               cell.classList.remove("day-normal","day-work", "day-holiday", "day-leave", "day-absent", "shift-morning", "shift-night");
-            
+
               //  ใส่คลาสสถานะ (จุดซ้าย)
               const sClass = getStatusClass(statusSelect.value);
               if (sClass) cell.classList.add(sClass);
-            
+
               // ใส่คลาสประจำกะ (จุดขวา)
               const shClass = getShiftClass(shiftSelect.value);
               if (shClass) cell.classList.add(shClass);
           }
 
-          renderSummary(); 
+          renderSummary();
       };
   });
 }
@@ -454,7 +454,7 @@ function getCalendarDayLabel(date, dayData) {
     if (dayData?.status) details.push(dayData.status);
     if (dayData?.shift) details.push(`กะ${dayData.shift}`);
     const suffix = details.length ? `, ${details.join(", ")}` : ", ยังไม่ได้เลือกสถานะ";
-    return `${daysTH[date.getDay()]}ที่ ${date.getDate()} ${suffix}`;
+    return `${formatThaiFullDate(date)}${suffix}`;
 }
 
 function setActiveCalendarCell(cell = null) {
@@ -478,17 +478,17 @@ function renderCalendar() {
 
     const y = +yearSelect.value;
     const m = +monthSelect.value;
-    
+
     // ขอบเขตวันที่: 16 เดือนที่แล้ว ถึง 15 เดือนนี้
     const start = new Date(y, m - 1, 16);
     const end = new Date(y, m, 15);
 
     // 1. สร้างช่องว่าง (Blank) ของแถวแรก
     // หาว่าวันที่ 16 (วันเริ่มวิก) ตรงกับวันอะไร (0=อาทิตย์, 6=เสาร์)
-    const firstDayType = start.getDay(); 
+    const firstDayType = start.getDay();
     for (let i = 0; i < firstDayType; i++) {
         const blank = document.createElement("div");
-        blank.className = "day-cell-blank"; 
+        blank.className = "day-cell-blank";
         calendarEl.appendChild(blank);
     }
 
@@ -506,6 +506,7 @@ function renderCalendar() {
         cell.textContent = d.getDate();
         cell.dataset.date = key;
         cell.setAttribute("aria-expanded", "false");
+        if (key === formatLocalDate(new Date())) cell.setAttribute("aria-current", "date");
 
         // แสดงสถานะทั้งทางภาพและข้อความสำหรับ screen reader
         const dayData = savedDataList.find(x => x.date === key);
@@ -513,7 +514,7 @@ function renderCalendar() {
         if (dayData) {
             const sClass = getStatusClass(dayData.status);
             if (sClass) cell.classList.add(sClass);
-            
+
             const shClass = getShiftClass(dayData.shift);
             if (shClass) cell.classList.add(shClass);
         }
@@ -597,12 +598,12 @@ function toggleInline(cell) {
     }
 
     /* 2. กรณีเลือกวันใหม่ (ไม่ว่าจะแถวเดิมหรือคนละแถว) */
-    
+
     // เก็บสถานะว่าเป็นการเปลี่ยนในแถวเดิมหรือไม่ก่อนจะลบอะไร
     const isSameRow = expandRow && expandRow.dataset.rowIndex == rowIndex;
 
     setActiveCalendarCell(cell);
-    
+
     selectedDate = dateKey;
     activeCell = cell;
 
@@ -621,7 +622,7 @@ function toggleInline(cell) {
         }
     } else {
         /* --- กรณีคนละแถว: ปิดของเก่า (ทันที) แล้วเปิดของใหม่ (สไลด์ลง) --- */
-        removeExpand(true); 
+        removeExpand(true);
 
         expandRow = document.createElement("div");
         expandRow.className = "calendar-expand";
@@ -667,7 +668,7 @@ function removeExpand(immediate = false) {
         // หากต้องการสไลด์ปิดให้ใช้ slideClose ที่ส่งให้ก่อนหน้า
         slideClose(expandRow).then(cleanupLogic);
     }
-    
+
     // ลบบรรทัดที่สั่งลบ .active ทิ้งไป (เราจะไปลบใน toggleInline แทน)
 }
 // Settings
@@ -746,7 +747,7 @@ function calculate(data=getPayrollData()){
   const { salaryPay, ot1Pay, ot15Pay, ot2Pay, ot3Pay, nightShiftPay, nightFoodPay, otFoodPay, skillPay, mentorPay, holidayspecialPay, vacationPay, sickdocterPay, businessextraPay, incentive1Pay, incentive2Pay }=result.income;
   const { socialSecurity }=result.deductions;
   const { totalIncome, netPay }=result.totals;
-  
+
 
   if (periodSummaryQuick) {
     periodSummaryQuick.innerHTML = `
@@ -870,7 +871,7 @@ function calculate(data=getPayrollData()){
         <div class="summary-item summary-deduct">
           <span class="summary-label">ประกันสังคม</span>
           <span class="summary-qty">${format2(S.SOCIAL_SECURITY_PERCENT)}%</span>
-          <span class="summary-money">-${format2(socialSecurity)} บาท</span>
+          <span class="summary-money">${socialSecurity > 0 ? "-" : ""}${format2(socialSecurity)} บาท</span>
         </div>
         <div class="summary-item summary-net">
           <span class="summary-label"><b>สุทธิ</b></span>
@@ -887,7 +888,7 @@ function calculate(data=getPayrollData()){
 function saveSettings() {
     const y = yearSelect.value;
     const m = monthSelect.value;
-    
+
     const settings = {
         mentor: document.getElementById("mentorCheck").checked,
         dailyWage: dailyInput.value,
@@ -898,7 +899,7 @@ function saveSettings() {
         incentive1: document.getElementById("incentive1").value,
         incentive2: document.getElementById("incentive2").value
     };
-    
+
     // บันทึกแยกรายเดือน
     localStorage.setItem(`settings-${y}-${m}`, JSON.stringify(settings));
     // บันทึกว่าเปิดหน้าไหนล่าสุด
@@ -996,11 +997,11 @@ document.getElementById("mentorCheck").onchange = () => { saveSettings(); render
 /* ===== ปรับปรุงระบบหุบการ์ดเมื่อคลิกด้านนอก ===== */
 document.addEventListener("click", function(event) {
     if (!expandRow) return; // ถ้าไม่มีการ์ดเปิดอยู่ ไม่ต้องทำอะไร
-    
+
     // ตรวจสอบว่าจุดที่คลิก อยู่นอกปฏิทิน และ อยู่นอกการ์ดที่กำลังกางอยู่หรือไม่
     const isClickInsideCalendar = calendarEl.contains(event.target);
     const isClickInsideCard = expandRow.contains(event.target);
-    
+
     if (!isClickInsideCalendar && !isClickInsideCard) {
         slideClose(expandRow).then(() => {
             removeExpand(true);
@@ -1100,8 +1101,8 @@ function initApp() {
     yearSelect.value = String(initialYear);
 
     // 4. โหลดข้อมูลและแสดงผล
-    loadSettings(); 
-    renderMonth(); 
+    loadSettings();
+    renderMonth();
 }
 
 // เรียกใช้เพียงครั้งเดียวที่บรรทัดสุดท้าย
