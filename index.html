@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./styles.css?v=21">
+<link rel="stylesheet" href="./styles.css?v=22">
 </head>
 
 <body>
@@ -259,10 +259,10 @@
 <section class="backup-card" aria-label="ส่งออก สำรอง และกู้คืนข้อมูล">
   <h2 class="backup-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-download"></use></svg>ส่งออกและสำรองข้อมูล</h2>
   <div class="backup-copy">
-    ส่งออกงวดปัจจุบันเป็นไฟล์ Excel สำหรับเปิดใน Google Sheets หรือสำรองข้อมูลทุกงวดเป็น JSON ข้อมูลจะไม่ถูกส่งขึ้นเซิร์ฟเวอร์
+    ดาวน์โหลดรายละเอียดงวดปัจจุบัน เปิดได้ทั้ง Microsoft Excel และ Google Sheets หรือสำรองข้อมูลทุกงวดเป็น JSON ข้อมูลจะไม่ถูกส่งขึ้นเซิร์ฟเวอร์
   </div>
   <div class="backup-actions">
-    <button type="button" id="exportSheetBtn" class="backup-button backup-button-primary backup-button-sheet">ส่งออก Google Sheets (.xlsx)</button>
+    <button type="button" id="exportSheetBtn" class="backup-button backup-button-primary backup-button-sheet">ส่งออกไฟล์ Excel (.xlsx)</button>
     <button type="button" id="exportDataBtn" class="backup-button">สำรอง JSON</button>
     <button type="button" id="importDataBtn" class="backup-button">นำเข้า JSON</button>
     <input type="file" id="importDataFile" accept="application/json,.json" hidden>
@@ -277,10 +277,10 @@
   </div>
 </section>
 
-<script src="./payroll-engine.js?v=21"></script>
-<script src="./storage-transfer.js?v=21"></script>
-<script src="./sheet-export.js?v=21"></script>
-<script src="./app.js?v=21"></script>
+<script src="./payroll-engine.js?v=22"></script>
+<script src="./storage-transfer.js?v=22"></script>
+<script src="./sheet-export.js?v=22"></script>
+<script src="./app.js?v=22"></script>
 
 </body>
 </html>
