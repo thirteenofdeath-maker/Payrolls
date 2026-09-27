@@ -52,7 +52,7 @@ test("นำเข้าทดแทนเฉพาะข้อมูล Payroll
 
   assert.equal(result.restoredKeys, 1);
   assert.equal(storage.getItem("payroll-2026-8"), null);
-  assert.equal(storage.getItem("payroll-2026-9"), "new");
+  assert.equal(storage.getItem("payroll-2026-9"), "[]");
   assert.equal(storage.getItem("unrelatedApp"), "untouched");
 });
 
