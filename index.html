@@ -7617,6 +7617,32 @@ select option { background:var(--time-surface); color:var(--time-text); }
   outline-offset:2px !important;
   border-color:var(--time-accent) !important;
 }
+
+/* Collapsed panels and calendar heading: override child colors left by legacy themes. */
+.collapse-toggle .collapse-text,
+.input-collapse-toggle .collapse-text,
+.summary-collapse-toggle .collapse-text {
+  color:var(--time-text) !important;
+  font-size:14px !important;
+}
+.collapse-toggle .collapse-state,
+.input-collapse-toggle .collapse-state,
+.summary-collapse-toggle .collapse-state {
+  background:var(--time-panel) !important;
+  border:1px solid var(--time-line) !important;
+  color:var(--time-text) !important;
+}
+.collapse-toggle[aria-expanded="false"] .collapse-state,
+.input-collapse-toggle[aria-expanded="false"] .collapse-state,
+.summary-collapse-toggle[aria-expanded="false"] .collapse-state {
+  background:var(--time-accent) !important;
+  border-color:var(--time-accent) !important;
+  color:var(--time-on-accent) !important;
+}
+.calendar .weekdays {
+  border:1px solid var(--time-line) !important;
+  box-shadow:none !important;
+}
 </style>
 </head>
 
