@@ -7334,6 +7334,98 @@ body {
 .period-nav-btn .oh-icon { width: 25px; height: 25px; stroke-width: 2.2; }
 .nav-symbol { display: inline-flex !important; align-items: center; justify-content: center; }
 
+/* Our Home period picker: one calm control instead of nested form boxes */
+.period-switcher {
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) 46px !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+.period-controls {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.35fr) minmax(90px, .85fr) !important;
+  gap: 0 !important;
+  padding: 6px !important;
+  background: #FFF9F0 !important;
+  border: 1px solid var(--home-line) !important;
+  border-radius: 22px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82) !important;
+}
+.period-controls .field-card {
+  position: relative !important;
+  min-width: 0 !important;
+  padding: 7px 34px 7px 12px !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 15px !important;
+  box-shadow: none !important;
+}
+.period-controls .field-card:first-child {
+  border-right: 1px solid var(--home-line) !important;
+  border-radius: 15px 0 0 15px !important;
+}
+.period-controls .field-card::after {
+  content: "" !important;
+  position: absolute !important;
+  right: 14px !important;
+  bottom: 19px !important;
+  width: 7px !important;
+  height: 7px !important;
+  border: 0 !important;
+  border-right: 1.8px solid var(--home-sage) !important;
+  border-bottom: 1.8px solid var(--home-sage) !important;
+  transform: rotate(45deg) !important;
+  pointer-events: none !important;
+}
+.period-controls .field-card > span {
+  margin: 0 0 1px !important;
+  color: var(--home-muted) !important;
+  font-size: 10.5px !important;
+  font-weight: 650 !important;
+  line-height: 1.2 !important;
+}
+.period-controls select,
+#monthSelect,
+#yearSelect {
+  width: 100% !important;
+  min-height: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--home-text) !important;
+  font-size: 16px !important;
+  font-weight: 750 !important;
+  line-height: 30px !important;
+  text-align: left !important;
+  box-shadow: none !important;
+}
+.period-controls select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--home-sage) 46%, transparent) !important;
+  outline-offset: 3px !important;
+  border-radius: 7px !important;
+}
+.period-nav-btn {
+  border: 1px solid color-mix(in srgb, var(--home-sage) 18%, var(--home-line)) !important;
+  background: var(--home-sage-soft) !important;
+  color: var(--home-sage) !important;
+  box-shadow: 0 5px 12px rgba(82,104,67,.08) !important;
+}
+.period-nav-btn .nav-symbol,
+.period-nav-btn .oh-icon {
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--home-sage) !important;
+}
+.period-nav-btn:hover,
+.period-nav-btn:focus-visible {
+  background: color-mix(in srgb, var(--home-sage-soft) 76%, white) !important;
+  border-color: color-mix(in srgb, var(--home-sage) 32%, var(--home-line)) !important;
+}
+
 @media (max-width: 420px) {
   .app-header { padding: 14px 15px !important; }
   .app-header-right { display:flex !important; }
@@ -7341,7 +7433,11 @@ body {
   .clock-date { font-size: 9px !important; }
   .clock-time { font-size: 19px !important; }
   .period-section { padding: 13px !important; }
+  .period-switcher { grid-template-columns: 42px minmax(0, 1fr) 42px !important; gap: 8px !important; }
   .period-nav-btn { flex-basis: 42px !important; width: 42px !important; min-width: 42px !important; height: 42px !important; min-height: 42px !important; }
+  .period-controls .field-card { padding-right: 28px !important; padding-left: 10px !important; }
+  .period-controls .field-card::after { right: 11px !important; }
+  .period-controls select, #monthSelect, #yearSelect { font-size: 15px !important; }
 }
 </style>
 </head>
