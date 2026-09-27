@@ -807,7 +807,7 @@ function calculate(data=getPayrollData()){
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมชั่วโมงโอที</b></span>
           <span class="summary-qty"><b>${format2(totalOtHours)} ชม.</b></span>
-          <span class="summary-money">-</span>
+          <span class="summary-money" aria-hidden="true"></span>
         </div>
         <div class="summary-item">
           <span class="summary-label">โอที 1 แรง</span>
@@ -873,7 +873,7 @@ function calculate(data=getPayrollData()){
         <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg>รวมและรายการหัก</h3>
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมรายได้</b></span>
-          <span class="summary-qty">-</span>
+          <span class="summary-qty" aria-hidden="true"></span>
           <span class="summary-money">${format2(totalIncome)} บาท</span>
         </div>
         <div class="summary-item summary-deduct">
@@ -883,7 +883,7 @@ function calculate(data=getPayrollData()){
         </div>
         <div class="summary-item summary-net">
           <span class="summary-label"><b>สุทธิ</b></span>
-          <span class="summary-qty">-</span>
+          <span class="summary-qty" aria-hidden="true"></span>
           <span class="summary-money">${format2(netPay)} บาท</span>
         </div>
       </section>
