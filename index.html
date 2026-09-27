@@ -8,9 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="เงินเดือนคร่าวๆ">
 <meta name="description" content="เว็บแอปคำนวณเงินเดือนแบบไม่เป็นทางการ ใช้ประเมินรายงวดเท่านั้น">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#6F835E">
 <link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
+<link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <style>
 /* 1. Global Setup */
@@ -7387,10 +7388,11 @@ body {
 .period-controls select,
 #monthSelect,
 #yearSelect {
-  width: 100% !important;
+  width: calc(100% + 34px) !important;
   min-height: 30px !important;
   height: 30px !important;
-  padding: 0 !important;
+  margin-right: -34px !important;
+  padding: 0 34px 0 0 !important;
   appearance: none !important;
   -webkit-appearance: none !important;
   background: transparent !important;
@@ -7437,7 +7439,12 @@ body {
   .period-nav-btn { flex-basis: 42px !important; width: 42px !important; min-width: 42px !important; height: 42px !important; min-height: 42px !important; }
   .period-controls .field-card { padding-right: 28px !important; padding-left: 10px !important; }
   .period-controls .field-card::after { right: 11px !important; }
-  .period-controls select, #monthSelect, #yearSelect { font-size: 15px !important; }
+  .period-controls select, #monthSelect, #yearSelect {
+    width: calc(100% + 28px) !important;
+    margin-right: -28px !important;
+    padding-right: 28px !important;
+    font-size: 15px !important;
+  }
 }
 </style>
 </head>
