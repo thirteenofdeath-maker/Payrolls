@@ -110,11 +110,24 @@
             <div>พ</div><div>พฤ</div><div>ศ</div><div>ส</div>
           </div>
           <div class="days" id="calendarDays"></div>
-          <div class="calendar-legend" aria-label="คำอธิบายสัญลักษณ์">
-            <span class="legend-item"><i class="legend-dot legend-work"></i>ทำงาน</span>
-            <span class="legend-item"><i class="legend-dot legend-leave"></i>ลา</span>
-            <span class="legend-item"><i class="legend-dot legend-absent"></i>ขาดงาน</span>
-            <span class="legend-item"><i class="legend-dot legend-shift"></i>กะดึก</span>
+          <div class="calendar-legend" aria-label="คำอธิบายสถานะวันและกะทำงาน">
+            <div class="legend-group">
+              <strong class="legend-title">สถานะวัน</strong>
+              <div class="legend-items">
+                <span class="legend-item"><i class="legend-dot legend-work" aria-hidden="true"></i>ทำงาน</span>
+                <span class="legend-item"><i class="legend-dot legend-holiday" aria-hidden="true"></i>วันหยุด</span>
+                <span class="legend-item"><i class="legend-dot legend-leave" aria-hidden="true"></i>ลา</span>
+                <span class="legend-item"><i class="legend-dot legend-absent" aria-hidden="true"></i>ขาดงาน</span>
+              </div>
+              <small class="legend-note">วันหยุดรวมวันหยุดพิเศษ · ลารวมพักร้อน ป่วย และลากิจ</small>
+            </div>
+            <div class="legend-group">
+              <strong class="legend-title">กะทำงาน</strong>
+              <div class="legend-items">
+                <span class="legend-item"><i class="legend-dot legend-morning" aria-hidden="true"></i>กะเช้า</span>
+                <span class="legend-item"><i class="legend-dot legend-night" aria-hidden="true"></i>กะดึก</span>
+              </div>
+            </div>
           </div>
         </div>
         <div id="cardContainer"></div>
