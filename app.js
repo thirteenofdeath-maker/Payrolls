@@ -125,7 +125,7 @@ function setPanelCollapsed(panel, collapsed, immediate = false) {
   panel.style.overflow = "hidden";
   panel.style.willChange = "max-height, opacity, transform";
 
-  if (immediate) {
+  if (immediate || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     panel.hidden = collapsed;
     panel.style.maxHeight = collapsed ? "0px" : "none";
     panel.style.opacity = collapsed ? "0" : "1";
@@ -524,7 +524,14 @@ function renderCalendar() {
 }
 
 function slideOpen(element) {
-  element.animate([
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    element.style.maxHeight = "none";
+    element.style.opacity = "1";
+    element.style.transform = "none";
+    return Promise.resolve();
+  }
+
+  return element.animate([
     {
       maxHeight: "0px",
       opacity: 0,
@@ -543,6 +550,12 @@ function slideOpen(element) {
 }
 
 function slideClose(element) {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    element.style.maxHeight = "0";
+    element.style.opacity = "0";
+    return Promise.resolve();
+  }
+
   return element.animate([
     {
       maxHeight: "500px",
@@ -752,7 +765,7 @@ function calculate(data=getPayrollData()){
   <div class="summary-panel">
     <div id="summaryCategoryList" class="summary-grid">
       <section class="summary-card">
-        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>รายได้หลัก</div>
+        <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>รายได้หลัก</h3>
         <div class="summary-item">
           <span class="summary-label">วันทำงาน</span>
           <span class="summary-qty">${format2(cNormalday)} วัน</span>
@@ -781,7 +794,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card">
-        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-timer"></use></svg>โอที</div>
+        <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-timer"></use></svg>โอที</h3>
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมชั่วโมงโอที</b></span>
           <span class="summary-qty"><b>${format2(totalOtHours)} ชม.</b></span>
@@ -810,7 +823,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card">
-        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>ค่ากะ / ค่าอาหาร</div>
+        <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>ค่ากะ / ค่าอาหาร</h3>
         <div class="summary-item">
           <span class="summary-label">ค่ากะดึก</span>
           <span class="summary-qty">${format2(nightShiftDays)} วัน</span>
@@ -829,7 +842,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card">
-        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg>ค่าพิเศษ</div>
+        <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg>ค่าพิเศษ</h3>
         <div class="summary-item">
           <span class="summary-label">ค่าทักษะ</span>
           <span class="summary-qty">${format2(skillDays)} วัน</span>
@@ -848,7 +861,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card full">
-        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg>รวมและรายการหัก</div>
+        <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg>รวมและรายการหัก</h3>
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมรายได้</b></span>
           <span class="summary-qty">-</span>
