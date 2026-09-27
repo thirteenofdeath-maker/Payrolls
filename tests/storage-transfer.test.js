@@ -40,19 +40,19 @@ test("สำรองเฉพาะข้อมูลของแอป", () =>
 
 test("นำเข้าทดแทนเฉพาะข้อมูล Payrolls", () => {
   const storage = new MemoryStorage({
-    "payroll-old": "old",
+    "payroll-2026-8": "[]",
     unrelatedApp: "untouched"
   });
   const result = restoreBackup(storage, {
     app: "payroll-estimator",
     schemaVersion: 1,
     exportedAt: "2026-09-27T12:00:00.000Z",
-    data: { "payroll-new": "new" }
+    data: { "payroll-2026-9": "[]" }
   });
 
   assert.equal(result.restoredKeys, 1);
-  assert.equal(storage.getItem("payroll-old"), null);
-  assert.equal(storage.getItem("payroll-new"), "new");
+  assert.equal(storage.getItem("payroll-2026-8"), null);
+  assert.equal(storage.getItem("payroll-2026-9"), "[]");
   assert.equal(storage.getItem("unrelatedApp"), "untouched");
 });
 
@@ -91,7 +91,7 @@ test("คืนข้อมูลเดิมเมื่อนำเข้า�
       this.failNextWrite = true;
     }
     setItem(key, value) {
-      if (this.failNextWrite && key === "payroll-new") {
+      if (this.failNextWrite && key === "payroll-2026-9") {
         this.failNextWrite = false;
         throw new Error("Quota exceeded");
       }
@@ -100,16 +100,40 @@ test("คืนข้อมูลเดิมเมื่อนำเข้า�
   }
 
   const storage = new FailingStorage({
-    "payroll-old": "original",
+    "payroll-2026-8": "original",
     unrelatedApp: "untouched"
   });
 
   assert.throws(() => restoreBackup(storage, {
     app: "payroll-estimator",
     schemaVersion: 1,
-    data: { "payroll-new": "new" }
+    data: { "payroll-2026-9": "[]" }
   }), /คืนข้อมูลเดิมให้แล้ว/);
-  assert.equal(storage.getItem("payroll-old"), "original");
-  assert.equal(storage.getItem("payroll-new"), null);
+  assert.equal(storage.getItem("payroll-2026-8"), "original");
+  assert.equal(storage.getItem("payroll-2026-9"), null);
   assert.equal(storage.getItem("unrelatedApp"), "untouched");
+});
+
+test("ปฏิเสธข้อมูลวันทำงานที่ JSON เสีย", () => {
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { "payroll-2026-8": "not-json" }
+  }), /วันทำงาน/);
+});
+
+test("ปฏิเสธข้อมูลวันทำงานที่ไม่มีวันที่ถูกต้อง", () => {
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { "payroll-2026-8": JSON.stringify([{ status: "วันทำงาน" }]) }
+  }), /วันทำงาน/);
+});
+
+test("ปฏิเสธการตั้งค่าที่ไม่ใช่ออบเจ็กต์", () => {
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { "settings-2026-8": "[]" }
+  }), /การตั้งค่า/);
 });
