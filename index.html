@@ -7643,6 +7643,59 @@ select option { background:var(--time-surface); color:var(--time-text); }
   border:1px solid var(--time-line) !important;
   box-shadow:none !important;
 }
+
+/* Content contrast: legacy themes style these children more specifically than
+   their current surfaces, so bind every visible level to the actual surface. */
+.input-panel .input-section .section-title,
+.input-panel .input-section.emphasis-section .section-title {
+  color:var(--time-text) !important;
+}
+.input-panel .input-section .section-icon {
+  background:color-mix(in srgb, var(--time-accent) 14%, var(--time-surface)) !important;
+  color:var(--time-accent) !important;
+}
+:is(html[data-daypart="night"], html[data-daypart="late-night"]) .input-section .field-card > span,
+:is(html[data-daypart="night"], html[data-daypart="late-night"]) .input-section .incentive-input-card > span,
+:is(html[data-daypart="night"], html[data-daypart="late-night"]) .input-section .social-card > span {
+  color:#4B5563 !important;
+}
+.summary-panel .summary-card,
+.summary-panel .summary-card.full {
+  background:var(--time-secondary) !important;
+  border-color:var(--time-line) !important;
+  color:var(--time-text) !important;
+}
+.summary-panel .summary-card .summary-heading {
+  color:var(--time-text) !important;
+}
+.summary-panel .summary-card .summary-item .summary-label,
+.summary-panel .summary-card .summary-item .summary-money {
+  color:var(--time-text) !important;
+}
+.summary-panel .summary-card .summary-item .summary-qty {
+  color:var(--time-muted) !important;
+}
+.summary-panel .summary-card .summary-item + .summary-item {
+  border-top:1px solid color-mix(in srgb, var(--time-line) 72%, transparent) !important;
+}
+.summary-panel .summary-card .summary-emphasis {
+  background:color-mix(in srgb, var(--time-accent) 8%, var(--time-secondary)) !important;
+}
+.summary-panel .summary-card .summary-deduct .summary-money {
+  color:#B4232E !important;
+}
+:is(html[data-daypart="night"], html[data-daypart="late-night"]) .summary-panel .summary-card .summary-deduct .summary-money {
+  color:#FF929C !important;
+}
+.summary-panel .summary-card .summary-net {
+  background:var(--time-accent) !important;
+  border-color:var(--time-accent) !important;
+}
+.summary-panel .summary-card .summary-net .summary-label,
+.summary-panel .summary-card .summary-net .summary-qty,
+.summary-panel .summary-card .summary-net .summary-money {
+  color:var(--time-on-accent) !important;
+}
 </style>
 </head>
 
