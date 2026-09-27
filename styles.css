@@ -410,12 +410,14 @@ input[readonly] {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-top: 12px;
+  margin-top: 0;
   padding: 15px 16px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-2);
 }
+
+.period-summary-quick + .period-switcher { margin-top: 14px; }
 
 .period-summary-quick > div { min-width: 0; }
 
