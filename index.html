@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./styles.css?v=25">
+<link rel="stylesheet" href="./styles.css?v=26">
 </head>
 
 <body>
@@ -75,6 +75,14 @@
         <span class="section-icon"><svg class="oh-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
         <span>งวดจ่าย</span>
       </h2>
+      <div id="periodSummaryQuick" class="period-summary-quick" aria-live="polite">
+        <div>
+          <span class="quick-label">ยอดสุทธิประจำงวด</span>
+          <span class="quick-period">--</span>
+          <strong>0.00 บาท</strong>
+        </div>
+        <span class="quick-unit" aria-hidden="true"></span>
+      </div>
       <div class="period-switcher">
         <button type="button" id="prevPeriodBtn" class="period-nav-btn period-nav-prev" data-icon="‹" aria-label="งวดก่อนหน้า">
           <span class="nav-symbol"><svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg></span>
@@ -94,14 +102,6 @@
           <span class="nav-symbol"><svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span>
           <span class="nav-label">ถัดไป</span>
         </button>
-      </div>
-      <div id="periodSummaryQuick" class="period-summary-quick" aria-live="polite">
-        <div>
-          <span class="quick-label">ยอดสุทธิประจำงวด</span>
-          <span class="quick-period">--</span>
-          <strong>0.00 บาท</strong>
-        </div>
-        <span class="quick-unit" aria-hidden="true"></span>
       </div>
       <div class="period-calendar-wrap">
         <div class="calendar" role="group" aria-label="ปฏิทินงวดเงินเดือน">
@@ -277,10 +277,10 @@
   </div>
 </section>
 
-<script src="./payroll-engine.js?v=25"></script>
-<script src="./storage-transfer.js?v=25"></script>
-<script src="./sheet-export.js?v=25"></script>
-<script src="./app.js?v=25"></script>
+<script src="./payroll-engine.js?v=26"></script>
+<script src="./storage-transfer.js?v=26"></script>
+<script src="./sheet-export.js?v=26"></script>
+<script src="./app.js?v=26"></script>
 
 </body>
 </html>
