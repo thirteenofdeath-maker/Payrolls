@@ -167,7 +167,7 @@
     add("กะและอาหาร", "ค่าอาหารกะดึก", counts.nightShiftDays, "วัน", settings.FOOD_NIGHT_FEE, income.nightFoodPay);
     add("กะและอาหาร", "ค่าอาหาร OT", counts.otFoodDays, "วัน", settings.FOOD_OT_FEE, income.otFoodPay);
     add("รายได้เพิ่มเติม", "ค่าทักษะ", counts.skillDays, "วัน", settings.SKILL_FEE, income.skillPay);
-    add("รายได้เพิ่มเติม", "ค่าครูฝึก", settings.mentor ? 1 : 0, "รายการ", settings.MENTOR_FEE, income.mentorPay);
+    add("รายได้เพิ่มเติม", "ค่าพี่เลี้ยง", settings.mentor ? 1 : 0, "รายการ", settings.MENTOR_FEE, income.mentorPay);
     add("รายได้เพิ่มเติม", "Incentive 1", income.incentive1Pay ? 1 : 0, "รายการ", income.incentive1Pay, income.incentive1Pay);
     add("รายได้เพิ่มเติม", "Incentive 2", income.incentive2Pay ? 1 : 0, "รายการ", income.incentive2Pay, income.incentive2Pay);
     rows.push({ cells: ["", "รวมรายได้", "", "", "", totals.totalIncome], styles: [4, 4, 4, 4, 4, 4] });
@@ -191,7 +191,7 @@
       ["กะและอาหาร", "ค่าอาหารกะดึก", s.FOOD_NIGHT_FEE, "บาท/วัน"],
       ["กะและอาหาร", "ค่าอาหาร OT", s.FOOD_OT_FEE, "บาท/วัน"],
       ["รายได้เพิ่มเติม", "ค่าทักษะ", s.SKILL_FEE, "บาท/วัน"],
-      ["รายได้เพิ่มเติม", "ค่าครูฝึก", s.MENTOR_FEE, "บาท/งวด"],
+      ["รายได้เพิ่มเติม", "ค่าพี่เลี้ยง", s.MENTOR_FEE, "บาท/งวด"],
       ["รายการหัก", "ประกันสังคม", s.SOCIAL_SECURITY_PERCENT, "%"]
     ];
     return [
