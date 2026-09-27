@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "payroll-estimator-";
-const CACHE_NAME = `${CACHE_PREFIX}v12`;
+const CACHE_NAME = `${CACHE_PREFIX}v13`;
 const APP_ASSETS = [
   "./",
   "./index.html",

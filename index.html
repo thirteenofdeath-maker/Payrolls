@@ -7573,6 +7573,50 @@ select option { background:var(--time-surface); color:var(--time-text); }
   background:color-mix(in srgb, var(--time-accent) 22%, var(--time-surface)) !important;
   border-color:color-mix(in srgb, var(--time-accent) 42%, var(--time-line)) !important;
 }
+
+/* Daily editor: keep the real, rendered controls readable in every daypart.
+   These selectors intentionally outrank older theme layers in this single-file app. */
+.calendar .calendar-expand {
+  background:var(--time-secondary) !important;
+  border:1px solid var(--time-line) !important;
+  box-shadow:none !important;
+}
+.calendar-expand .card {
+  background:var(--time-secondary) !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+.calendar-expand .card .card-header,
+.calendar-expand .card .card-date {
+  color:var(--time-text) !important;
+}
+.calendar-expand .card .card-header {
+  border-bottom:1px solid var(--time-line) !important;
+}
+.calendar-expand .card .card-body .row {
+  background:color-mix(in srgb, var(--time-surface) 82%, var(--time-panel)) !important;
+  border:1px solid color-mix(in srgb, var(--time-line) 72%, transparent) !important;
+  box-shadow:none !important;
+}
+.calendar-expand .card .card-body .row label {
+  color:var(--time-muted) !important;
+  font-size:14px !important;
+}
+.calendar-expand .card .card-body .row label .oh-icon {
+  color:var(--time-accent) !important;
+}
+.calendar-expand .card .card-body .row select {
+  background:var(--time-panel) !important;
+  border:1px solid var(--time-line) !important;
+  color:var(--time-text) !important;
+  font-size:14px !important;
+  box-shadow:none !important;
+}
+.calendar-expand .card .card-body .row select:focus-visible {
+  outline:2px solid color-mix(in srgb, var(--time-accent) 58%, transparent) !important;
+  outline-offset:2px !important;
+  border-color:var(--time-accent) !important;
+}
 </style>
 </head>
 
