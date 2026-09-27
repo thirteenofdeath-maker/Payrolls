@@ -13,7 +13,8 @@
 
   const APP_ID = "payroll-estimator";
   const SCHEMA_VERSION = 1;
-  const APP_KEY_PREFIXES = ["payroll-", "settings-"];
+  const PAYROLL_PERIOD_KEY = /^payroll-\\d{4}-(?:[0-9]|1[01])$/;
+  const SETTINGS_PERIOD_KEY = /^settings-\\d{4}-(?:[0-9]|1[01])$/;
   const APP_EXACT_KEYS = new Set([
     "payrollTheme",
     "payrollInputCollapsed",
@@ -23,7 +24,65 @@
   ]);
 
   function isAppStorageKey(key) {
-    return APP_EXACT_KEYS.has(key) || APP_KEY_PREFIXES.some(prefix => key.startsWith(prefix));
+    return APP_EXACT_KEYS.has(key) ||
+      PAYROLL_PERIOD_KEY.test(key) ||
+      SETTINGS_PERIOD_KEY.test(key);
+  }
+
+  function validateStorageEntry(key, value) {
+    if (!isAppStorageKey(key) || typeof value !== "string") {
+      throw new Error("ไฟล์สำรองมีรายการที่ไม่ใช่ข้อมูลของแอป");
+    }
+
+    if (value.length > 1024 * 1024) {
+      throw new Error("ข้อมูลในไฟล์สำรองมีขนาดใหญ่เกินไป");
+    }
+
+    if (PAYROLL_PERIOD_KEY.test(key)) {
+      let cards;
+      try {
+        cards = JSON.parse(value);
+      } catch (error) {
+        throw new Error("ข้อมูลวันทำงานในไฟล์สำรองเสียหาย");
+      }
+
+      const isValidCard = card =>
+        card &&
+        typeof card === "object" &&
+        !Array.isArray(card) &&
+        /^\\d{4}-\\d{2}-\\d{2}$/.test(String(card.date || ""));
+
+      if (!Array.isArray(cards) || cards.length > 62 || !cards.every(isValidCard)) {
+        throw new Error("ข้อมูลวันทำงานในไฟล์สำรองไม่ถูกต้อง");
+      }
+    }
+
+    if (SETTINGS_PERIOD_KEY.test(key)) {
+      let settings;
+      try {
+        settings = JSON.parse(value);
+      } catch (error) {
+        throw new Error("การตั้งค่าในไฟล์สำรองเสียหาย");
+      }
+
+      if (!settings || typeof settings !== "object" || Array.isArray(settings)) {
+        throw new Error("การตั้งค่าในไฟล์สำรองไม่ถูกต้อง");
+      }
+    }
+
+    if (key === "payrollInputCollapsed" || key === "payrollSummaryCollapsed") {
+      if (value !== "0" && value !== "1") {
+        throw new Error("สถานะการพับส่วนแสดงผลไม่ถูกต้อง");
+      }
+    }
+
+    if (key === "lastViewedMonth" && !/^(?:[0-9]|1[01])$/.test(value)) {
+      throw new Error("เดือนล่าสุดในไฟล์สำรองไม่ถูกต้อง");
+    }
+
+    if (key === "lastViewedYear" && !/^\\d{4}$/.test(value)) {
+      throw new Error("ปีล่าสุดในไฟล์สำรองไม่ถูกต้อง");
+    }
   }
 
   function listAppStorageKeys(storage) {
@@ -75,10 +134,14 @@
     if (entries.length > 10000) {
       throw new Error("ไฟล์สำรองมีรายการมากเกินไป");
     }
+    const totalSize = entries.reduce((size, [key, value]) =>
+      size + key.length + (typeof value === "string" ? value.length : 0), 0);
+    if (totalSize > 5 * 1024 * 1024) {
+      throw new Error("ไฟล์สำรองใหญ่เกิน 5 MB");
+    }
+
     for (const [key, value] of entries) {
-      if (!isAppStorageKey(key) || typeof value !== "string") {
-        throw new Error("ไฟล์สำรองมีรายการที่ไม่ใช่ข้อมูลของแอป");
-      }
+      validateStorageEntry(key, value);
     }
 
     return {
@@ -120,6 +183,7 @@
     APP_ID,
     SCHEMA_VERSION,
     isAppStorageKey,
+    validateStorageEntry,
     listAppStorageKeys,
     createBackup,
     parseAndValidateBackup,
