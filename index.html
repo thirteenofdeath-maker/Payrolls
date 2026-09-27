@@ -7089,8 +7089,235 @@ select:focus {
 .backup-status { min-height: 20px; margin-top: 10px; font-size: 13px; color: #475569; }
 .backup-status[data-state="error"] { color: #b91c1c; }
 .backup-status[data-state="success"] { color: #15803d; }
+
+/* ===== Our Home polish: warm, simple, less nested ===== */
+:root {
+  --home-canvas: #F5F3EE;
+  --home-surface: #FFFCF6;
+  --home-text: #4A2D25;
+  --home-muted: #806A61;
+  --home-line: #E5D8CC;
+  --home-sage: #6F835E;
+  --home-sage-soft: #DCE8D1;
+  --home-peach-soft: #F8DED2;
+  --home-blue-soft: #E2EDF3;
+  --theme-primary: var(--home-sage);
+  --theme-soft: var(--home-sage-soft);
+  --theme-on-soft: var(--home-text);
+}
+html[data-daypart="morning"] { --daypart-start:#FBF6E9; --daypart-end:#F7EBDD; --daypart-soft:#F2DFA4; --daypart-accent:var(--home-sage); }
+html[data-daypart="afternoon"] { --daypart-start:#F7F4EC; --daypart-end:#EAF0E5; --daypart-soft:#DCE8D1; --daypart-accent:var(--home-sage); }
+html[data-daypart="evening"] { --daypart-start:#FAF0E9; --daypart-end:#F3E5DE; --daypart-soft:#F8DED2; --daypart-accent:var(--home-sage); }
+html[data-daypart="night"] { --daypart-start:#F4F3EF; --daypart-end:#E8EDF0; --daypart-soft:#E2EDF3; --daypart-accent:var(--home-sage); }
+
+body {
+  padding: 12px !important;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(255,255,255,.72), transparent 30%),
+    linear-gradient(155deg, var(--daypart-start), var(--home-canvas) 54%, var(--daypart-end)) !important;
+}
+.main-container { max-width: 680px !important; gap: 14px !important; }
+
+.app-header {
+  min-height: 0 !important;
+  padding: 16px 18px !important;
+  background: linear-gradient(135deg, var(--home-sage-soft), #F8E9DF) !important;
+  border: 0 !important;
+  border-radius: 24px !important;
+  box-shadow: 0 10px 26px rgba(74,45,37,.08) !important;
+}
+.app-header::before,
+.app-header::after { display: none !important; }
+.app-title-block h2,
+.app-header h2 {
+  margin: 0 0 3px !important;
+  font-size: clamp(25px, 5.2vw, 31px) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -.5px !important;
+  color: var(--home-text) !important;
+}
+.app-subtitle { font-size: 12px !important; color: var(--home-muted) !important; }
+.header-clock {
+  min-width: 138px !important;
+  padding: 9px 13px !important;
+  background: rgba(255,252,246,.82) !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  box-shadow: none !important;
+}
+.clock-date { font-size: 10px !important; color: var(--home-muted) !important; }
+.clock-time { font-size: 22px !important; line-height: 1.1 !important; color: var(--home-text) !important; }
+
+.input-panel {
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.input-panel::before,
+.input-panel::after { display: none !important; }
+.input-section,
+.period-section,
+.summary-card,
+.card,
+.backup-card,
+.standalone-disclaimer-card {
+  background: var(--home-surface) !important;
+  border: 1px solid var(--home-line) !important;
+  box-shadow: 0 7px 20px rgba(74,45,37,.045) !important;
+}
+.period-section {
+  padding: 16px !important;
+  border-radius: 24px !important;
+}
+.section-title {
+  margin-bottom: 12px !important;
+  font-size: 15px !important;
+  color: var(--home-text) !important;
+}
+.section-icon {
+  width: 34px !important;
+  height: 34px !important;
+  background: var(--home-blue-soft) !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+}
+
+.period-switcher { gap: 8px !important; align-items: center !important; }
+.period-controls { gap: 8px !important; }
+.period-controls .field-card {
+  padding: 8px 10px !important;
+  background: #FFFDF9 !important;
+  border: 1px solid var(--home-line) !important;
+  border-radius: 16px !important;
+  box-shadow: none !important;
+}
+.period-controls .field-card > span {
+  font-size: 11px !important;
+  color: var(--home-muted) !important;
+}
+.period-controls select {
+  min-height: 42px !important;
+  font-size: 16px !important;
+  color: var(--home-text) !important;
+  background-color: var(--home-surface) !important;
+  border-color: color-mix(in srgb, var(--home-line) 74%, white) !important;
+}
+.period-nav-btn {
+  flex: 0 0 46px !important;
+  width: 46px !important;
+  min-width: 46px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  padding: 0 !important;
+  align-self: center !important;
+  background: var(--home-sage-soft) !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  color: var(--home-sage) !important;
+  box-shadow: none !important;
+}
+.period-nav-btn .nav-label { display: none !important; }
+.period-nav-btn .nav-symbol { font-size: 30px !important; line-height: 1 !important; }
+
+.period-summary-quick {
+  margin: 14px 0 !important;
+  padding: 18px !important;
+  min-height: 0 !important;
+  background: linear-gradient(135deg, #667A57, #7F916F) !important;
+  border: 0 !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+}
+.period-summary-quick * { color: #FFFDF7 !important; }
+.period-summary-quick strong {
+  margin-top: 8px !important;
+  font-size: clamp(30px, 7vw, 40px) !important;
+  line-height: 1.05 !important;
+}
+.period-summary-quick .quick-period {
+  width: fit-content !important;
+  margin-top: 4px !important;
+  padding: 3px 9px !important;
+  background: rgba(255,255,255,.16) !important;
+  border-radius: 999px !important;
+}
+
+.period-calendar-wrap {
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.calendar {
+  margin: 0 !important;
+  padding: 10px !important;
+  background: #FFFDF9 !important;
+  border: 1px solid var(--home-line) !important;
+  border-radius: 20px !important;
+  box-shadow: none !important;
+}
+.weekdays {
+  padding: 8px 2px !important;
+  background: var(--home-blue-soft) !important;
+  border-radius: 13px !important;
+  color: var(--home-text) !important;
+}
+.day-cell {
+  min-height: 44px !important;
+  margin: 3px !important;
+  padding: 9px 0 !important;
+  background: var(--home-surface) !important;
+  border: 1px solid var(--home-line) !important;
+  border-radius: 13px !important;
+  color: var(--home-text) !important;
+}
+.day-cell.active {
+  background: var(--home-sage) !important;
+  border-color: var(--home-sage) !important;
+  color: #fff !important;
+}
+
+.collapse-toggle,
+.summary-collapse-toggle,
+.input-collapse-toggle {
+  min-height: 50px !important;
+  padding: 11px 16px !important;
+  background: var(--home-surface) !important;
+  border: 1px solid var(--home-line) !important;
+  border-radius: 18px !important;
+  color: var(--home-text) !important;
+  box-shadow: 0 6px 16px rgba(74,45,37,.04) !important;
+}
+.collapse-state {
+  padding: 5px 11px !important;
+  background: var(--home-sage-soft) !important;
+  border-radius: 999px !important;
+  color: #47613C !important;
+}
+.summary-shell {
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.summary-toolbar { margin: 0 !important; }
+.summary-card { border-radius: 20px !important; }
+.summary-net { background: var(--home-sage) !important; border-color: var(--home-sage) !important; }
+.backup-card,
+.standalone-disclaimer-card { border-radius: 22px !important; }
+
 @media (max-width: 420px) {
+  .app-header { padding: 14px 15px !important; }
   .app-header-right { display:flex !important; }
+  .header-clock { min-width: 120px !important; padding: 8px 10px !important; }
+  .clock-date { font-size: 9px !important; }
+  .clock-time { font-size: 19px !important; }
+  .period-section { padding: 13px !important; }
+  .period-nav-btn { flex-basis: 42px !important; width: 42px !important; min-width: 42px !important; height: 42px !important; min-height: 42px !important; }
 }
 </style>
 </head>
@@ -7346,10 +7573,10 @@ function applyDaypartTone(now = new Date()) {
     : hour >= 16 && hour < 20 ? "evening"
     : "night";
   const themeColors = {
-    morning: "#FFF8E7",
-    afternoon: "#F7F2E7",
-    evening: "#FBE9E1",
-    night: "#F1ECF5"
+    morning: "#FBF6E9",
+    afternoon: "#F7F4EC",
+    evening: "#FAF0E9",
+    night: "#F4F3EF"
   };
 
   document.documentElement.removeAttribute("data-theme");
