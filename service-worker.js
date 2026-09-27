@@ -1,5 +1,5 @@
 const CACHE_PREFIX = "payroll-estimator-";
-const CACHE_NAME = `${CACHE_PREFIX}v19`;
+const CACHE_NAME = `${CACHE_PREFIX}v20`;
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -7,6 +7,8 @@ const APP_ASSETS = [
   "./app.js",
   "./payroll-engine.js",
   "./storage-transfer.js",
+  "./sheet-export.js",
+  "./vendor/fflate.min.js",
   "./manifest.json",
   "./icon-192.png",
   "./icon-512.png",

@@ -854,6 +854,13 @@ input[readonly] {
   font-weight: 700;
 }
 
+.backup-button-sheet { flex-basis: 100%; }
+
+.backup-button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
 .backup-button-primary {
   border-color: var(--accent);
   background: var(--accent);
