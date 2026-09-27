@@ -965,9 +965,27 @@ input[readonly] {
     grid-template-columns: 1fr;
   }
 
+  .period-controls .field-card {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+    padding: 7px 10px;
+  }
+
+  .period-controls .field-card > span {
+    margin-bottom: 0;
+  }
+
   .period-controls .field-card:first-child {
     border-right: 0;
     border-bottom: 1px solid var(--line);
+  }
+
+  .period-nav-btn {
+    align-self: center;
+    min-height: 48px;
+    height: 48px;
   }
 
   .row {
