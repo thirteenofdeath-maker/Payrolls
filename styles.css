@@ -630,16 +630,27 @@ input[readonly] {
   font-weight: 750;
 }
 
+.card-actions {
+  display: flex;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
 .badge {
   display: inline-flex;
+  max-width: 100%;
   min-height: 28px;
   align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
   padding: 4px 9px;
   border-radius: 99px;
   background: var(--surface-2);
   color: var(--muted);
   font-size: .75rem;
   font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .badge-work { color: var(--success); }
@@ -950,13 +961,27 @@ input[readonly] {
   .period-summary-quick { align-items: stretch; }
   .quick-unit { width: 7px; height: auto; }
 
+  .period-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .period-controls .field-card:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
   .row {
     grid-template-columns: 1fr;
     gap: 5px;
   }
 
-  .card-header { align-items: flex-start; }
-  .badge { max-width: 42%; text-align: center; }
+  .card-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(84px, 38%);
+    align-items: start;
+  }
+
+  .badge { text-align: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
