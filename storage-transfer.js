@@ -13,8 +13,8 @@
 
   const APP_ID = "payroll-estimator";
   const SCHEMA_VERSION = 1;
-  const PAYROLL_PERIOD_KEY = /^payroll-\\d{4}-(?:[0-9]|1[01])$/;
-  const SETTINGS_PERIOD_KEY = /^settings-\\d{4}-(?:[0-9]|1[01])$/;
+  const PAYROLL_PERIOD_KEY = /^payroll-\d{4}-(?:[0-9]|1[01])$/;
+  const SETTINGS_PERIOD_KEY = /^settings-\d{4}-(?:[0-9]|1[01])$/;
   const APP_EXACT_KEYS = new Set([
     "payrollTheme",
     "payrollInputCollapsed",
@@ -50,7 +50,7 @@
         card &&
         typeof card === "object" &&
         !Array.isArray(card) &&
-        /^\\d{4}-\\d{2}-\\d{2}$/.test(String(card.date || ""));
+        /^\d{4}-\d{2}-\d{2}$/.test(String(card.date || ""));
 
       if (!Array.isArray(cards) || cards.length > 62 || !cards.every(isValidCard)) {
         throw new Error("ข้อมูลวันทำงานในไฟล์สำรองไม่ถูกต้อง");
@@ -80,7 +80,7 @@
       throw new Error("เดือนล่าสุดในไฟล์สำรองไม่ถูกต้อง");
     }
 
-    if (key === "lastViewedYear" && !/^\\d{4}$/.test(value)) {
+    if (key === "lastViewedYear" && !/^\d{4}$/.test(value)) {
       throw new Error("ปีล่าสุดในไฟล์สำรองไม่ถูกต้อง");
     }
   }
