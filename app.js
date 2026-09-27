@@ -473,6 +473,7 @@ function setActiveCalendarCell(cell = null) {
 function renderCalendar() {
     calendarEl.innerHTML = "";
     selectedDate = null;
+    activeCell = null;
     removeExpand(true);
 
     const y = +yearSelect.value;
