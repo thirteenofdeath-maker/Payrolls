@@ -193,13 +193,6 @@ button {
 button:active { transform: scale(0.95); }
 
 
-/* ไอคอนสถานะในการ์ดแก้ไขข้อมูล */
-/* ใส่ไอคอนปฏิทินเฉพาะ div ตัวแรก (วันที่) ที่อยู่ทางซ้าย */
-.card-header div:first-child::before {
-    content: "📅 "; 
-    display: inline-block;
-}
-
 /* ป้องกันไม่ให้ actions หรือ badge แสดงไอคอนซ้ำ */
 .card-actions::before {
     content: none !important;
@@ -235,13 +228,6 @@ button:active { transform: scale(0.95); }
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
-
-/* เพิ่ม Icon เล็กๆ หน้าสถานะผ่าน CSS */
-.badge-work::before { content: "✅ "; }
-.badge-holiday::before { content: "🏖️ "; }
-.badge-leave::before { content: "📝 "; }
-.badge-absent::before { content: "❌ "; }
-
 
 /* ===== Compact one-screen UI: no PDF / backup / import buttons ===== */
 :root {
@@ -2565,7 +2551,6 @@ body {
   font-size: 11.5px !important;
   font-weight: 900 !important;
 }
-.period-controls .select-card:first-child > span::before { content: "🗓️"; }
 .period-controls .select-card:last-child > span::before { content: "พ.ศ."; font-size: 10px; }
 #monthSelect,
 #yearSelect {
@@ -7309,6 +7294,45 @@ body {
 .summary-net { background: var(--home-sage) !important; border-color: var(--home-sage) !important; }
 .backup-card,
 .standalone-disclaimer-card { border-radius: 22px !important; }
+.icon-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.oh-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.section-icon .oh-icon { width: 18px; height: 18px; }
+.summary-heading,
+.backup-heading,
+.standalone-disclaimer-heading,
+.card-body .row label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.summary-heading .oh-icon,
+.backup-heading .oh-icon,
+.standalone-disclaimer-heading .oh-icon { color: var(--home-sage) !important; }
+.card-body .row label .oh-icon { width: 17px; height: 17px; color: var(--home-sage) !important; }
+.card-header div:first-child::before { content: none !important; }
+.card-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.card-date .oh-icon { width: 17px; height: 17px; color: var(--home-sage) !important; }
+.period-nav-btn .oh-icon { width: 25px; height: 25px; stroke-width: 2.2; }
+.nav-symbol { display: inline-flex !important; align-items: center; justify-content: center; }
 
 @media (max-width: 420px) {
   .app-header { padding: 14px 15px !important; }
@@ -7324,6 +7348,47 @@ body {
 
 <body>
 
+<svg class="icon-sprite" aria-hidden="true">
+  <symbol id="icon-calendar" viewBox="0 0 24 24">
+    <path d="M8 2v4M16 2v4M3 9h18"/><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"/>
+  </symbol>
+  <symbol id="icon-wallet" viewBox="0 0 24 24">
+    <path d="M4 6a3 3 0 0 1 3-3h10a2 2 0 0 1 2 2v2"/><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 11h5v5h-5a2.5 2.5 0 0 1 0-5Z"/>
+  </symbol>
+  <symbol id="icon-moon" viewBox="0 0 24 24">
+    <path d="M20 15.2A8.5 8.5 0 1 1 8.8 4a7 7 0 0 0 11.2 11.2Z"/><path d="m17 3 .4 1.2L19 5l-1.6.8L17 7l-.4-1.2L15 5l1.6-.8L17 3Z"/>
+  </symbol>
+  <symbol id="icon-receipt" viewBox="0 0 24 24">
+    <path d="M6 3v18l3-2 3 2 3-2 3 2V3l-3 2-3-2-3 2-3-2Z"/><path d="M9 9h6M9 13h6"/>
+  </symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24">
+    <path d="M12 3v11m0 0 4-4m-4 4-4-4"/><path d="M5 17v3h14v-3"/>
+  </symbol>
+  <symbol id="icon-info" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/>
+  </symbol>
+  <symbol id="icon-pin" viewBox="0 0 24 24">
+    <path d="M12 21s6-5 6-11a6 6 0 1 0-12 0c0 6 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/>
+  </symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+  </symbol>
+  <symbol id="icon-gauge" viewBox="0 0 24 24">
+    <path d="M5 18a8 8 0 1 1 14 0"/><path d="m12 14 4-4"/><circle cx="12" cy="14" r="1"/>
+  </symbol>
+  <symbol id="icon-timer" viewBox="0 0 24 24">
+    <circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6M12 5V2"/>
+  </symbol>
+  <symbol id="icon-sparkles" viewBox="0 0 24 24">
+    <path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z"/><path d="m18.5 14 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2Z"/>
+  </symbol>
+  <symbol id="icon-briefcase" viewBox="0 0 24 24">
+    <rect x="3" y="7" width="18" height="13" rx="3"/><path d="M9 7V4h6v3M3 12h18M10 12v2h4v-2"/>
+  </symbol>
+  <symbol id="icon-chevron-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+</svg>
+
 <div class="main-container">
   <div class="app-header">
     <div class="app-title-block">
@@ -7338,12 +7403,12 @@ body {
   <section class="input-panel" aria-label="ตั้งค่าข้อมูลเงินเดือน">
     <div class="input-section period-section">
       <div class="section-title">
-        <span class="section-icon">📅</span>
+        <span class="section-icon"><svg class="oh-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
         <span>งวดจ่าย</span>
       </div>
       <div class="period-switcher">
         <button type="button" id="prevPeriodBtn" class="period-nav-btn period-nav-prev" data-icon="‹" aria-label="งวดก่อนหน้า">
-          <span class="nav-symbol">‹</span>
+          <span class="nav-symbol"><svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg></span>
           <span class="nav-label">ก่อนหน้า</span>
         </button>
         <div class="period-controls">
@@ -7357,7 +7422,7 @@ body {
           </label>
         </div>
         <button type="button" id="nextPeriodBtn" class="period-nav-btn period-nav-next" data-icon="›" aria-label="งวดถัดไป">
-          <span class="nav-symbol">›</span>
+          <span class="nav-symbol"><svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span>
           <span class="nav-label">ถัดไป</span>
         </button>
       </div>
@@ -7389,7 +7454,7 @@ body {
     <div id="inputDetails" class="input-details">
     <div class="input-section primary-section emphasis-section">
       <div class="section-title">
-        <span class="section-icon">💰</span>
+        <span class="section-icon"><svg class="oh-icon" aria-hidden="true"><use href="#icon-wallet"></use></svg></span>
         <span>ค่าแรงหลัก</span>
       </div>
       <div class="field-grid two-cols">
@@ -7412,7 +7477,7 @@ body {
 
     <div class="input-section fee-section">
       <div class="section-title">
-        <span class="section-icon">🌙</span>
+        <span class="section-icon"><svg class="oh-icon" aria-hidden="true"><use href="#icon-moon"></use></svg></span>
         <span>ค่ากะและค่าอาหาร</span>
       </div>
       <div class="field-grid three-cols">
@@ -7442,7 +7507,7 @@ body {
 
     <div class="input-section extra-section">
       <div class="section-title">
-        <span class="section-icon">🧾</span>
+        <span class="section-icon"><svg class="oh-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg></span>
         <span>รายการเสริม / รายการหัก</span>
       </div>
       <div class="extras-grid">
@@ -7503,7 +7568,7 @@ body {
 </section>
 
 <section class="backup-card" aria-label="สำรองและกู้คืนข้อมูล">
-  <div class="backup-heading">💾 สำรองข้อมูลในเครื่อง</div>
+  <div class="backup-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-download"></use></svg>สำรองข้อมูลในเครื่อง</div>
   <div class="backup-copy">
     ดาวน์โหลดข้อมูลทุกงวดเป็นไฟล์ JSON หรือนำไฟล์เดิมกลับมา ข้อมูลจะไม่ถูกส่งขึ้นเซิร์ฟเวอร์
   </div>
@@ -7516,7 +7581,7 @@ body {
 </section>
 
 <section class="standalone-disclaimer-card" aria-label="หมายเหตุการคำนวณ">
-  <div class="standalone-disclaimer-heading">⚠️ หมายเหตุ</div>
+  <div class="standalone-disclaimer-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-info"></use></svg>หมายเหตุ</div>
   <div class="standalone-disclaimer-text">
     ข้อมูลนี้เป็นเพียงการคำนวณแบบคร่าวๆ ไม่สามารถนำมาอ้างอิงจริงได้ โปรดใช้วิจารณญาณในการใช้งาน
   </div>
@@ -7743,7 +7808,7 @@ syncHourly();
 
 let selectedDate=null;
 let expandRow=null;
-let activeCell = null; // ⭐ cell ที่เปิดอยู่จริง
+let activeCell = null; // cell ที่เปิดอยู่จริง
 let lastTapTime = 0;
 
 /* ===== UTIL ===== */
@@ -7812,13 +7877,13 @@ function createCard(date, saved) {
   card.dataset.date = dateStr;
   card.innerHTML = `
     <div class="card-header">
-      <div>${dateStr} (${daysTH[date.getDay()]})</div>
+      <div class="card-date"><svg class="oh-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg>${dateStr} (${daysTH[date.getDay()]})</div>
       <div class="card-actions">
         <span class="badge"></span>
       </div>
     </div>
     <div class="card-body">
-      <div class="row"><label>📌 สถานะ</label>
+      <div class="row"><label><svg class="oh-icon" aria-hidden="true"><use href="#icon-pin"></use></svg>สถานะ</label>
         <select class="status">
           <option value="">--เลือกวัน--</option>
           <option>วันทำงาน</option>
@@ -7832,14 +7897,14 @@ function createCard(date, saved) {
           <option>ขาดงาน</option>
         </select>
       </div>
-      <div class="row"><label>⏰ กะ</label>
+      <div class="row"><label><svg class="oh-icon" aria-hidden="true"><use href="#icon-clock"></use></svg>กะ</label>
         <select class="shift">
           <option value="">--เลือกกะ--</option>
-          <option value="เช้า">☀️ กะเช้า</option>
-          <option value="ดึก">🌙 กะดึก</option>
+          <option value="เช้า">กะเช้า</option>
+          <option value="ดึก">กะดึก</option>
         </select>
       </div>
-      <div class="row"><label>⚙️ ช่วงเวลาปกติ</label>
+      <div class="row"><label><svg class="oh-icon" aria-hidden="true"><use href="#icon-gauge"></use></svg>ช่วงเวลาปกติ</label>
         <select class="normal">
           <option value="0">-</option>
           <option value="4">4 ชม.(ครึ่งวัน)</option>
@@ -7847,7 +7912,7 @@ function createCard(date, saved) {
           <option value="8">8 ชม.(เต็มวัน)</option>
         </select>
       </div>
-      <div class="row"><label>🚀 ช่วงเวลาโอที</label>
+      <div class="row"><label><svg class="oh-icon" aria-hidden="true"><use href="#icon-timer"></use></svg>ช่วงเวลาโอที</label>
         <select class="ot">
           <option value="0">-</option>
           <!-- ค่า value เป็นหน่วยคำนวณจากไฟล์ HR โดยตรง ไม่ใช่ decimal hours -->
@@ -7856,7 +7921,7 @@ function createCard(date, saved) {
           <option value="4.51">4 ชม. 30 น.</option>
         </select>
       </div>
-      <div class="row"><label>⭐ ทักษะ</label>
+      <div class="row"><label><svg class="oh-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg>ทักษะ</label>
         <select class="skillDaily">
           <option value="0">ไม่ได้รับ</option>
           <option value="1">ได้รับ</option>
@@ -8228,7 +8293,7 @@ function calculate(data=getPayrollData()){
   <div class="summary-panel">
     <div id="summaryCategoryList" class="summary-grid">
       <section class="summary-card">
-        <div class="summary-heading">💼 รายได้หลัก</div>
+        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>รายได้หลัก</div>
         <div class="summary-item">
           <span class="summary-label">วันทำงาน</span>
           <span class="summary-qty">${format2(cNormalday)} วัน</span>
@@ -8257,7 +8322,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card">
-        <div class="summary-heading">⏱️ โอที</div>
+        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-timer"></use></svg>โอที</div>
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมชั่วโมงโอที</b></span>
           <span class="summary-qty"><b>${format2(totalOtHours)} ชม.</b></span>
@@ -8286,7 +8351,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card">
-        <div class="summary-heading">🌙 ค่ากะ / ค่าอาหาร</div>
+        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>ค่ากะ / ค่าอาหาร</div>
         <div class="summary-item">
           <span class="summary-label">ค่ากะดึก</span>
           <span class="summary-qty">${format2(nightShiftDays)} วัน</span>
@@ -8305,7 +8370,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card">
-        <div class="summary-heading">⭐ ค่าพิเศษ</div>
+        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg>ค่าพิเศษ</div>
         <div class="summary-item">
           <span class="summary-label">ค่าทักษะ</span>
           <span class="summary-qty">${format2(skillDays)} วัน</span>
@@ -8324,7 +8389,7 @@ function calculate(data=getPayrollData()){
       </section>
 
       <section class="summary-card full">
-        <div class="summary-heading">🧾 รวมและรายการหัก</div>
+        <div class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg>รวมและรายการหัก</div>
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมรายได้</b></span>
           <span class="summary-qty">-</span>
