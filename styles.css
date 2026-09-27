@@ -324,24 +324,39 @@ input:disabled {
   color: var(--accent-strong);
 }
 
-.period-controls {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.period-picker-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 0;
+  min-height: 48px;
+  padding: 6px 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-2);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 750;
+  text-align: center;
   overflow: hidden;
 }
 
-.period-controls .field-card {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+.period-picker-control:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
-.period-controls .field-card:first-child {
-  border-right: 1px solid var(--line);
+.period-picker-control input[type="month"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .field-card {
@@ -394,15 +409,6 @@ input[type="number"] {
 input[readonly] {
   background: var(--surface-3);
   color: var(--muted);
-}
-
-.period-controls select {
-  min-height: 44px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  border: 0;
-  background-color: transparent;
-  font-size: 1rem;
 }
 
 .period-summary-quick {
@@ -962,41 +968,6 @@ input[readonly] {
 
   .period-summary-quick { align-items: stretch; }
   .quick-unit { width: 7px; height: auto; }
-
-  .period-controls {
-    grid-template-columns: minmax(0, 1.35fr) minmax(74px, .65fr);
-    min-height: 48px;
-  }
-
-  .period-controls .field-card {
-    display: block;
-    padding: 2px 0;
-  }
-
-  .period-controls .field-card > span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .period-controls .field-card:first-child {
-    border-right: 0;
-    border-bottom: 0;
-  }
-
-  .period-controls select {
-    min-height: 44px;
-    padding: 4px 3px;
-    background-image: none;
-    text-align: center;
-    text-align-last: center;
-  }
 
   .period-nav-btn {
     align-self: center;

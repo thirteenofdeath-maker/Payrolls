@@ -9,6 +9,8 @@ const container=document.getElementById("cardContainer");
 const calendarEl=document.getElementById("calendarDays");
 const monthSelect=document.getElementById("monthSelect");
 const yearSelect=document.getElementById("yearSelect");
+const periodMonthPicker=document.getElementById("periodMonthPicker");
+const periodPickerLabel=document.getElementById("periodPickerLabel");
 const prevPeriodBtn=document.getElementById("prevPeriodBtn");
 const nextPeriodBtn=document.getElementById("nextPeriodBtn");
 
@@ -72,6 +74,15 @@ function normalizeYearValue(year) {
   const n = Number(year);
   if (!Number.isFinite(n)) return new Date().getFullYear();
   return n > 2400 ? n - 543 : n;
+}
+
+function syncPeriodPicker() {
+  if (!periodMonthPicker || !periodPickerLabel || monthSelect.value === "" || !yearSelect.value) return;
+
+  const year = Number(yearSelect.value);
+  const month = Number(monthSelect.value);
+  periodMonthPicker.value = `${year}-${String(month + 1).padStart(2, "0")}`;
+  periodPickerLabel.textContent = `${monthNames[month]} ${toBuddhistYear(year)}`;
 }
 
 function formatThaiShortDate(d) {
@@ -956,6 +967,7 @@ function applyPeriodChange() {
     const selectedYear = normalizeYearValue(yearSelect.value);
     rebuildYearOptions(selectedYear);
     yearSelect.value = String(selectedYear);
+    syncPeriodPicker();
     loadSettings();
     renderMonth();
     updateHeaderInfo();
@@ -979,6 +991,19 @@ function movePeriod(offset) {
 /* ===== 3. จัดระเบียบเหตุการณ์ (Events) ให้มีการบันทึกที่ถูกต้อง ===== */
 monthSelect.onchange = applyPeriodChange;
 yearSelect.onchange = applyPeriodChange;
+periodMonthPicker.addEventListener("change", () => {
+    const match = /^(\d{4})-(\d{2})$/.exec(periodMonthPicker.value);
+    if (!match) return;
+
+    const pickedYear = Number(match[1]);
+    const pickedMonth = Number(match[2]) - 1;
+    if (!Number.isInteger(pickedMonth) || pickedMonth < 0 || pickedMonth > 11) return;
+
+    rebuildYearOptions(pickedYear);
+    yearSelect.value = String(pickedYear);
+    monthSelect.value = String(pickedMonth);
+    applyPeriodChange();
+});
 prevPeriodBtn.onclick = () => movePeriod(-1);
 nextPeriodBtn.onclick = () => movePeriod(1);
 
@@ -1124,6 +1149,7 @@ function initApp() {
         monthSelect.value = now.getMonth();
     }
     yearSelect.value = String(initialYear);
+    syncPeriodPicker();
 
     // 4. โหลดข้อมูลและแสดงผล
     loadSettings();
