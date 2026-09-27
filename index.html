@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./styles.css?v=29">
+<link rel="stylesheet" href="./styles.css?v=30">
 </head>
 
 <body>
@@ -75,26 +75,19 @@
         <span class="section-icon"><svg class="oh-icon" aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
         <span>งวดจ่าย</span>
       </h2>
-      <div id="periodSummaryQuick" class="period-summary-quick" aria-live="polite">
-        <div class="quick-main">
-          <span class="quick-label">ยอดสุทธิประจำงวด</span>
-          <div class="quick-period-switcher">
-            <button type="button" id="prevPeriodBtn" class="quick-period-nav" aria-label="งวดก่อนหน้า">
-              <svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
-            </button>
-            <div class="quick-period-control">
-              <span id="periodPickerLabel" class="quick-period" aria-hidden="true">เลือกงวดเงินเดือน</span>
-              <span class="quick-period-caret" aria-hidden="true">⌄</span>
-              <input type="month" id="periodMonthPicker" aria-label="เลือกงวดเงินเดือน">
-            </div>
-            <button type="button" id="nextPeriodBtn" class="quick-period-nav" aria-label="งวดถัดไป">
-              <svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
-            </button>
-          </div>
-          <strong id="periodQuickNet">0.00 บาท</strong>
-          <small id="periodQuickDetail">รวมรายได้ 0.00 บาท · หักประกันสังคม 0.00 บาท (0.00%)</small>
+      <div class="period-switcher">
+        <button type="button" id="prevPeriodBtn" class="period-nav-btn" aria-label="งวดก่อนหน้า">
+          <span class="nav-symbol"><svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg></span>
+          <span class="nav-label">ก่อนหน้า</span>
+        </button>
+        <div class="period-picker-control">
+          <span id="periodPickerLabel" aria-hidden="true">เลือกเดือนและปี</span>
+          <input type="month" id="periodMonthPicker" aria-label="เลือกเดือนและปี">
         </div>
-        <span class="quick-unit" aria-hidden="true"></span>
+        <button type="button" id="nextPeriodBtn" class="period-nav-btn" aria-label="งวดถัดไป">
+          <span class="nav-symbol"><svg class="oh-icon" aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span>
+          <span class="nav-label">ถัดไป</span>
+        </button>
       </div>
       <div class="period-select-source" hidden>
         <label>เดือน<select id="monthSelect"></select></label>
@@ -127,8 +120,17 @@
             </div>
           </div>
         </div>
-        <div id="cardContainer"></div>
       </div>
+      <div id="periodSummaryQuick" class="period-summary-quick" aria-live="polite">
+        <div class="quick-main">
+          <span class="quick-label">ยอดสุทธิประจำงวด</span>
+          <span class="quick-period">--</span>
+          <strong id="periodQuickNet">0.00 บาท</strong>
+          <small id="periodQuickDetail">รวมรายได้ 0.00 บาท · หักประกันสังคม 0.00 บาท (0.00%)</small>
+        </div>
+        <span class="quick-unit" aria-hidden="true"></span>
+      </div>
+      <div id="cardContainer"></div>
     </div>
 
     <button type="button" id="inputToggle" class="collapse-toggle input-collapse-toggle" aria-expanded="true" aria-controls="inputDetails">
@@ -274,10 +276,10 @@
   </div>
 </section>
 
-<script src="./payroll-engine.js?v=29"></script>
-<script src="./storage-transfer.js?v=29"></script>
-<script src="./sheet-export.js?v=29"></script>
-<script src="./app.js?v=29"></script>
+<script src="./payroll-engine.js?v=30"></script>
+<script src="./storage-transfer.js?v=30"></script>
+<script src="./sheet-export.js?v=30"></script>
+<script src="./app.js?v=30"></script>
 
 </body>
 </html>
