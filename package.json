@@ -1,0 +1,7 @@
+{
+  "name": "payroll-estimator",
+  "private": true,
+  "scripts": {
+    "test": "node --test"
+  }
+}
