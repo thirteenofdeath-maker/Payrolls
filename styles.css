@@ -19,6 +19,7 @@
   --radius-md: 14px;
   --radius-sm: 10px;
   --focus: #225f79;
+  --on-accent: #fffdf8;
   --content-width: 1180px;
 }
 
@@ -90,6 +91,7 @@ html[data-daypart="night"] {
   --info: #8bc4e0;
   --shadow: none;
   --focus: #ffd891;
+  --on-accent: #17130d;
 }
 
 html[data-daypart="late-night"] {
@@ -110,6 +112,7 @@ html[data-daypart="late-night"] {
   --info: #8bc4e0;
   --shadow: none;
   --focus: #ffd891;
+  --on-accent: #17130d;
 }
 
 * { box-sizing: border-box; }
@@ -493,7 +496,7 @@ input[readonly] {
 .day-cell[aria-expanded="true"] {
   border-color: var(--accent-strong);
   background: var(--accent);
-  color: #17130d;
+  color: var(--on-accent);
 }
 
 .day-cell::before,
@@ -769,10 +772,10 @@ input[readonly] {
   padding: 12px 8px;
   border-radius: var(--radius-sm);
   background: var(--accent);
-  color: #17130d;
+  color: var(--on-accent);
 }
 
-.summary-net .summary-qty { color: #463a27; }
+.summary-net .summary-qty { color: var(--on-accent); opacity: .78; }
 .summary-net .summary-money { font-size: 1.05rem; }
 
 .backup-card,
@@ -803,7 +806,7 @@ input[readonly] {
 .backup-button-primary {
   border-color: var(--accent);
   background: var(--accent);
-  color: #17130d;
+  color: var(--on-accent);
 }
 
 .backup-status {
