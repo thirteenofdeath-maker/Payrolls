@@ -1013,6 +1013,7 @@ document.addEventListener("click", function(event) {
 });
 
 const exportDataBtn = document.getElementById("exportDataBtn");
+const exportSheetBtn = document.getElementById("exportSheetBtn");
 const importDataBtn = document.getElementById("importDataBtn");
 const importDataFile = document.getElementById("importDataFile");
 const backupStatus = document.getElementById("backupStatus");
@@ -1021,6 +1022,30 @@ function setBackupStatus(message, state = "") {
   backupStatus.textContent = message;
   backupStatus.dataset.state = state;
 }
+
+exportSheetBtn.addEventListener("click", async () => {
+  const originalLabel = exportSheetBtn.textContent;
+  exportSheetBtn.disabled = true;
+  exportSheetBtn.textContent = "กำลังสร้างไฟล์…";
+  setBackupStatus("กำลังจัดทำรายการรายวันและสรุปทั้งงวด…");
+
+  try {
+    const data = getPayrollData();
+    const model = PayrollSheetExport.buildExportModel(data, calculatePayroll, {
+      periodLabel: getPeriodRangeText(),
+      generatedAt: new Date().toISOString()
+    });
+    const month = String(Number(monthSelect.value) + 1).padStart(2, "0");
+    const filename = `payroll-detail-${yearSelect.value}-${month}.xlsx`;
+    await PayrollSheetExport.download(model, filename);
+    setBackupStatus("ส่งออกแล้ว: รายวัน · สรุปงวด · ตั้งค่าที่ใช้", "success");
+  } catch (error) {
+    setBackupStatus(`ส่งออกไม่สำเร็จ: ${error.message}`, "error");
+  } finally {
+    exportSheetBtn.disabled = false;
+    exportSheetBtn.textContent = originalLabel;
+  }
+});
 
 exportDataBtn.addEventListener("click", () => {
   try {
