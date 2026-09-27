@@ -256,7 +256,7 @@ function loadCards() {
     return parsed.filter(item =>
       item &&
       typeof item === "object" &&
-      /^\\d{4}-\\d{2}-\\d{2}$/.test(String(item.date || ""))
+      /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || ""))
     );
   } catch (error) {
     console.warn("Ignoring invalid saved payroll data:", error);
