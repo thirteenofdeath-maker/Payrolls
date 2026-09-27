@@ -84,7 +84,7 @@ function syncPeriodPicker() {
   const year = Number(yearSelect.value);
   const month = Number(monthSelect.value);
   periodMonthPicker.value = `${year}-${String(month + 1).padStart(2, "0")}`;
-  periodPickerLabel.textContent = getPeriodRangeText();
+  periodPickerLabel.textContent = `${monthNames[month]} ${toBuddhistYear(year)}`;
 }
 
 function formatThaiShortDate(d) {
@@ -763,6 +763,8 @@ function calculate(data=getPayrollData()){
 
 
   if (periodSummaryQuick) {
+    const quickPeriod = periodSummaryQuick.querySelector(".quick-period");
+    if (quickPeriod) quickPeriod.textContent = getPeriodRangeText();
     periodQuickNet.textContent = `${format2(netPay)} บาท`;
     periodQuickDetail.textContent = `รวมรายได้ ${format2(totalIncome)} บาท · หักประกันสังคม ${format2(socialSecurity)} บาท (${format2(S.SOCIAL_SECURITY_PERCENT)}%)`;
   }
