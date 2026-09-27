@@ -391,7 +391,7 @@ input[readonly] {
 }
 
 .period-controls select {
-  min-height: 36px;
+  min-height: 44px;
   padding-top: 4px;
   padding-bottom: 4px;
   border: 0;
