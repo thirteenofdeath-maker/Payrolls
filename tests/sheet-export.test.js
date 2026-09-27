@@ -64,10 +64,15 @@ test("creates an XLSX workbook with the three requested sheets", () => {
   const workbook = decode(files["xl/workbook.xml"]);
   const dailySheet = decode(files["xl/worksheets/sheet1.xml"]);
   const summarySheet = decode(files["xl/worksheets/sheet2.xml"]);
+  const settingsSheet = decode(files["xl/worksheets/sheet3.xml"]);
   assert.match(workbook, /name="รายวัน"/);
   assert.match(workbook, /name="สรุปงวด"/);
   assert.match(workbook, /name="ตั้งค่าที่ใช้"/);
   assert.match(dailySheet, /2\.51/);
   assert.match(dailySheet, /หน่วย OT \(HR\)/);
   assert.match(summarySheet, /ยอดสุทธิ/);
+  assert.match(summarySheet, /ค่าพี่เลี้ยง/);
+  assert.match(settingsSheet, /ค่าพี่เลี้ยง/);
+  assert.doesNotMatch(summarySheet, /ค่าครูฝึก/);
+  assert.doesNotMatch(settingsSheet, /ค่าครูฝึก/);
 });
