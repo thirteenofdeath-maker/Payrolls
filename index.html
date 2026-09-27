@@ -6970,6 +6970,35 @@ html[data-palette] select:focus {
   cursor: not-allowed;
   background-image: none;
 }
+.backup-card {
+  margin-top: 20px;
+  padding: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: left;
+}
+.backup-heading { font-size: 16px; font-weight: 700; color: #1f2937; }
+.backup-copy { margin-top: 4px; font-size: 13px; line-height: 1.55; color: #64748b; }
+.backup-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.backup-button {
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+}
+.backup-button-primary {
+  border-color: var(--theme-primary);
+  background: var(--theme-primary);
+  color: var(--theme-on-primary);
+}
+.backup-status { min-height: 20px; margin-top: 10px; font-size: 13px; color: #475569; }
+.backup-status[data-state="error"] { color: #b91c1c; }
+.backup-status[data-state="success"] { color: #15803d; }
 @media (max-width: 420px) {
   .app-header-right { display:flex !important; }
 }
@@ -7180,6 +7209,19 @@ html[data-palette] select:focus {
   <div id="result" style="margin-top:10px;"></div>
 </section>
 
+<section class="backup-card" aria-label="สำรองและกู้คืนข้อมูล">
+  <div class="backup-heading">💾 สำรองข้อมูลในเครื่อง</div>
+  <div class="backup-copy">
+    ดาวน์โหลดข้อมูลทุกงวดเป็นไฟล์ JSON หรือนำไฟล์เดิมกลับมา ข้อมูลจะไม่ถูกส่งขึ้นเซิร์ฟเวอร์
+  </div>
+  <div class="backup-actions">
+    <button type="button" id="exportDataBtn" class="backup-button backup-button-primary">ดาวน์โหลดไฟล์สำรอง</button>
+    <button type="button" id="importDataBtn" class="backup-button">นำเข้าข้อมูล</button>
+    <input type="file" id="importDataFile" accept="application/json,.json" hidden>
+  </div>
+  <div id="backupStatus" class="backup-status" role="status" aria-live="polite"></div>
+</section>
+
 <section class="standalone-disclaimer-card" aria-label="หมายเหตุการคำนวณ">
   <div class="standalone-disclaimer-heading">⚠️ หมายเหตุ</div>
   <div class="standalone-disclaimer-text">
@@ -7188,6 +7230,7 @@ html[data-palette] select:focus {
 </section>
 
 <script src="./payroll-engine.js"></script>
+<script src="./storage-transfer.js"></script>
 <script>
 
 function num(v){
@@ -7230,6 +7273,7 @@ const inputDetails = document.getElementById("inputDetails");
 const summaryToggle = document.getElementById("summaryToggle");
 const summaryShell = document.querySelector(".summary-shell");
 const { calculatePayroll } = PayrollEngine;
+const { createBackup, parseAndValidateBackup, restoreBackup } = PayrollStorageTransfer;
 
 function applyTheme(theme) {
   const palettes=["default","quantum","prompt","forest","blueberry","cyber-teal","lime-compute","inkberry","signal-violet","lime-spark","emerald","signal-blue","ultra-violet","butter-iris","neon-orange","clay-butter","dragonfruit","cyber-grape","raspberry"];
@@ -8136,7 +8180,68 @@ document.addEventListener("click", function(event) {
         });
     }
 });
-// --- Removed PDF / Export / Import tools for compact version ---
+
+const exportDataBtn = document.getElementById("exportDataBtn");
+const importDataBtn = document.getElementById("importDataBtn");
+const importDataFile = document.getElementById("importDataFile");
+const backupStatus = document.getElementById("backupStatus");
+
+function setBackupStatus(message, state = "") {
+  backupStatus.textContent = message;
+  backupStatus.dataset.state = state;
+}
+
+exportDataBtn.addEventListener("click", () => {
+  try {
+    const backup = createBackup(localStorage);
+    const content = JSON.stringify(backup, null, 2);
+    const blob = new Blob([content], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const date = formatLocalDate(new Date());
+    link.href = url;
+    link.download = `payroll-backup-${date}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setBackupStatus(`ดาวน์โหลดไฟล์สำรองแล้ว (${Object.keys(backup.data).length} รายการ)`, "success");
+  } catch (error) {
+    setBackupStatus(`สำรองข้อมูลไม่สำเร็จ: ${error.message}`, "error");
+  }
+});
+
+importDataBtn.addEventListener("click", () => {
+  importDataFile.value = "";
+  importDataFile.click();
+});
+
+importDataFile.addEventListener("change", async () => {
+  const file = importDataFile.files?.[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    setBackupStatus("ไฟล์สำรองใหญ่เกิน 5 MB", "error");
+    return;
+  }
+
+  try {
+    const backup = parseAndValidateBackup(await file.text());
+    const itemCount = Object.keys(backup.data).length;
+    const confirmed = window.confirm(
+      `นำเข้า ${itemCount} รายการและแทนที่ข้อมูล Payrolls ในเครื่องนี้หรือไม่?`
+    );
+    if (!confirmed) {
+      setBackupStatus("ยกเลิกการนำเข้าข้อมูล");
+      return;
+    }
+
+    restoreBackup(localStorage, backup, { replace: true });
+    setBackupStatus(`นำเข้าสำเร็จ ${itemCount} รายการ กำลังโหลดข้อมูลใหม่…`, "success");
+    window.setTimeout(() => window.location.reload(), 500);
+  } catch (error) {
+    setBackupStatus(`นำเข้าข้อมูลไม่สำเร็จ: ${error.message}`, "error");
+  }
+});
 
 /* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
 function initApp() {

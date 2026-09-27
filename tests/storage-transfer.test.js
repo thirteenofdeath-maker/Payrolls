@@ -1,0 +1,115 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const {
+  createBackup,
+  parseAndValidateBackup,
+  restoreBackup
+} = require("../storage-transfer.js");
+
+class MemoryStorage {
+  constructor(values = {}) {
+    this.values = new Map(Object.entries(values));
+  }
+  get length() { return this.values.size; }
+  key(index) { return [...this.values.keys()][index] ?? null; }
+  getItem(key) { return this.values.has(key) ? this.values.get(key) : null; }
+  setItem(key, value) { this.values.set(key, String(value)); }
+  removeItem(key) { this.values.delete(key); }
+}
+
+test("สำรองเฉพาะข้อมูลของแอป", () => {
+  const storage = new MemoryStorage({
+    "payroll-2026-8": "[]",
+    "settings-2026-8": "{}",
+    payrollTheme: "forest",
+    unrelatedApp: "keep-private"
+  });
+  const backup = createBackup(storage, new Date("2026-09-27T12:00:00.000Z"));
+
+  assert.deepEqual(backup, {
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    exportedAt: "2026-09-27T12:00:00.000Z",
+    data: {
+      "payroll-2026-8": "[]",
+      payrollTheme: "forest",
+      "settings-2026-8": "{}"
+    }
+  });
+});
+
+test("นำเข้าทดแทนเฉพาะข้อมูล Payrolls", () => {
+  const storage = new MemoryStorage({
+    "payroll-old": "old",
+    unrelatedApp: "untouched"
+  });
+  const result = restoreBackup(storage, {
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    exportedAt: "2026-09-27T12:00:00.000Z",
+    data: { "payroll-new": "new" }
+  });
+
+  assert.equal(result.restoredKeys, 1);
+  assert.equal(storage.getItem("payroll-old"), null);
+  assert.equal(storage.getItem("payroll-new"), "new");
+  assert.equal(storage.getItem("unrelatedApp"), "untouched");
+});
+
+test("ปฏิเสธ JSON ที่เสีย", () => {
+  assert.throws(() => parseAndValidateBackup("{"), /JSON/);
+});
+
+test("ปฏิเสธไฟล์จากแอปอื่น", () => {
+  assert.throws(() => parseAndValidateBackup({
+    app: "other-app",
+    schemaVersion: 1,
+    data: {}
+  }), /ไม่ได้มาจากแอป/);
+});
+
+test("ปฏิเสธ schema version ที่ไม่รองรับ", () => {
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 2,
+    data: {}
+  }), /เวอร์ชัน 2/);
+});
+
+test("ปฏิเสธ key ที่ไม่ใช่ข้อมูล Payrolls", () => {
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { password: "do-not-import" }
+  }), /ไม่ใช่ข้อมูลของแอป/);
+});
+
+test("คืนข้อมูลเดิมเมื่อนำเข้าไม่สำเร็จ", () => {
+  class FailingStorage extends MemoryStorage {
+    constructor(values) {
+      super(values);
+      this.failNextWrite = true;
+    }
+    setItem(key, value) {
+      if (this.failNextWrite && key === "payroll-new") {
+        this.failNextWrite = false;
+        throw new Error("Quota exceeded");
+      }
+      super.setItem(key, value);
+    }
+  }
+
+  const storage = new FailingStorage({
+    "payroll-old": "original",
+    unrelatedApp: "untouched"
+  });
+
+  assert.throws(() => restoreBackup(storage, {
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { "payroll-new": "new" }
+  }), /คืนข้อมูลเดิมให้แล้ว/);
+  assert.equal(storage.getItem("payroll-old"), "original");
+  assert.equal(storage.getItem("payroll-new"), null);
+  assert.equal(storage.getItem("unrelatedApp"), "untouched");
+});
