@@ -14,6 +14,8 @@
   --warning: #9a641f;
   --danger: #b74343;
   --info: #386b88;
+  --shift-morning: #b97700;
+  --shift-night: #715ad1;
   --shadow: 0 10px 30px rgb(65 51 38 / 8%);
   --radius-lg: 20px;
   --radius-md: 14px;
@@ -89,6 +91,8 @@ html[data-daypart="night"] {
   --warning: #f1be72;
   --danger: #ff9b9b;
   --info: #8bc4e0;
+  --shift-morning: #f1be72;
+  --shift-night: #aa98ff;
   --shadow: none;
   --focus: #ffd891;
   --on-accent: #17130d;
@@ -110,6 +114,8 @@ html[data-daypart="late-night"] {
   --warning: #edbc76;
   --danger: #ff9c9c;
   --info: #8bc4e0;
+  --shift-morning: #edbc76;
+  --shift-night: #aa98ff;
   --shadow: none;
   --focus: #ffd891;
   --on-accent: #17130d;
@@ -529,16 +535,34 @@ input[readonly] {
 .day-cell.day-holiday::before { background: var(--info); opacity: 1; }
 .day-cell.day-leave::before { background: var(--warning); opacity: 1; }
 .day-cell.day-absent::before { background: var(--danger); opacity: 1; }
-.day-cell.shift-morning::after { background: #d89b00; opacity: 1; }
-.day-cell.shift-night::after { background: #715ad1; opacity: 1; }
+.day-cell.shift-morning::after { background: var(--shift-morning); opacity: 1; }
+.day-cell.shift-night::after { background: var(--shift-night); opacity: 1; }
 
 .calendar-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 12px;
+  display: grid;
+  gap: 9px;
   margin-top: 10px;
   color: var(--muted);
   font-size: .75rem;
+}
+
+.legend-group {
+  min-width: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.legend-title {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text);
+  font-size: .75rem;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
 }
 
 .legend-item {
@@ -554,9 +578,24 @@ input[readonly] {
 }
 
 .legend-work { background: var(--success); }
+.legend-holiday { background: var(--info); }
 .legend-leave { background: var(--warning); }
 .legend-absent { background: var(--danger); }
-.legend-shift { background: #715ad1; }
+.legend-morning { background: var(--shift-morning); }
+.legend-night { background: var(--shift-night); }
+
+.legend-note {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+@media (min-width: 520px) {
+  .calendar-legend {
+    grid-template-columns: minmax(0, 1.7fr) minmax(130px, .8fr);
+  }
+}
 
 .calendar-expand {
   grid-column: 1 / -1;
