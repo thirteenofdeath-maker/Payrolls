@@ -53,11 +53,11 @@ function applyDaypartTone(now = new Date()) {
     : hour >= 20 && hour < 23 ? "night"
     : "late-night";
   const themeColors = {
-    morning: "#FFF9EF",
-    "late-morning": "#FFF4E8",
-    noon: "#FFF3E2",
-    afternoon: "#FFF7D1",
-    evening: "#FFD6C6",
+    morning: "#EDF4F7",
+    "late-morning": "#EEF3F3",
+    noon: "#F1F3ED",
+    afternoon: "#F3F1E8",
+    evening: "#F2ECEC",
     night: "#081C30",
     "late-night": "#061523"
   };
