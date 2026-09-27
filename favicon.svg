@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="บ้านและเหรียญ">
+  <rect width="512" height="512" fill="#F8F2E9"/>
+  <circle cx="256" cy="250" r="184" fill="#DCE8D1"/>
+  <path d="M128 248 256 137l128 111v131c0 31-25 56-56 56H184c-31 0-56-25-56-56V248Z" fill="#FFFCF6" stroke="#6F835E" stroke-width="24" stroke-linejoin="round"/>
+  <path d="m105 267 151-130 151 130" fill="none" stroke="#6F835E" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M337 146v-42h45v82" fill="#F4C9B8" stroke="#6F835E" stroke-width="20" stroke-linejoin="round"/>
+  <circle cx="256" cy="337" r="63" fill="#F4C9B8" stroke="#6F835E" stroke-width="18"/>
+  <text x="256" y="375" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="112" font-weight="700" fill="#4A2D25">฿</text>
+</svg>
