@@ -286,14 +286,6 @@ input:disabled {
   color: var(--accent-strong);
 }
 
-.period-switcher {
-  display: grid;
-  grid-template-columns: minmax(88px, auto) minmax(0, 1fr) minmax(88px, auto);
-  gap: 10px;
-  align-items: stretch;
-}
-
-.period-nav-btn,
 .collapse-toggle,
 .backup-button {
   border: 1px solid var(--line);
@@ -303,51 +295,34 @@ input:disabled {
   transition: background-color .18s ease, border-color .18s ease;
 }
 
-.period-nav-btn:hover,
 .collapse-toggle:hover,
 .backup-button:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
 
-.period-nav-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 8px 10px;
-  font-weight: 700;
-}
-
-.nav-symbol {
-  display: inline-flex;
-  color: var(--accent-strong);
-}
-
-.period-picker-control {
+.quick-period-control {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 0;
-  min-height: 48px;
-  padding: 6px 14px;
+  min-height: 42px;
+  padding: 5px 32px 5px 10px;
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
   color: var(--text);
-  font-size: 1rem;
-  font-weight: 750;
   text-align: center;
   overflow: hidden;
 }
 
-.period-picker-control:focus-within {
+.quick-period-control:focus-within {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
-.period-picker-control input[type="month"] {
+.quick-period-control input[type="month"] {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -412,10 +387,7 @@ input[readonly] {
 }
 
 .period-summary-quick {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  position: relative;
   margin-top: 0;
   padding: 15px 16px;
   border: 1px solid var(--line);
@@ -423,9 +395,35 @@ input[readonly] {
   background: var(--surface-2);
 }
 
-.period-summary-quick + .period-switcher { margin-top: 14px; }
+.quick-main {
+  min-width: 0;
+  padding-right: 25px;
+}
 
-.period-summary-quick > div { min-width: 0; }
+.quick-period-switcher {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 42px;
+  gap: 7px;
+  margin: 6px 0 7px;
+}
+
+.quick-period-nav {
+  display: inline-flex;
+  min-width: 42px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--accent-strong);
+}
+
+.quick-period-nav:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
 
 .quick-label,
 .quick-period,
@@ -440,9 +438,21 @@ input[readonly] {
 }
 
 .quick-period {
-  margin: 2px 0 4px;
+  min-width: 0;
   color: var(--text);
   font-size: .875rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.quick-period-caret {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1;
+  transform: translateY(-58%);
 }
 
 .period-summary-quick strong {
@@ -460,8 +470,11 @@ input[readonly] {
 }
 
 .quick-unit {
+  position: absolute;
+  top: 15px;
+  right: 16px;
+  bottom: 15px;
   width: 10px;
-  height: 42px;
   border-radius: 99px;
   background: var(--accent);
 }
@@ -929,13 +942,7 @@ input[readonly] {
 
   .input-section { padding: 14px; }
 
-  .period-switcher {
-    grid-template-columns: 48px minmax(0, 1fr) 48px;
-    gap: 7px;
-  }
-
   .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .period-nav-btn { padding: 8px; }
 
   .two-cols,
   .three-cols { grid-template-columns: 1fr; }
@@ -966,14 +973,7 @@ input[readonly] {
   .clock-date, .clock-time { display: inline; }
   .clock-date::after { content: " · "; }
 
-  .period-summary-quick { align-items: stretch; }
-  .quick-unit { width: 7px; height: auto; }
-
-  .period-nav-btn {
-    align-self: center;
-    min-height: 48px;
-    height: 48px;
-  }
+  .quick-unit { width: 7px; }
 
   .row {
     grid-template-columns: 1fr;

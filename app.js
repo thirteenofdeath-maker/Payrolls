@@ -34,6 +34,8 @@ const socialSecurityPercentInput = document.getElementById("socialSecurityPercen
 const headerClock = document.getElementById("headerClock");
 const headerDateRange = document.getElementById("headerDateRange");
 const periodSummaryQuick = document.getElementById("periodSummaryQuick");
+const periodQuickNet = document.getElementById("periodQuickNet");
+const periodQuickDetail = document.getElementById("periodQuickDetail");
 const inputToggle = document.getElementById("inputToggle");
 const inputDetails = document.getElementById("inputDetails");
 const summaryToggle = document.getElementById("summaryToggle");
@@ -82,7 +84,7 @@ function syncPeriodPicker() {
   const year = Number(yearSelect.value);
   const month = Number(monthSelect.value);
   periodMonthPicker.value = `${year}-${String(month + 1).padStart(2, "0")}`;
-  periodPickerLabel.textContent = `${monthNames[month]} ${toBuddhistYear(year)}`;
+  periodPickerLabel.textContent = getPeriodRangeText();
 }
 
 function formatThaiShortDate(d) {
@@ -761,15 +763,8 @@ function calculate(data=getPayrollData()){
 
 
   if (periodSummaryQuick) {
-    periodSummaryQuick.innerHTML = `
-      <div>
-        <span class="quick-label">ยอดสุทธิประจำงวด</span>
-        <span class="quick-period">${getPeriodRangeText()}</span>
-        <strong>${format2(netPay)} บาท</strong>
-        <small>รวมรายได้ ${format2(totalIncome)} บาท · หักประกันสังคม ${format2(socialSecurity)} บาท (${format2(S.SOCIAL_SECURITY_PERCENT)}%)</small>
-      </div>
-      <span class="quick-unit" aria-hidden="true"></span>
-    `;
+    periodQuickNet.textContent = `${format2(netPay)} บาท`;
+    periodQuickDetail.textContent = `รวมรายได้ ${format2(totalIncome)} บาท · หักประกันสังคม ${format2(socialSecurity)} บาท (${format2(S.SOCIAL_SECURITY_PERCENT)}%)`;
   }
   updateHeaderInfo();
 
