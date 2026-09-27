@@ -7782,13 +7782,60 @@ select option { background:var(--time-surface); color:var(--time-text); }
    otherwise leave them much darker than the selected values. */
 .period-section .period-controls .field-card > span,
 .period-section .period-controls .select-card > span {
-  color:color-mix(in srgb, var(--time-text) 78%, var(--time-muted)) !important;
+  color:var(--time-text) !important;
   opacity:1 !important;
-  font-size:11px !important;
-  font-weight:700 !important;
+  font-size:12px !important;
+  font-weight:750 !important;
 }
 .period-section .period-controls .field-card:first-child {
   border-right-color:color-mix(in srgb, var(--time-line) 72%, transparent) !important;
+}
+
+/* Flat borders: one normal 1px outline on every major surface. */
+.app-header,
+.input-section,
+.summary-card,
+.card,
+.backup-card,
+.standalone-disclaimer-card,
+.calendar,
+.calendar-expand,
+.period-summary-quick,
+.collapse-toggle,
+.period-nav-btn,
+.backup-button,
+.field-card,
+.toggle-card,
+.incentive-card,
+.period-controls,
+.header-clock {
+  border-width:1px !important;
+  border-style:solid !important;
+  border-color:var(--time-line) !important;
+  box-shadow:none !important;
+}
+input,
+select,
+button {
+  box-shadow:none !important;
+}
+.app-header::before, .app-header::after,
+.input-panel::before, .input-panel::after,
+.input-section::before, .input-section::after,
+.summary-shell::before, .summary-shell::after,
+.summary-card::before, .summary-card::after,
+.backup-card::before, .backup-card::after,
+.standalone-disclaimer-card::before, .standalone-disclaimer-card::after,
+.period-summary-quick::before, .period-summary-quick::after {
+  display:none !important;
+  content:none !important;
+}
+.period-controls .field-card {
+  border:0 !important;
+  box-shadow:none !important;
+}
+.period-controls .field-card:first-child {
+  border-right:1px solid var(--time-line) !important;
 }
 </style>
 </head>
