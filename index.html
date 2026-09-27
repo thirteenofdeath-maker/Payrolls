@@ -7777,6 +7777,19 @@ select option { background:var(--time-surface); color:var(--time-text); }
 :is(html[data-daypart="night"], html[data-daypart="late-night"]) #inputDetails .mentor-toggle-card:has(.toggle-input:checked) .toggle-copy small {
   color:var(--time-muted) !important;
 }
+
+/* Period picker labels need their own contrast because older select-card rules
+   otherwise leave them much darker than the selected values. */
+.period-section .period-controls .field-card > span,
+.period-section .period-controls .select-card > span {
+  color:color-mix(in srgb, var(--time-text) 78%, var(--time-muted)) !important;
+  opacity:1 !important;
+  font-size:11px !important;
+  font-weight:700 !important;
+}
+.period-section .period-controls .field-card:first-child {
+  border-right-color:color-mix(in srgb, var(--time-line) 72%, transparent) !important;
+}
 </style>
 </head>
 
