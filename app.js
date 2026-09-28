@@ -44,7 +44,16 @@ const { calculatePayroll } = PayrollEngine;
 const { createBackup, parseAndValidateBackup, restoreBackup } = PayrollStorageTransfer;
 
 function applyDaypartTone(now = new Date()) {
-  const hour = now.getHours();
+  let hour = now.getHours();
+  try {
+    hour = Number(new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      hourCycle: "h23",
+      timeZone: "Asia/Bangkok"
+    }).format(now));
+  } catch {
+    // Use the device hour when the requested time zone is unavailable.
+  }
   const daypart = hour >= 5 && hour < 8 ? "morning"
     : hour >= 8 && hour < 11 ? "late-morning"
     : hour >= 11 && hour < 14 ? "noon"
@@ -53,13 +62,13 @@ function applyDaypartTone(now = new Date()) {
     : hour >= 20 && hour < 23 ? "night"
     : "late-night";
   const themeColors = {
-    morning: "#EDF4F7",
-    "late-morning": "#EEF3F3",
-    noon: "#F1F3ED",
-    afternoon: "#F3F1E8",
-    evening: "#F2ECEC",
-    night: "#081C30",
-    "late-night": "#061523"
+    morning: "#607a65",
+    "late-morning": "#6f7653",
+    noon: "#7c6c4f",
+    afternoon: "#7e6b4c",
+    evening: "#715348",
+    night: "#eef2f4",
+    "late-night": "#e8eef2"
   };
 
   document.documentElement.removeAttribute("data-theme");
