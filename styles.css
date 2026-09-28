@@ -274,8 +274,13 @@ input:disabled {
 .input-section.period-section {
   overflow: visible;
   padding: 0;
+  border: 0;
   background: transparent;
   box-shadow: none;
+}
+
+.period-section > .section-title {
+  margin: 0 4px 14px;
 }
 
 .section-title,
