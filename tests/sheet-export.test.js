@@ -76,3 +76,14 @@ test("creates an XLSX workbook with the three requested sheets", () => {
   assert.doesNotMatch(summarySheet, /ค่าครูฝึก/);
   assert.doesNotMatch(settingsSheet, /ค่าครูฝึก/);
 });
+
+test("sorts exported daily rows by date even when opened calendar cards moved in the DOM", () => {
+  const shuffledDays = [days[2], days[3], days[0], days[1]];
+  const model = buildExportModel({ settings, days: shuffledDays }, calculatePayroll);
+
+  assert.deepEqual(
+    model.daily.map(day => day.date),
+    ["2026-09-16", "2026-09-17", "2026-09-18", "2026-09-19"]
+  );
+  assert.equal(model.periodLabel, "2026-09-16 ถึง 2026-09-19");
+});
