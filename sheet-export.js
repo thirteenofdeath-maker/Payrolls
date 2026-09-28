@@ -23,8 +23,11 @@
       throw new Error("ข้อมูลสำหรับส่งออกไม่ถูกต้อง");
     }
 
-    const result = calculatePayroll(data);
-    const daily = data.days.map(day => {
+    const sortedDays = [...data.days].sort((left, right) =>
+      String(left?.date || "").localeCompare(String(right?.date || ""))
+    );
+    const result = calculatePayroll({ ...data, days: sortedDays });
+    const daily = sortedDays.map(day => {
       const dailySettings = { ...data.settings, mentor: false, incentive1: 0, incentive2: 0 };
       const dailyResult = calculatePayroll({ settings: dailySettings, days: [day] });
       return {
