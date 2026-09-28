@@ -1,127 +1,129 @@
 :root {
   color-scheme: light;
-  --canvas: #eaf1f5;
-  --surface: #fffdf9;
-  --surface-2: #e2ebf0;
-  --surface-3: #d5e2e9;
-  --text: #173047;
-  --muted: #617786;
-  --line: #d4dfe5;
-  --accent: #173047;
-  --accent-strong: #173047;
-  --accent-soft: #dbe6ed;
-  --success: #39775a;
+  --canvas: #fff9ef;
+  --surface: #fffdf8;
+  --surface-2: #f8f2e8;
+  --surface-3: #e4eee0;
+  --text: #352e2c;
+  --muted: #685f58;
+  --line: #e4eee0;
+  --accent: #607a65;
+  --accent-strong: #4f6754;
+  --accent-soft: #e4eee0;
+  --success: #789b63;
   --warning: #9a641f;
-  --danger: #b74343;
-  --info: #386b88;
+  --danger: #b3492f;
+  --info: #66859d;
   --shift-morning: #b97700;
   --shift-night: #715ad1;
-  --shadow: 0 14px 34px rgb(39 65 82 / 10%);
-  --control-shadow: 0 5px 14px rgb(39 65 82 / 8%);
+  --shadow: 0 1px 2px rgb(57 65 61 / 3%), 0 8px 24px rgb(57 65 61 / 6%);
+  --control-shadow: 0 2px 8px rgb(57 65 61 / 5%);
+  --nested-shadow: inset 0 0 0 1px var(--line), 0 2px 8px rgb(57 65 61 / 4%);
   --radius-lg: 26px;
   --radius-md: 18px;
   --radius-sm: 13px;
-  --focus: #225f79;
-  --on-accent: #fffdf8;
+  --focus: #4f6754;
+  --on-accent: #ffffff;
   --content-width: 1180px;
 }
 
 html[data-daypart="morning"] {
-  --canvas: #edf4f7;
-  --surface: #fffdf9;
-  --surface-2: #e2ebf0;
-  --surface-3: #d5e2e9;
-  --accent: #173047;
-  --accent-strong: #173047;
-  --accent-soft: #dbe6ed;
+  --canvas: #fff9ef;
+  --surface: #fffdf8;
+  --surface-2: #f8f2e8;
+  --surface-3: #e4eee0;
+  --text: #352e2c;
+  --muted: #685f58;
+  --line: #e4eee0;
+  --accent: #607a65;
+  --accent-strong: #4f6754;
+  --accent-soft: #e4eee0;
 }
 
 html[data-daypart="late-morning"] {
-  --canvas: #eef3f3;
-  --surface: #fffdf9;
-  --surface-2: #e4ecec;
-  --surface-3: #d7e3e4;
-  --accent: #1b3a50;
-  --accent-strong: #173047;
-  --accent-soft: #dce7ea;
+  --canvas: #fff4e8;
+  --surface: #fffbf5;
+  --surface-2: #f2e6d8;
+  --surface-3: #d9e3c3;
+  --text: #4f4439;
+  --muted: #675f57;
+  --line: #d9e3c3;
+  --accent: #6f7653;
+  --accent-strong: #555d3f;
+  --accent-soft: #d9e3c3;
 }
 
 html[data-daypart="noon"] {
-  --canvas: #f1f3ed;
-  --surface: #fffdf8;
-  --surface-2: #e8ece2;
-  --surface-3: #dce3d5;
-  --accent: #26414f;
-  --accent-strong: #1c3546;
-  --accent-soft: #e0e8e3;
+  --canvas: #fff3e2;
+  --surface: #fffaf1;
+  --surface-2: #e9d8c7;
+  --surface-3: #d9c29c;
+  --text: #514238;
+  --muted: #6e6158;
+  --line: #d9c29c;
+  --accent: #7c6c4f;
+  --accent-strong: #5f513b;
+  --accent-soft: #e9d8c7;
 }
 
 html[data-daypart="afternoon"] {
-  --canvas: #f3f1e8;
-  --surface: #fffdf7;
-  --surface-2: #ece7d9;
-  --surface-3: #e1dac8;
-  --accent: #2e4350;
-  --accent-strong: #223847;
-  --accent-soft: #e5e5dc;
+  --canvas: #fff7d1;
+  --surface: #fffbdf;
+  --surface-2: #ebc9a7;
+  --surface-3: #d8b181;
+  --text: #544238;
+  --muted: #6f6257;
+  --line: #d8b181;
+  --accent: #7e6b4c;
+  --accent-strong: #604d35;
+  --accent-soft: #ebc9a7;
 }
 
 html[data-daypart="evening"] {
-  --canvas: #f2ecec;
-  --surface: #fffaf7;
-  --surface-2: #eadfe0;
-  --surface-3: #dfd2d4;
-  --accent: #354355;
-  --accent-strong: #28384c;
-  --accent-soft: #e6dfe2;
+  --canvas: #ffd6c6;
+  --surface: #fff1eb;
+  --surface-2: #f7b89c;
+  --surface-3: #e98a72;
+  --text: #513c35;
+  --muted: #72584f;
+  --line: #e98a72;
+  --accent: #715348;
+  --accent-strong: #624339;
+  --accent-soft: #f7b89c;
 }
 
 html[data-daypart="night"] {
-  color-scheme: dark;
-  --canvas: #111a20;
-  --surface: #1d272e;
-  --surface-2: #26343d;
-  --surface-3: #303f48;
-  --text: #f8f5f0;
-  --muted: #b8c1c6;
-  --line: #3c4b55;
-  --accent: #f1c97a;
-  --accent-strong: #ffdda0;
-  --accent-soft: #3b403d;
-  --success: #82c79f;
-  --warning: #f1be72;
-  --danger: #ff9b9b;
-  --info: #8bc4e0;
-  --shift-morning: #f1be72;
-  --shift-night: #aa98ff;
-  --shadow: 0 16px 38px rgb(0 0 0 / 24%);
-  --control-shadow: 0 6px 16px rgb(0 0 0 / 18%);
-  --focus: #ffd891;
-  --on-accent: #17130d;
+  --canvas: #eef2f4;
+  --surface: #fffaf2;
+  --surface-2: #dce4ea;
+  --surface-3: #c6d3db;
+  --text: #20364a;
+  --muted: #5d6d79;
+  --line: #c6d3db;
+  --accent: #20364a;
+  --accent-strong: #081c30;
+  --accent-soft: #dce4ea;
+  --success: #5f9369;
+  --danger: #b94f3d;
+  --info: #5d88a3;
+  --focus: #20364a;
 }
 
 html[data-daypart="late-night"] {
-  color-scheme: dark;
-  --canvas: #0b141a;
-  --surface: #172129;
-  --surface-2: #223039;
-  --surface-3: #2b3a44;
-  --text: #f8f5f0;
-  --muted: #bac3c8;
-  --line: #364650;
-  --accent: #e7c58a;
-  --accent-strong: #ffdda2;
-  --accent-soft: #373e3c;
-  --success: #80c59e;
-  --warning: #edbc76;
-  --danger: #ff9c9c;
-  --info: #8bc4e0;
-  --shift-morning: #edbc76;
-  --shift-night: #aa98ff;
-  --shadow: 0 16px 38px rgb(0 0 0 / 26%);
-  --control-shadow: 0 6px 16px rgb(0 0 0 / 20%);
-  --focus: #ffd891;
-  --on-accent: #17130d;
+  --canvas: #e8eef2;
+  --surface: #f9f7f2;
+  --surface-2: #d7e1e8;
+  --surface-3: #bccbd5;
+  --text: #1b2d40;
+  --muted: #586b79;
+  --line: #bccbd5;
+  --accent: #1b2d40;
+  --accent-strong: #061523;
+  --accent-soft: #dce4ea;
+  --success: #5f9369;
+  --danger: #b94f3d;
+  --info: #587f99;
+  --focus: #1b2d40;
 }
 
 * { box-sizing: border-box; }
@@ -137,12 +139,13 @@ body {
   margin: 0;
   padding: max(16px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right))
     max(28px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
-  background: linear-gradient(180deg, var(--canvas), color-mix(in srgb, var(--canvas) 90%, var(--surface-2))) fixed;
+  background: var(--canvas);
   color: var(--text);
   font-family: "Leelawadee UI", "Noto Sans Thai", Tahoma, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 400ms ease, color 400ms ease;
 }
 
 button, input, select { font: inherit; }
@@ -207,10 +210,11 @@ input:disabled {
 .summary-card,
 .backup-card,
 .standalone-disclaimer-card {
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow);
+  transition: background-color 400ms ease, border-color 400ms ease, color 400ms ease;
 }
 
 .app-header {
@@ -304,7 +308,7 @@ input:disabled {
 .period-nav-btn,
 .collapse-toggle,
 .backup-button {
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-2);
   color: var(--text);
@@ -341,7 +345,7 @@ input:disabled {
   min-width: 0;
   min-height: 48px;
   padding: 6px 14px;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--text);
@@ -373,7 +377,7 @@ input:disabled {
   display: block;
   min-width: 0;
   padding: 12px;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-2);
   color: var(--text);
@@ -427,7 +431,7 @@ input[readonly] {
   justify-content: space-between;
   gap: 14px;
   padding: 15px 16px;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -481,7 +485,7 @@ input[readonly] {
 
 .calendar {
   padding: 18px 12px;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   background: var(--surface);
   box-shadow: var(--shadow);
@@ -627,10 +631,10 @@ input[readonly] {
 .card {
   margin: 8px 2px 4px;
   padding: 14px;
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--surface);
-  box-shadow: var(--control-shadow);
+  background: var(--surface-2);
+  box-shadow: var(--nested-shadow);
 }
 
 .card-header {
@@ -665,7 +669,7 @@ input[readonly] {
   overflow: hidden;
   padding: 4px 9px;
   border-radius: 99px;
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--muted);
   font-size: .75rem;
   font-weight: 750;
@@ -738,7 +742,7 @@ input[readonly] {
 
 .toggle-card,
 .incentive-card {
-  border: 0;
+  border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--surface-2);
 }
