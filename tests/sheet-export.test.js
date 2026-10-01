@@ -50,7 +50,8 @@ test("builds an auditable daily breakdown without period-only payments", () => {
 test("creates an XLSX workbook with the three requested sheets", () => {
   const model = buildExportModel({ settings, days }, calculatePayroll, {
     periodLabel: "16 ก.ย. - 15 ต.ค. 2569",
-    generatedAt: "2026-09-27T12:00:00.000Z"
+    generatedAt: "2026-09-27T12:00:00.000Z",
+    actualSlip: { gross: 1800, deductions: 80, net: 1720 }
   });
   const bytes = createWorkbook(model, fflate);
   const files = fflate.unzipSync(bytes);
@@ -72,6 +73,8 @@ test("creates an XLSX workbook with the three requested sheets", () => {
   assert.match(dailySheet, /หน่วย OT \(HR\)/);
   assert.match(summarySheet, /ยอดสุทธิ/);
   assert.match(summarySheet, /ค่าพี่เลี้ยง/);
+  assert.match(summarySheet, /ยอดสุทธิตามสลิป/);
+  assert.match(summarySheet, /ผลต่างสุทธิ \(สลิป - คำนวณ\)/);
   assert.match(settingsSheet, /ค่าพี่เลี้ยง/);
   assert.doesNotMatch(summarySheet, /ค่าครูฝึก/);
   assert.doesNotMatch(settingsSheet, /ค่าครูฝึก/);
