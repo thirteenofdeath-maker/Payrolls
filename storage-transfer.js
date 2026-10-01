@@ -15,10 +15,13 @@
   const SCHEMA_VERSION = 1;
   const PAYROLL_PERIOD_KEY = /^payroll-\d{4}-(?:[0-9]|1[01])$/;
   const SETTINGS_PERIOD_KEY = /^settings-\d{4}-(?:[0-9]|1[01])$/;
+  const ACTUAL_SLIP_PERIOD_KEY = /^actual-slip-\d{4}-(?:[0-9]|1[01])$/;
   const APP_EXACT_KEYS = new Set([
     "payrollTheme",
     "payrollInputCollapsed",
     "payrollSummaryCollapsed",
+    "payrollSlipCollapsed",
+    "payrollDashboardCollapsed",
     "lastViewedMonth",
     "lastViewedYear"
   ]);
@@ -26,7 +29,8 @@
   function isAppStorageKey(key) {
     return APP_EXACT_KEYS.has(key) ||
       PAYROLL_PERIOD_KEY.test(key) ||
-      SETTINGS_PERIOD_KEY.test(key);
+      SETTINGS_PERIOD_KEY.test(key) ||
+      ACTUAL_SLIP_PERIOD_KEY.test(key);
   }
 
   function validateStorageEntry(key, value) {
@@ -70,7 +74,32 @@
       }
     }
 
-    if (key === "payrollInputCollapsed" || key === "payrollSummaryCollapsed") {
+    if (ACTUAL_SLIP_PERIOD_KEY.test(key)) {
+      let slip;
+      try {
+        slip = JSON.parse(value);
+      } catch (error) {
+        throw new Error("ข้อมูลสลิปจริงในไฟล์สำรองเสียหาย");
+      }
+
+      const optionalNonNegativeNumber = amount =>
+        amount === null || (typeof amount === "number" && Number.isFinite(amount) && amount >= 0);
+      const requiredNonNegativeNumber = amount =>
+        typeof amount === "number" && Number.isFinite(amount) && amount >= 0;
+
+      if (!slip || typeof slip !== "object" || Array.isArray(slip) ||
+          !optionalNonNegativeNumber(slip.gross) ||
+          !optionalNonNegativeNumber(slip.deductions) ||
+          !requiredNonNegativeNumber(slip.net) ||
+          !optionalNonNegativeNumber(slip.estimatedGross) ||
+          !optionalNonNegativeNumber(slip.estimatedDeductions) ||
+          !optionalNonNegativeNumber(slip.estimatedNet) ||
+          (slip.note !== undefined && (typeof slip.note !== "string" || slip.note.length > 500))) {
+        throw new Error("ข้อมูลสลิปจริงในไฟล์สำรองไม่ถูกต้อง");
+      }
+    }
+
+    if (["payrollInputCollapsed", "payrollSummaryCollapsed", "payrollSlipCollapsed", "payrollDashboardCollapsed"].includes(key)) {
       if (value !== "0" && value !== "1") {
         throw new Error("สถานะการพับส่วนแสดงผลไม่ถูกต้อง");
       }

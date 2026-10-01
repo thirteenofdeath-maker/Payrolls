@@ -40,8 +40,20 @@ const inputToggle = document.getElementById("inputToggle");
 const inputDetails = document.getElementById("inputDetails");
 const summaryToggle = document.getElementById("summaryToggle");
 const summaryShell = document.querySelector(".summary-shell");
+const slipToggle = document.getElementById("slipToggle");
+const slipDetails = document.getElementById("slipDetails");
+const dashboardToggle = document.getElementById("dashboardToggle");
+const slipDashboard = document.getElementById("slipDashboard");
+const actualSlipGrossInput = document.getElementById("actualSlipGross");
+const actualSlipDeductionsInput = document.getElementById("actualSlipDeductions");
+const actualSlipNetInput = document.getElementById("actualSlipNet");
+const actualSlipNoteInput = document.getElementById("actualSlipNote");
+const saveActualSlipBtn = document.getElementById("saveActualSlipBtn");
+const deleteActualSlipBtn = document.getElementById("deleteActualSlipBtn");
+const actualSlipStatus = document.getElementById("actualSlipStatus");
 const { calculatePayroll } = PayrollEngine;
 const { createBackup, parseAndValidateBackup, restoreBackup } = PayrollStorageTransfer;
+let lastPayrollResult = null;
 
 function applyDaypartTone(now = new Date()) {
   let hour = now.getHours();
@@ -223,11 +235,31 @@ function setSummaryCollapsed(collapsed, immediate = false) {
   setPanelCollapsed(getSummaryCollapseTarget(), collapsed, immediate);
 }
 
+function setSlipCollapsed(collapsed, immediate = false) {
+  if (!slipDetails || !slipToggle) return;
+  updateCollapseButton(slipToggle, collapsed, "สลิปเงินจริง", "ซ่อนช่องกรอกสลิปจริง", "แสดงช่องกรอกสลิปจริง");
+  localStorage.setItem("payrollSlipCollapsed", collapsed ? "1" : "0");
+  setPanelCollapsed(slipDetails, collapsed, immediate);
+}
+
+function setDashboardCollapsed(collapsed, immediate = false) {
+  if (!slipDashboard || !dashboardToggle) return;
+  updateCollapseButton(dashboardToggle, collapsed, "Dashboard เปรียบเทียบสลิป", "ซ่อน Dashboard เปรียบเทียบสลิป", "แสดง Dashboard เปรียบเทียบสลิป");
+  localStorage.setItem("payrollDashboardCollapsed", collapsed ? "1" : "0");
+  setPanelCollapsed(slipDashboard, collapsed, immediate);
+}
+
 if (inputToggle) {
   inputToggle.onclick = () => setInputCollapsed(!inputToggle.matches('[aria-expanded="false"]'));
 }
 if (summaryToggle) {
   summaryToggle.onclick = () => setSummaryCollapsed(!summaryShell.classList.contains("summary-collapsed"));
+}
+if (slipToggle) {
+  slipToggle.onclick = () => setSlipCollapsed(slipToggle.getAttribute("aria-expanded") === "true");
+}
+if (dashboardToggle) {
+  dashboardToggle.onclick = () => setDashboardCollapsed(dashboardToggle.getAttribute("aria-expanded") === "true");
 }
 
 function syncHourly(){
@@ -760,9 +792,176 @@ function format2(v){
     maximumFractionDigits: 2
   });
 }
+
+function getActualSlipKey(year = yearSelect.value, month = monthSelect.value) {
+  return `actual-slip-${year}-${month}`;
+}
+
+function optionalMoney(value) {
+  if (value === null || value === undefined || String(value).trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function readActualSlip(year = yearSelect.value, month = monthSelect.value) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(getActualSlipKey(year, month)));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+    const net = optionalMoney(parsed.net);
+    if (net === null) return null;
+    return {
+      gross: optionalMoney(parsed.gross),
+      deductions: optionalMoney(parsed.deductions),
+      net,
+      note: typeof parsed.note === "string" ? parsed.note.slice(0, 500) : "",
+      estimatedGross: optionalMoney(parsed.estimatedGross),
+      estimatedDeductions: optionalMoney(parsed.estimatedDeductions),
+      estimatedNet: optionalMoney(parsed.estimatedNet),
+      savedAt: typeof parsed.savedAt === "string" ? parsed.savedAt : ""
+    };
+  } catch {
+    return null;
+  }
+}
+
+function setActualSlipStatus(message, state = "") {
+  if (!actualSlipStatus) return;
+  actualSlipStatus.textContent = message;
+  actualSlipStatus.dataset.state = state;
+}
+
+function loadActualSlip() {
+  const slip = readActualSlip();
+  actualSlipGrossInput.value = slip?.gross ?? "";
+  actualSlipDeductionsInput.value = slip?.deductions ?? "";
+  actualSlipNetInput.value = slip?.net ?? "";
+  actualSlipNoteInput.value = slip?.note ?? "";
+  deleteActualSlipBtn.hidden = !slip;
+  setActualSlipStatus(slip ? "โหลดข้อมูลสลิปของงวดนี้แล้ว" : "ยังไม่มีข้อมูลสลิปจริงของงวดนี้");
+}
+
+function periodLabelFromStorage(year, month) {
+  const monthIndex = Number(month);
+  return `${monthNames[monthIndex] || ""} ${toBuddhistYear(year)}`.trim();
+}
+
+function listActualSlipHistory() {
+  const items = [];
+  for (let index = 0; index < localStorage.length; index++) {
+    const key = localStorage.key(index);
+    const match = /^actual-slip-(\d{4})-(?:([0-9])|(1[01]))$/.exec(key || "");
+    if (!match) continue;
+    const year = match[1];
+    const month = match[2] ?? match[3];
+    const slip = readActualSlip(year, month);
+    if (!slip || slip.estimatedNet === null) continue;
+    items.push({
+      key,
+      year: Number(year),
+      month: Number(month),
+      label: periodLabelFromStorage(year, month),
+      estimatedNet: slip.estimatedNet,
+      actualNet: slip.net
+    });
+  }
+  return items
+    .sort((left, right) => left.year - right.year || left.month - right.month)
+    .slice(-6);
+}
+
+function moneyOrWaiting(value) {
+  return value === null ? "ยังไม่กรอก" : `${format2(value)} บาท`;
+}
+
+function differenceText(actual, estimated) {
+  if (actual === null || estimated === null) return "—";
+  const difference = actual - estimated;
+  return `${difference > 0 ? "+" : ""}${format2(difference)} บาท`;
+}
+
+function renderSlipDashboard(result = lastPayrollResult) {
+  if (!slipDashboard || !result) return;
+  const slip = readActualSlip();
+  if (!slip) {
+    slipDashboard.innerHTML = `
+      <div class="dashboard-card dashboard-empty">
+        <strong>ยังไม่มีสลิปจริงสำหรับเปรียบเทียบ</strong>
+        <span>เปิด “สลิปเงินจริง” แล้วกรอกยอดสุทธิจากสลิปของงวดนี้</span>
+      </div>`;
+    setDashboardCollapsed(dashboardToggle?.getAttribute("aria-expanded") === "false", true);
+    return;
+  }
+
+  const estimatedGross = result.totals.totalIncome;
+  const estimatedDeductions = result.deductions.socialSecurity;
+  const estimatedNet = result.totals.netPay;
+  const netDifference = slip.net - estimatedNet;
+  const variancePercent = estimatedNet !== 0 ? (netDifference / estimatedNet) * 100 : null;
+  const absolutePercent = variancePercent === null ? null : Math.abs(variancePercent);
+  const status = absolutePercent === null ? "ไม่มีฐานคำนวณ"
+    : absolutePercent < 0.01 ? "ตรงกัน"
+    : absolutePercent <= 1 ? "ใกล้เคียง"
+    : "ควรตรวจสอบรายการต่าง";
+  const varianceClass = netDifference > 0 ? "variance-positive" : netDifference < 0 ? "variance-negative" : "";
+  const rows = [
+    ["รายได้รวม", estimatedGross, slip.gross],
+    ["รายการหัก", estimatedDeductions, slip.deductions],
+    ["ยอดสุทธิ", estimatedNet, slip.net]
+  ];
+
+  const currentKey = getActualSlipKey();
+  const history = listActualSlipHistory().map(item =>
+    item.key === currentKey ? { ...item, estimatedNet } : item
+  );
+  const maxHistoryValue = Math.max(1, ...history.flatMap(item => [item.estimatedNet, item.actualNet]));
+  const historyMarkup = history.length ? `
+    <div class="history-block">
+      <h3 class="history-heading">แนวโน้ม 6 งวดล่าสุด</h3>
+      <div class="history-list">
+        ${history.map(item => {
+          const difference = item.actualNet - item.estimatedNet;
+          return `
+            <div class="history-item">
+              <span class="history-period">${item.label}</span>
+              <div class="history-bars" aria-label="${item.label}: คำนวณ ${format2(item.estimatedNet)} บาท สลิปจริง ${format2(item.actualNet)} บาท">
+                <span class="history-bar-track"><i class="history-bar history-bar-estimated" style="width:${Math.max(2, item.estimatedNet / maxHistoryValue * 100)}%"></i></span>
+                <span class="history-bar-track"><i class="history-bar history-bar-actual" style="width:${Math.max(2, item.actualNet / maxHistoryValue * 100)}%"></i></span>
+              </div>
+              <span class="history-variance">ต่าง ${difference > 0 ? "+" : ""}${format2(difference)}</span>
+            </div>`;
+        }).join("")}
+      </div>
+      <div class="history-legend">
+        <span><i class="history-bar-estimated"></i>ยอดคำนวณ</span>
+        <span><i class="history-bar-actual"></i>ยอดตามสลิปจริง</span>
+      </div>
+    </div>` : "";
+
+  slipDashboard.innerHTML = `
+    <div class="dashboard-card">
+      <div class="comparison-hero">
+        <div class="comparison-metric"><span>คำนวณสุทธิ</span><strong>${format2(estimatedNet)}</strong></div>
+        <div class="comparison-metric metric-net"><span>ตามสลิปจริง</span><strong>${format2(slip.net)}</strong></div>
+        <div class="comparison-metric ${varianceClass}"><span>ผลต่าง</span><strong>${netDifference > 0 ? "+" : ""}${format2(netDifference)}</strong></div>
+        <div class="comparison-metric"><span>คลาดเคลื่อน</span><strong>${variancePercent === null ? "—" : `${variancePercent > 0 ? "+" : ""}${format2(variancePercent)}%`}</strong></div>
+      </div>
+      <div class="comparison-table">
+        <div class="comparison-row comparison-row-head"><span>รายการ</span><span>คำนวณ</span><span>สลิปจริง</span><span>ผลต่าง</span></div>
+        ${rows.map(([label, estimated, actual]) => `
+          <div class="comparison-row">
+            <b>${label}</b><span>${moneyOrWaiting(estimated)}</span><span>${moneyOrWaiting(actual)}</span><span>${differenceText(actual, estimated)}</span>
+          </div>`).join("")}
+      </div>
+      <p class="comparison-status">สถานะ: <b>${status}</b>${slip.note ? ` · มีหมายเหตุจากสลิป` : ""}</p>
+      ${historyMarkup}
+    </div>`;
+  setDashboardCollapsed(dashboardToggle?.getAttribute("aria-expanded") === "false", true);
+}
+
 // UI adapter: renders only the result returned by the payroll engine.
 function calculate(data=getPayrollData()){
   const result=calculatePayroll(data);
+  lastPayrollResult = result;
   const S=result.settings;
   const { cNormalday, cHolidaySpecial, cVacation, cSickDoctor, cBusinessExtra, nightShiftDays, otFoodDays, skillDays }=result.counts;
   const { ot1Hour, ot15Hours, ot2Hours, ot3Hours, totalOtHours }=result.hours;
@@ -778,6 +977,7 @@ function calculate(data=getPayrollData()){
     periodQuickDetail.textContent = `รวมรายได้ ${format2(totalIncome)} บาท · หักประกันสังคม ${format2(socialSecurity)} บาท (${format2(S.SOCIAL_SECURITY_PERCENT)}%)`;
   }
   updateHeaderInfo();
+  renderSlipDashboard(result);
 
   document.getElementById("result").innerHTML = `
   <div class="summary-panel">
@@ -975,6 +1175,7 @@ function applyPeriodChange() {
     yearSelect.value = String(selectedYear);
     syncPeriodPicker();
     loadSettings();
+    loadActualSlip();
     renderMonth();
     updateHeaderInfo();
     localStorage.setItem('lastViewedMonth', monthSelect.value);
@@ -1025,6 +1226,51 @@ document.getElementById("mentorCheck").onchange = () => { saveSettings(); render
     input.oninput = () => { saveSettings(); renderSummary(); };
     input.onchange = () => { saveSettings(); renderSummary(); };
 });
+
+[actualSlipGrossInput, actualSlipDeductionsInput, actualSlipNetInput, actualSlipNoteInput].forEach(input => {
+    if (!input) return;
+    input.addEventListener("input", () => setActualSlipStatus("มีการแก้ไขที่ยังไม่ได้บันทึก"));
+});
+
+saveActualSlipBtn.addEventListener("click", () => {
+    const gross = optionalMoney(actualSlipGrossInput.value);
+    const deductions = optionalMoney(actualSlipDeductionsInput.value);
+    const net = optionalMoney(actualSlipNetInput.value);
+    if ((actualSlipGrossInput.value.trim() !== "" && gross === null) ||
+        (actualSlipDeductionsInput.value.trim() !== "" && deductions === null)) {
+      setActualSlipStatus("รายได้รวมและรายการหักต้องเป็นจำนวนตั้งแต่ 0 ขึ้นไป", "error");
+      return;
+    }
+    if (actualSlipNetInput.value.trim() === "" || net === null) {
+      setActualSlipStatus("กรุณากรอกยอดสุทธิตามสลิปเป็นจำนวนตั้งแต่ 0 ขึ้นไป", "error");
+      actualSlipNetInput.focus();
+      return;
+    }
+
+    const result = lastPayrollResult || calculatePayroll(getPayrollData());
+    const slip = {
+      gross,
+      deductions,
+      net,
+      note: actualSlipNoteInput.value.trim().slice(0, 500),
+      estimatedGross: result.totals.totalIncome,
+      estimatedDeductions: result.deductions.socialSecurity,
+      estimatedNet: result.totals.netPay,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(getActualSlipKey(), JSON.stringify(slip));
+    deleteActualSlipBtn.hidden = false;
+    setActualSlipStatus("บันทึกสลิปจริงของงวดนี้แล้ว", "success");
+    renderSlipDashboard(result);
+});
+
+deleteActualSlipBtn.addEventListener("click", () => {
+    if (!window.confirm("ลบข้อมูลสลิปจริงของงวดนี้หรือไม่?")) return;
+    localStorage.removeItem(getActualSlipKey());
+    loadActualSlip();
+    renderSlipDashboard(lastPayrollResult);
+    setActualSlipStatus("ลบข้อมูลสลิปจริงของงวดนี้แล้ว", "success");
+});
 /* ===== ปรับปรุงระบบหุบการ์ดเมื่อคลิกด้านนอก ===== */
 document.addEventListener("click", function(event) {
     if (!expandRow) return; // ถ้าไม่มีการ์ดเปิดอยู่ ไม่ต้องทำอะไร
@@ -1064,7 +1310,8 @@ exportSheetBtn.addEventListener("click", async () => {
     const data = getPayrollData();
     const model = PayrollSheetExport.buildExportModel(data, calculatePayroll, {
       periodLabel: getPeriodRangeText(),
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
+      actualSlip: readActualSlip()
     });
     const month = String(Number(monthSelect.value) + 1).padStart(2, "0");
     const filename = `payroll-detail-${yearSelect.value}-${month}.xlsx`;
@@ -1137,6 +1384,8 @@ function initApp() {
     setInterval(applyDaypartTone, 60 * 1000);
     setInputCollapsed(localStorage.getItem("payrollInputCollapsed") === "1", true);
     setSummaryCollapsed(localStorage.getItem("payrollSummaryCollapsed") === "1", true);
+    setSlipCollapsed(localStorage.getItem("payrollSlipCollapsed") !== "0", true);
+    setDashboardCollapsed(localStorage.getItem("payrollDashboardCollapsed") === "1", true);
     updateHeaderInfo();
     setInterval(updateHeaderInfo, 1000);
     const now = new Date();
@@ -1159,6 +1408,7 @@ function initApp() {
 
     // 4. โหลดข้อมูลและแสดงผล
     loadSettings();
+    loadActualSlip();
     renderMonth();
 }
 

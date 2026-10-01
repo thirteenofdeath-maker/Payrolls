@@ -64,7 +64,8 @@
       generatedAt: metadata.generatedAt || new Date().toISOString(),
       daily,
       result,
-      settings: data.settings
+      settings: data.settings,
+      actualSlip: metadata.actualSlip || null
     };
   }
 
@@ -176,6 +177,15 @@
     rows.push({ cells: ["", "รวมรายได้", "", "", "", totals.totalIncome], styles: [4, 4, 4, 4, 4, 4] });
     rows.push({ cells: ["หัก", "ประกันสังคม", "", "", `${settings.SOCIAL_SECURITY_PERCENT}%`, deductions.socialSecurity], styles: [0, 0, 0, 0, 0, 3] });
     rows.push({ cells: ["", "ยอดสุทธิ", "", "", "", totals.netPay], styles: [5, 5, 5, 5, 5, 5], height: 28 });
+    if (model.actualSlip && Number.isFinite(Number(model.actualSlip.net))) {
+      const slipGross = model.actualSlip.gross === null ? "ยังไม่กรอก" : number(model.actualSlip.gross);
+      const slipDeductions = model.actualSlip.deductions === null ? "ยังไม่กรอก" : number(model.actualSlip.deductions);
+      const slipNet = number(model.actualSlip.net);
+      rows.push({ cells: ["สลิปจริง", "รายได้รวมตามสลิป", "", "", "", slipGross], styles: [0, 0, 0, 0, 0, typeof slipGross === "number" ? 3 : 0] });
+      rows.push({ cells: ["สลิปจริง", "รายการหักตามสลิป", "", "", "", slipDeductions], styles: [0, 0, 0, 0, 0, typeof slipDeductions === "number" ? 3 : 0] });
+      rows.push({ cells: ["สลิปจริง", "ยอดสุทธิตามสลิป", "", "", "", slipNet], styles: [0, 0, 0, 0, 0, 3] });
+      rows.push({ cells: ["เทียบสลิป", "ผลต่างสุทธิ (สลิป - คำนวณ)", "", "", "", slipNet - totals.netPay], styles: [4, 4, 4, 4, 4, 4] });
+    }
     return rows;
   }
 

@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./styles.css?v=35">
+<link rel="stylesheet" href="./styles.css?v=36">
 </head>
 
 <body>
@@ -240,6 +240,59 @@
       </div>
     </div>
     </div>
+
+    <button type="button" id="slipToggle" class="collapse-toggle slip-collapse-toggle" aria-expanded="false" aria-controls="slipDetails">
+      <span class="collapse-text">สลิปเงินจริง</span>
+      <span class="collapse-state">แสดง</span>
+    </button>
+
+    <div id="slipDetails" class="slip-details" hidden>
+      <div class="input-section slip-section">
+        <h2 class="section-title">
+          <span class="section-icon"><svg class="oh-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg></span>
+          <span>ข้อมูลจากสลิปจริง</span>
+        </h2>
+        <p class="section-helper">บันทึกตัวเลขจากสลิปของงวดนี้เพื่อเทียบกับยอดที่แอปคำนวณ ข้อมูลเก็บเฉพาะในเครื่องนี้</p>
+        <div class="field-grid three-cols slip-field-grid">
+          <label class="field-card">
+            <span>รายได้รวมตามสลิป</span>
+            <div class="input-with-unit amount-input-wrap">
+              <input type="number" id="actualSlipGross" min="0" step="0.01" inputmode="decimal" placeholder="ยังไม่กรอก">
+              <span>บาท</span>
+            </div>
+          </label>
+          <label class="field-card">
+            <span>รายการหักตามสลิป</span>
+            <div class="input-with-unit amount-input-wrap">
+              <input type="number" id="actualSlipDeductions" min="0" step="0.01" inputmode="decimal" placeholder="ยังไม่กรอก">
+              <span>บาท</span>
+            </div>
+          </label>
+          <label class="field-card field-important">
+            <span>ยอดสุทธิตามสลิป</span>
+            <div class="input-with-unit amount-input-wrap">
+              <input type="number" id="actualSlipNet" min="0" step="0.01" inputmode="decimal" placeholder="กรอกยอดที่ได้รับจริง">
+              <span>บาท</span>
+            </div>
+          </label>
+        </div>
+        <label class="field-card slip-note-card">
+          <span>หมายเหตุจากสลิป</span>
+          <textarea id="actualSlipNote" rows="2" maxlength="500" placeholder="เช่น โบนัส รายการย้อนหลัง หรือรายการหักอื่น"></textarea>
+        </label>
+        <div class="slip-actions">
+          <button type="button" id="saveActualSlipBtn" class="backup-button backup-button-primary">บันทึกสลิปจริง</button>
+          <button type="button" id="deleteActualSlipBtn" class="backup-button slip-delete-button" hidden>ลบข้อมูลสลิปงวดนี้</button>
+        </div>
+        <div id="actualSlipStatus" class="backup-status" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <button type="button" id="dashboardToggle" class="collapse-toggle dashboard-collapse-toggle" aria-expanded="true" aria-controls="slipDashboard">
+      <span class="collapse-text">Dashboard เปรียบเทียบสลิป</span>
+      <span class="collapse-state">ซ่อน</span>
+    </button>
+    <section id="slipDashboard" class="slip-dashboard" aria-live="polite"></section>
   </section>
 
 <div id="summaryContainer"></div>
@@ -276,12 +329,12 @@
   </div>
 </section>
 
-<script src="./payroll-engine.js?v=35"></script>
-<script src="./storage-transfer.js?v=35"></script>
-<script src="./sheet-export.js?v=35"></script>
-<script src="./app.js?v=35"></script>
+<script src="./payroll-engine.js?v=36"></script>
+<script src="./storage-transfer.js?v=36"></script>
+<script src="./sheet-export.js?v=36"></script>
+<script src="./app.js?v=36"></script>
 
 </body>
 </html>
 
-<!-- app-version: chronological-export-v35 -->
+<!-- app-version: actual-slip-dashboard-v36 -->
