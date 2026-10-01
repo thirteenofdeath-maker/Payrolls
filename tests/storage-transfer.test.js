@@ -21,6 +21,15 @@ test("สำรองเฉพาะข้อมูลของแอป", () =>
   const storage = new MemoryStorage({
     "payroll-2026-8": "[]",
     "settings-2026-8": "{}",
+    "actual-slip-2026-8": JSON.stringify({
+      gross: 22000,
+      deductions: 750,
+      net: 21250,
+      estimatedGross: 21980,
+      estimatedDeductions: 750,
+      estimatedNet: 21230,
+      note: "รายการย้อนหลัง"
+    }),
     payrollTheme: "forest",
     unrelatedApp: "keep-private"
   });
@@ -31,6 +40,15 @@ test("สำรองเฉพาะข้อมูลของแอป", () =>
     schemaVersion: 1,
     exportedAt: "2026-09-27T12:00:00.000Z",
     data: {
+      "actual-slip-2026-8": JSON.stringify({
+        gross: 22000,
+        deductions: 750,
+        net: 21250,
+        estimatedGross: 21980,
+        estimatedDeductions: 750,
+        estimatedNet: 21230,
+        note: "รายการย้อนหลัง"
+      }),
       "payroll-2026-8": "[]",
       payrollTheme: "forest",
       "settings-2026-8": "{}"
@@ -136,4 +154,31 @@ test("ปฏิเสธการตั้งค่าที่ไม่ใช�
     schemaVersion: 1,
     data: { "settings-2026-8": "[]" }
   }), /การตั้งค่า/);
+});
+
+test("สำรองและตรวจสอบข้อมูลสลิปจริงแยกตามงวด", () => {
+  const slip = JSON.stringify({
+    gross: 22000,
+    deductions: 750,
+    net: 21250,
+    estimatedGross: 21980,
+    estimatedDeductions: 750,
+    estimatedNet: 21230,
+    note: "โบนัส"
+  });
+  const backup = parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { "actual-slip-2026-8": slip }
+  });
+
+  assert.equal(backup.data["actual-slip-2026-8"], slip);
+});
+
+test("ปฏิเสธข้อมูลสลิปจริงที่ยอดสุทธิไม่ถูกต้อง", () => {
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { "actual-slip-2026-8": JSON.stringify({ net: -1 }) }
+  }), /สลิปจริง/);
 });
