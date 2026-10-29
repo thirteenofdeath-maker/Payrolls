@@ -1134,9 +1134,15 @@ input[readonly] {
   min-width: 0;
 }
 
+.data-management-copy strong {
+  font-size: .9375rem;
+  line-height: 1.4;
+}
+
 .data-management-copy span {
   color: var(--muted);
-  font-size: .8rem;
+  font-size: .8125rem;
+  line-height: 1.45;
 }
 
 .danger-outline-button {
@@ -1145,6 +1151,8 @@ input[readonly] {
   border-color: color-mix(in srgb, var(--danger) 58%, var(--line));
   color: var(--danger);
   background: transparent;
+  font-size: .875rem;
+  line-height: 1.35;
 }
 
 .clear-data-dialog {
@@ -1174,13 +1182,15 @@ input[readonly] {
 
 .dialog-eyebrow {
   color: var(--danger);
-  font-size: .75rem;
+  font-size: .8125rem;
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .clear-dialog-header h2 {
   margin: 2px 0 0;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
+  line-height: 1.4;
 }
 
 .dialog-close-button {
@@ -1203,6 +1213,7 @@ input[readonly] {
   margin: 12px 0 14px;
   color: var(--muted);
   font-size: .875rem;
+  line-height: 1.5;
 }
 
 .clear-options {
@@ -1244,14 +1255,23 @@ input[readonly] {
 
 .clear-option-danger input { accent-color: var(--danger); }
 .clear-option > span { display: grid; gap: 2px; }
-.clear-option small { color: var(--muted); }
+.clear-option strong {
+  font-size: .9375rem;
+  line-height: 1.4;
+}
+.clear-option small {
+  color: var(--muted);
+  font-size: .8125rem;
+  line-height: 1.45;
+}
 
 .clear-confirm-wrap {
   display: grid;
   gap: 6px;
   margin-top: 13px;
   color: var(--danger);
-  font-size: .85rem;
+  font-size: .8125rem;
+  line-height: 1.45;
 }
 
 .clear-confirm-wrap[hidden] { display: none; }
@@ -1263,6 +1283,7 @@ input[readonly] {
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--text);
+  font-size: .875rem;
 }
 
 .clear-dialog-backup {
@@ -1276,7 +1297,8 @@ input[readonly] {
   border-radius: var(--radius-sm);
   background: var(--surface-2);
   color: var(--muted);
-  font-size: .8rem;
+  font-size: .8125rem;
+  line-height: 1.45;
 }
 
 .text-button {
@@ -1285,7 +1307,9 @@ input[readonly] {
   border: 0;
   background: transparent;
   color: var(--accent-strong);
+  font-size: .8125rem;
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .clear-dialog-actions {
@@ -1299,6 +1323,11 @@ input[readonly] {
   border-color: var(--danger);
   background: var(--danger);
   color: #fff;
+}
+
+.clear-dialog-actions .backup-button {
+  font-size: .9375rem;
+  line-height: 1.35;
 }
 
 @media (min-width: 900px) {
