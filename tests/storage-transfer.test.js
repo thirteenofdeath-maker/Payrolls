@@ -3,7 +3,9 @@ const assert = require("node:assert/strict");
 const {
   createBackup,
   parseAndValidateBackup,
-  restoreBackup
+  restoreBackup,
+  clearPeriodData,
+  clearAllAppData
 } = require("../storage-transfer.js");
 
 class MemoryStorage {
@@ -181,4 +183,55 @@ test("ปฏิเสธข้อมูลสลิปจริงที่ย�
     schemaVersion: 1,
     data: { "actual-slip-2026-8": JSON.stringify({ net: -1 }) }
   }), /สลิปจริง/);
+});
+
+test("ล้างเฉพาะข้อมูลงวดที่เลือกโดยไม่แตะงวดอื่น", () => {
+  const storage = new MemoryStorage({
+    "payroll-2026-8": "[]",
+    "settings-2026-8": "{}",
+    "actual-slip-2026-8": JSON.stringify({ net: 20000 }),
+    "payroll-2026-9": "[]",
+    unrelatedApp: "untouched"
+  });
+
+  const result = clearPeriodData(storage, 2026, 8);
+
+  assert.deepEqual(result.removedKeys.sort(), [
+    "actual-slip-2026-8",
+    "payroll-2026-8",
+    "settings-2026-8"
+  ]);
+  assert.equal(storage.getItem("payroll-2026-9"), "[]");
+  assert.equal(storage.getItem("unrelatedApp"), "untouched");
+});
+
+test("ล้างเฉพาะสลิปจริงของงวดที่เลือก", () => {
+  const storage = new MemoryStorage({
+    "payroll-2026-8": "[]",
+    "settings-2026-8": "{}",
+    "actual-slip-2026-8": JSON.stringify({ net: 20000 })
+  });
+
+  clearPeriodData(storage, 2026, 8, { slipOnly: true });
+
+  assert.equal(storage.getItem("actual-slip-2026-8"), null);
+  assert.equal(storage.getItem("payroll-2026-8"), "[]");
+  assert.equal(storage.getItem("settings-2026-8"), "{}");
+});
+
+test("ล้างข้อมูลทั้งหมดเฉพาะของ Payrolls", () => {
+  const storage = new MemoryStorage({
+    "payroll-2026-8": "[]",
+    "settings-2026-8": "{}",
+    "actual-slip-2026-8": JSON.stringify({ net: 20000 }),
+    payrollInputCollapsed: "1",
+    unrelatedApp: "untouched"
+  });
+
+  const result = clearAllAppData(storage);
+
+  assert.equal(result.removedKeys.length, 4);
+  assert.equal(storage.getItem("payroll-2026-8"), null);
+  assert.equal(storage.getItem("payrollInputCollapsed"), null);
+  assert.equal(storage.getItem("unrelatedApp"), "untouched");
 });

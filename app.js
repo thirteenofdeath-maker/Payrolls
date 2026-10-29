@@ -52,7 +52,13 @@ const saveActualSlipBtn = document.getElementById("saveActualSlipBtn");
 const deleteActualSlipBtn = document.getElementById("deleteActualSlipBtn");
 const actualSlipStatus = document.getElementById("actualSlipStatus");
 const { calculatePayroll } = PayrollEngine;
-const { createBackup, parseAndValidateBackup, restoreBackup } = PayrollStorageTransfer;
+const {
+  createBackup,
+  parseAndValidateBackup,
+  restoreBackup,
+  clearPeriodData,
+  clearAllAppData
+} = PayrollStorageTransfer;
 let lastPayrollResult = null;
 
 function applyDaypartTone(now = new Date()) {
@@ -1294,6 +1300,16 @@ const exportSheetBtn = document.getElementById("exportSheetBtn");
 const importDataBtn = document.getElementById("importDataBtn");
 const importDataFile = document.getElementById("importDataFile");
 const backupStatus = document.getElementById("backupStatus");
+const openClearDataBtn = document.getElementById("openClearDataBtn");
+const clearDataDialog = document.getElementById("clearDataDialog");
+const closeClearDataBtn = document.getElementById("closeClearDataBtn");
+const cancelClearDataBtn = document.getElementById("cancelClearDataBtn");
+const confirmClearDataBtn = document.getElementById("confirmClearDataBtn");
+const backupBeforeClearBtn = document.getElementById("backupBeforeClearBtn");
+const clearPeriodLabel = document.getElementById("clearPeriodLabel");
+const clearAllConfirmWrap = document.getElementById("clearAllConfirmWrap");
+const clearAllConfirmInput = document.getElementById("clearAllConfirmInput");
+const clearScopeInputs = [...document.querySelectorAll('input[name="clearScope"]')];
 
 function setBackupStatus(message, state = "") {
   backupStatus.textContent = message;
@@ -1377,6 +1393,98 @@ importDataFile.addEventListener("change", async () => {
   }
 });
 
+function getSelectedClearScope() {
+  return clearScopeInputs.find(input => input.checked)?.value || "period";
+}
+
+function updateClearDialogState() {
+  const scope = getSelectedClearScope();
+  const isAll = scope === "all";
+  clearAllConfirmWrap.hidden = !isAll;
+
+  if (scope === "slip") {
+    confirmClearDataBtn.textContent = "ล้างเฉพาะสลิปจริง";
+  } else if (isAll) {
+    confirmClearDataBtn.textContent = "ล้างข้อมูลทั้งหมด";
+  } else {
+    confirmClearDataBtn.textContent = "ล้างข้อมูลงวดนี้";
+  }
+
+  confirmClearDataBtn.disabled = isAll && clearAllConfirmInput.value.trim() !== "ล้างข้อมูล";
+}
+
+function refreshCurrentPeriodAfterClear() {
+  if (expandRow) removeExpand(true);
+  selectedDate = null;
+  activeCell = null;
+  loadSettings();
+  loadActualSlip();
+  renderMonth();
+  updateHeaderInfo();
+}
+
+openClearDataBtn.addEventListener("click", () => {
+  clearScopeInputs.forEach(input => { input.checked = input.value === "period"; });
+  clearAllConfirmInput.value = "";
+  clearPeriodLabel.textContent = getPeriodRangeText();
+  updateClearDialogState();
+  clearDataDialog.showModal();
+});
+
+[closeClearDataBtn, cancelClearDataBtn].forEach(button => {
+  button.addEventListener("click", () => clearDataDialog.close());
+});
+
+clearScopeInputs.forEach(input => input.addEventListener("change", () => {
+  clearAllConfirmInput.value = "";
+  updateClearDialogState();
+  if (getSelectedClearScope() === "all") clearAllConfirmInput.focus();
+}));
+clearAllConfirmInput.addEventListener("input", updateClearDialogState);
+
+backupBeforeClearBtn.addEventListener("click", () => exportDataBtn.click());
+
+confirmClearDataBtn.addEventListener("click", () => {
+  const scope = getSelectedClearScope();
+  const year = Number(yearSelect.value);
+  const month = Number(monthSelect.value);
+
+  try {
+    if (scope === "all") {
+      if (clearAllConfirmInput.value.trim() !== "ล้างข้อมูล") return;
+      const { removedKeys } = clearAllAppData(localStorage);
+      clearDataDialog.close();
+      sessionStorage.setItem(
+        "payrollClearNotice",
+        removedKeys.length
+          ? `ล้างข้อมูล Payrolls ทั้งหมดแล้ว (${removedKeys.length} รายการ)`
+          : "ไม่มีข้อมูล Payrolls ให้ล้าง"
+      );
+      window.location.reload();
+      return;
+    }
+
+    const slipOnly = scope === "slip";
+    const { removedKeys } = clearPeriodData(localStorage, year, month, { slipOnly });
+    refreshCurrentPeriodAfterClear();
+    clearDataDialog.close();
+
+    if (!removedKeys.length) {
+      setBackupStatus(slipOnly ? "งวดนี้ยังไม่มีข้อมูลสลิปจริง" : "งวดนี้ยังไม่มีข้อมูลให้ล้าง");
+    } else {
+      setBackupStatus(
+        slipOnly
+          ? "ล้างสลิปจริงของงวดนี้แล้ว ข้อมูลวันทำงานยังอยู่ครบ"
+          : `ล้างข้อมูลของงวด ${getPeriodRangeText()} แล้ว`,
+        "success"
+      );
+    }
+  } catch (error) {
+    setBackupStatus(`ล้างข้อมูลไม่สำเร็จ: ${error.message}`, "error");
+    clearDataDialog.close();
+  }
+});
+
 /* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
 function initApp() {
     localStorage.removeItem("payrollTheme");
@@ -1414,6 +1522,12 @@ function initApp() {
 
 // เรียกใช้เพียงครั้งเดียวที่บรรทัดสุดท้าย
 initApp();
+
+const clearNotice = sessionStorage.getItem("payrollClearNotice");
+if (clearNotice) {
+  sessionStorage.removeItem("payrollClearNotice");
+  setBackupStatus(clearNotice, "success");
+}
 
 /* ===== PWA: register service worker for GitHub Pages ===== */
 if ("serviceWorker" in navigator) {
