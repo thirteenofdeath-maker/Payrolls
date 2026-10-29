@@ -11,8 +11,15 @@ const monthSelect=document.getElementById("monthSelect");
 const yearSelect=document.getElementById("yearSelect");
 const periodMonthPicker=document.getElementById("periodMonthPicker");
 const periodPickerLabel=document.getElementById("periodPickerLabel");
+const periodPickerRange=document.getElementById("periodPickerRange");
+const periodPickerMonth=document.getElementById("periodPickerMonth");
 const prevPeriodBtn=document.getElementById("prevPeriodBtn");
 const nextPeriodBtn=document.getElementById("nextPeriodBtn");
+const periodProgressText=document.getElementById("periodProgressText");
+const periodProgressHint=document.getElementById("periodProgressHint");
+const showMissingDaysBtn=document.getElementById("showMissingDaysBtn");
+const missingDaysPanel=document.getElementById("missingDaysPanel");
+const missingDaysList=document.getElementById("missingDaysList");
 
 const monthNames=[
   "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
@@ -52,6 +59,7 @@ const saveActualSlipBtn = document.getElementById("saveActualSlipBtn");
 const deleteActualSlipBtn = document.getElementById("deleteActualSlipBtn");
 const actualSlipStatus = document.getElementById("actualSlipStatus");
 const { calculatePayroll } = PayrollEngine;
+const { analyzePeriod, describeMoneyDifference } = PayrollQuality;
 const {
   createBackup,
   parseAndValidateBackup,
@@ -60,6 +68,7 @@ const {
   clearAllAppData
 } = PayrollStorageTransfer;
 let lastPayrollResult = null;
+let missingDaysVisible = false;
 
 function applyDaypartTone(now = new Date()) {
   let hour = now.getHours();
@@ -106,12 +115,14 @@ function normalizeYearValue(year) {
 }
 
 function syncPeriodPicker() {
-  if (!periodMonthPicker || !periodPickerLabel || monthSelect.value === "" || !yearSelect.value) return;
+  if (!periodMonthPicker || !periodPickerLabel || !periodPickerRange || !periodPickerMonth || monthSelect.value === "" || !yearSelect.value) return;
 
   const year = Number(yearSelect.value);
   const month = Number(monthSelect.value);
   periodMonthPicker.value = `${year}-${String(month + 1).padStart(2, "0")}`;
-  periodPickerLabel.textContent = `${monthNames[month]} ${toBuddhistYear(year)}`;
+  periodPickerRange.textContent = getPeriodRangeCompactText();
+  periodPickerMonth.textContent = `${monthNames[month]} ${toBuddhistYear(year)}`;
+  periodMonthPicker.setAttribute("aria-label", `เลือกงวด ${getPeriodRangeText()} เดือนอ้างอิง ${monthNames[month]} ${toBuddhistYear(year)}`);
 }
 
 function formatThaiShortDate(d) {
@@ -138,6 +149,14 @@ function getPeriodRangeText() {
   const start = new Date(y, m - 1, 16);
   const end = new Date(y, m, 15);
   return `${formatThaiShortDate(start)} - ${formatThaiShortDate(end)}`;
+}
+
+function getPeriodRangeCompactText() {
+  if (!yearSelect.value || monthSelect.value === "") return "เลือกงวดจ่าย";
+  const y = Number(yearSelect.value);
+  const m = Number(monthSelect.value);
+  const format = date => date.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
+  return `งวด ${format(new Date(y, m - 1, 16))} – ${format(new Date(y, m, 15))}`;
 }
 
 function updateHeaderInfo() {
@@ -789,8 +808,64 @@ function getPayrollData(){
   };
 }
 
+function formatPeriodDay(dateText) {
+  const date = new Date(`${dateText}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return dateText;
+  return date.toLocaleDateString("th-TH", { day: "numeric", month: "short" });
+}
+
+function renderMissingDays(quality) {
+  if (!missingDaysList) return;
+  missingDaysList.innerHTML = quality.missingDates.map(date =>
+    `<button type="button" class="missing-day-chip" data-missing-date="${date}">${formatPeriodDay(date)}</button>`
+  ).join("");
+
+  missingDaysList.querySelectorAll(".missing-day-chip").forEach(button => {
+    button.addEventListener("click", event => {
+      event.stopPropagation();
+      const cell = document.querySelector(`.day-cell[data-date="${button.dataset.missingDate}"]`);
+      if (!cell) return;
+      cell.scrollIntoView({ behavior: "smooth", block: "center" });
+      cell.click();
+      window.setTimeout(() => cell.focus(), 250);
+    });
+  });
+}
+
+function updatePeriodCompleteness(data = getPayrollData()) {
+  const quality = analyzePeriod(data.days, { hasActualSlip: Boolean(readActualSlip()) });
+  if (!periodProgressText || !periodProgressHint || !showMissingDaysBtn || !missingDaysPanel) return quality;
+
+  periodProgressText.textContent = `ลงข้อมูลแล้ว ${quality.completedDays}/${quality.totalDays} วัน`;
+  if (quality.completedDays === 0) {
+    periodProgressHint.textContent = "เลือกวันที่ในปฏิทินเพื่อเริ่มลงข้อมูล";
+  } else if (quality.missingDates.length) {
+    periodProgressHint.textContent = `เหลืออีก ${quality.missingDates.length} วันที่ยังไม่ได้เลือกสถานะ`;
+  } else {
+    periodProgressHint.textContent = "เลือกสถานะครบทุกวันในงวดแล้ว";
+  }
+
+  const hasMissing = quality.missingDates.length > 0;
+  if (!hasMissing) missingDaysVisible = false;
+  showMissingDaysBtn.disabled = !hasMissing;
+  showMissingDaysBtn.textContent = hasMissing
+    ? (missingDaysVisible ? "ซ่อนวันที่ยังไม่ได้กรอก" : "ดูวันที่ยังไม่ได้กรอก")
+    : "ข้อมูลครบแล้ว";
+  showMissingDaysBtn.setAttribute("aria-expanded", missingDaysVisible ? "true" : "false");
+  missingDaysPanel.hidden = !missingDaysVisible;
+  renderMissingDays(quality);
+
+  const missingSet = new Set(quality.missingDates);
+  document.querySelectorAll(".day-cell").forEach(cell => {
+    cell.classList.toggle("day-missing", missingDaysVisible && missingSet.has(cell.dataset.date));
+  });
+  return quality;
+}
+
 function renderSummary(){
-  calculate(getPayrollData());
+  const data = getPayrollData();
+  updatePeriodCompleteness(data);
+  calculate(data);
 }
 function format2(v){
   return Number(v || 0).toLocaleString("th-TH", {
@@ -914,6 +989,9 @@ function renderSlipDashboard(result = lastPayrollResult) {
     ["รายการหัก", estimatedDeductions, slip.deductions],
     ["ยอดสุทธิ", estimatedNet, slip.net]
   ];
+  const explanations = rows.map(([label, estimated, actual]) =>
+    describeMoneyDifference(actual, estimated, label)
+  );
 
   const currentKey = getActualSlipKey();
   const history = listActualSlipHistory().map(item =>
@@ -958,6 +1036,9 @@ function renderSlipDashboard(result = lastPayrollResult) {
             <b>${label}</b><span>${moneyOrWaiting(estimated)}</span><span>${moneyOrWaiting(actual)}</span><span>${differenceText(actual, estimated)}</span>
           </div>`).join("")}
       </div>
+      <div class="comparison-explanations" aria-label="คำอธิบายผลต่าง">
+        ${explanations.map(text => `<p class="comparison-explanation">${text}</p>`).join("")}
+      </div>
       <p class="comparison-status">สถานะ: <b>${status}</b>${slip.note ? ` · มีหมายเหตุจากสลิป` : ""}</p>
       ${historyMarkup}
     </div>`;
@@ -984,6 +1065,19 @@ function calculate(data=getPayrollData()){
   }
   updateHeaderInfo();
   renderSlipDashboard(result);
+
+  const quality = analyzePeriod(data.days, { hasActualSlip: Boolean(readActualSlip()) });
+  if (quality.completedDays === 0) {
+    document.getElementById("result").innerHTML = `
+      <div class="summary-panel">
+        <div class="summary-empty-state">
+          <strong>ยังไม่มีรายการสำหรับสรุป</strong>
+          <span>เลือกวันที่ในปฏิทินแล้วระบุสถานะ เพื่อเริ่มคำนวณเงินเดือนงวดนี้</span>
+        </div>
+      </div>`;
+    setPanelCollapsed(getSummaryCollapseTarget(), summaryShell?.classList.contains("summary-collapsed"), true);
+    return;
+  }
 
   document.getElementById("result").innerHTML = `
   <div class="summary-panel">
@@ -1179,6 +1273,7 @@ function applyPeriodChange() {
     const selectedYear = normalizeYearValue(yearSelect.value);
     rebuildYearOptions(selectedYear);
     yearSelect.value = String(selectedYear);
+    missingDaysVisible = false;
     syncPeriodPicker();
     loadSettings();
     loadActualSlip();
@@ -1219,6 +1314,11 @@ periodMonthPicker.addEventListener("change", () => {
 });
 prevPeriodBtn.onclick = () => movePeriod(-1);
 nextPeriodBtn.onclick = () => movePeriod(1);
+showMissingDaysBtn.addEventListener("click", () => {
+    if (showMissingDaysBtn.disabled) return;
+    missingDaysVisible = !missingDaysVisible;
+    updatePeriodCompleteness();
+});
 
 // ส่วน Input อื่นๆ ให้บันทึกทันทีเมื่อเปลี่ยนค่า
 dailyInput.oninput = () => { syncHourly(); saveSettings(); renderSummary(); };
@@ -1300,6 +1400,12 @@ const exportSheetBtn = document.getElementById("exportSheetBtn");
 const importDataBtn = document.getElementById("importDataBtn");
 const importDataFile = document.getElementById("importDataFile");
 const backupStatus = document.getElementById("backupStatus");
+const lastBackupStatus = document.getElementById("lastBackupStatus");
+const exportCheckDialog = document.getElementById("exportCheckDialog");
+const exportIssueList = document.getElementById("exportIssueList");
+const closeExportCheckBtn = document.getElementById("closeExportCheckBtn");
+const cancelExportBtn = document.getElementById("cancelExportBtn");
+const continueExportBtn = document.getElementById("continueExportBtn");
 const openClearDataBtn = document.getElementById("openClearDataBtn");
 const clearDataDialog = document.getElementById("clearDataDialog");
 const closeClearDataBtn = document.getElementById("closeClearDataBtn");
@@ -1316,7 +1422,32 @@ function setBackupStatus(message, state = "") {
   backupStatus.dataset.state = state;
 }
 
-exportSheetBtn.addEventListener("click", async () => {
+function renderLastBackupStatus() {
+  const raw = localStorage.getItem("payrollLastBackupAt");
+  const date = raw ? new Date(raw) : null;
+  if (!lastBackupStatus) return;
+  if (!date || Number.isNaN(date.getTime())) {
+    lastBackupStatus.textContent = "ยังไม่เคยสำรอง JSON บนเครื่องนี้";
+    return;
+  }
+  lastBackupStatus.textContent = `สำรอง JSON ล่าสุด ${date.toLocaleString("th-TH", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Bangkok"
+  })} น.`;
+}
+
+function issueDatesText(issue) {
+  if (!issue.dates?.length) return "";
+  const visible = issue.dates.slice(0, 6).map(formatPeriodDay).join(", ");
+  const remaining = issue.dates.length - 6;
+  return `${visible}${remaining > 0 ? ` และอีก ${remaining} วัน` : ""}`;
+}
+
+async function performSheetExport() {
   const originalLabel = exportSheetBtn.textContent;
   exportSheetBtn.disabled = true;
   exportSheetBtn.textContent = "กำลังสร้างไฟล์…";
@@ -1339,6 +1470,29 @@ exportSheetBtn.addEventListener("click", async () => {
     exportSheetBtn.disabled = false;
     exportSheetBtn.textContent = originalLabel;
   }
+}
+
+exportSheetBtn.addEventListener("click", () => {
+  const data = getPayrollData();
+  const quality = analyzePeriod(data.days, { hasActualSlip: Boolean(readActualSlip()) });
+  if (!quality.issues.length) {
+    performSheetExport();
+    return;
+  }
+
+  exportIssueList.innerHTML = quality.issues.map(issue => `
+    <li>${issue.message}${issueDatesText(issue) ? `<small>${issueDatesText(issue)}</small>` : ""}</li>
+  `).join("");
+  exportCheckDialog.showModal();
+});
+
+[closeExportCheckBtn, cancelExportBtn].forEach(button => {
+  button.addEventListener("click", () => exportCheckDialog.close());
+});
+
+continueExportBtn.addEventListener("click", () => {
+  exportCheckDialog.close();
+  performSheetExport();
 });
 
 exportDataBtn.addEventListener("click", () => {
@@ -1355,6 +1509,8 @@ exportDataBtn.addEventListener("click", () => {
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    localStorage.setItem("payrollLastBackupAt", new Date().toISOString());
+    renderLastBackupStatus();
     setBackupStatus(`ดาวน์โหลดไฟล์สำรองแล้ว (${Object.keys(backup.data).length} รายการ)`, "success");
   } catch (error) {
     setBackupStatus(`สำรองข้อมูลไม่สำเร็จ: ${error.message}`, "error");
@@ -1522,6 +1678,7 @@ function initApp() {
 
 // เรียกใช้เพียงครั้งเดียวที่บรรทัดสุดท้าย
 initApp();
+renderLastBackupStatus();
 
 const clearNotice = sessionStorage.getItem("payrollClearNotice");
 if (clearNotice) {

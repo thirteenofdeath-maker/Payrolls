@@ -379,6 +379,108 @@ input:disabled {
   cursor: pointer;
 }
 
+.period-picker-label {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.period-picker-label strong,
+.period-picker-label small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.period-picker-label strong { font-size: .875rem; }
+.period-picker-label small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 650;
+}
+
+.period-progress {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+}
+
+.period-progress-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.period-progress-copy strong {
+  color: var(--text);
+  font-size: .875rem;
+}
+
+.period-progress-copy span {
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.period-progress-button {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 6px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent-strong);
+  font-size: .75rem;
+  font-weight: 750;
+}
+
+.period-progress-button:disabled {
+  color: var(--success);
+  cursor: default;
+  opacity: 1;
+}
+
+.missing-days-panel {
+  margin-top: 8px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.missing-days-panel[hidden] { display: none; }
+
+.missing-days-heading {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.missing-days-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.missing-day-chip {
+  min-height: 34px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: .75rem;
+  font-weight: 700;
+}
+
 .field-card {
   display: block;
   min-width: 0;
@@ -574,6 +676,10 @@ input[readonly] {
 .day-cell.day-absent::before { background: var(--danger); opacity: 1; }
 .day-cell.shift-morning::after { background: var(--shift-morning); opacity: 1; }
 .day-cell.shift-night::after { background: var(--shift-night); opacity: 1; }
+
+.day-cell.day-missing {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--warning) 72%, transparent);
+}
 
 .calendar-legend {
   display: grid;
@@ -775,6 +881,22 @@ input[readonly] {
   display: block;
   margin-bottom: 4px;
   color: var(--text);
+}
+
+.comparison-explanations {
+  display: grid;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.comparison-explanation {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: .8125rem;
+  line-height: 1.45;
 }
 
 .comparison-hero {
@@ -1021,6 +1143,30 @@ input[readonly] {
   gap: 12px;
 }
 
+.summary-empty-state {
+  display: grid;
+  gap: 4px;
+  min-height: 170px;
+  padding: 24px 18px;
+  place-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--muted);
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.summary-empty-state strong {
+  color: var(--text);
+  font-size: .9375rem;
+}
+
+.summary-empty-state span {
+  max-width: 320px;
+  font-size: .8125rem;
+}
+
 .summary-card {
   padding: 15px;
   min-width: 0;
@@ -1117,6 +1263,48 @@ input[readonly] {
 
 .backup-status[data-state="success"] { color: var(--success); }
 .backup-status[data-state="error"] { color: var(--danger); }
+
+.last-backup-status {
+  margin-top: -2px;
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.export-issue-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.export-issue-list li {
+  position: relative;
+  padding: 10px 12px 10px 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: .875rem;
+}
+
+.export-issue-list li::before {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  color: var(--warning);
+  content: "!";
+  font-weight: 900;
+}
+
+.export-issue-list small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: .75rem;
+}
+
+.export-check-actions { grid-template-columns: 1fr 1fr; }
 
 .data-management {
   display: flex;
@@ -1370,6 +1558,13 @@ input[readonly] {
 
   .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .period-nav-btn { padding: 8px; }
+
+  .period-progress {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .period-progress-button { width: 100%; }
 
   .two-cols,
   .three-cols { grid-template-columns: 1fr; }

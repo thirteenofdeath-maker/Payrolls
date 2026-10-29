@@ -235,3 +235,17 @@ test("ล้างข้อมูลทั้งหมดเฉพาะขอ�
   assert.equal(storage.getItem("payrollInputCollapsed"), null);
   assert.equal(storage.getItem("unrelatedApp"), "untouched");
 });
+
+test("สำรองและตรวจสอบเวลาสำรองล่าสุด", () => {
+  const storage = new MemoryStorage({
+    payrollLastBackupAt: "2026-10-30T01:30:00.000Z"
+  });
+  const backup = createBackup(storage);
+
+  assert.equal(backup.data.payrollLastBackupAt, "2026-10-30T01:30:00.000Z");
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { payrollLastBackupAt: "not-a-date" }
+  }), /เวลาสำรอง/);
+});
