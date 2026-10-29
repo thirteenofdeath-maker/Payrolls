@@ -116,7 +116,7 @@
       throw new Error("ปีล่าสุดในไฟล์สำรองไม่ถูกต้อง");
     }
 
-    if (key === "payrollYearlyYear" && !/^\d{4}$/.test(value)) {
+    if (key === "payrollYearlyYear" && !/^(?:19|20|21)\d{2}$/.test(value)) {
       throw new Error("ปีสรุปรายปีในไฟล์สำรองไม่ถูกต้อง");
     }
 

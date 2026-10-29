@@ -62,7 +62,7 @@ const deleteActualSlipBtn = document.getElementById("deleteActualSlipBtn");
 const actualSlipStatus = document.getElementById("actualSlipStatus");
 const { calculatePayroll } = PayrollEngine;
 const { analyzePeriod, describeMoneyDifference } = PayrollQuality;
-const { buildYearSummary } = PayrollYearly;
+const { buildYearSummary, resolveYearSelection } = PayrollYearly;
 const {
   createBackup,
   parseAndValidateBackup,
@@ -1132,8 +1132,9 @@ function listYearlyYears() {
     const match = /^(?:payroll|settings|actual-slip)-(\d{4})-(?:[0-9]|1[01])$/.exec(key);
     if (match) years.add(Number(match[1]));
   }
-  const storedYear = Number(localStorage.getItem("payrollYearlyYear"));
-  if (Number.isInteger(storedYear)) years.add(storedYear);
+  const storedYearRaw = localStorage.getItem("payrollYearlyYear");
+  const storedYear = storedYearRaw === null ? NaN : Number(storedYearRaw);
+  if (Number.isInteger(storedYear) && storedYear >= 1900 && storedYear <= 2199) years.add(storedYear);
   return [...years].sort((left, right) => right - left);
 }
 
@@ -1252,8 +1253,13 @@ function yearlyMonthDetails(month) {
 function renderYearlyDashboard(requestedYear = null) {
   if (!yearlyDashboard) return;
   const availableYears = listYearlyYears();
-  const storedYear = Number(localStorage.getItem("payrollYearlyYear"));
-  const selectedYear = Number(requestedYear) || (availableYears.includes(storedYear) ? storedYear : Number(yearSelect.value));
+  const storedYearRaw = localStorage.getItem("payrollYearlyYear");
+  const selectedYear = resolveYearSelection({
+    requestedYear,
+    storedYear: storedYearRaw,
+    currentYear: Number(yearSelect.value),
+    availableYears
+  });
   if (!availableYears.includes(selectedYear)) availableYears.push(selectedYear);
   availableYears.sort((left, right) => right - left);
   localStorage.setItem("payrollYearlyYear", String(selectedYear));
