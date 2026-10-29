@@ -208,6 +208,38 @@
     };
   }
 
+  function normalizePeriodPart(value, label, min, max) {
+    const number = Number(value);
+    if (!Number.isInteger(number) || number < min || number > max) {
+      throw new Error(`${label}ของงวดไม่ถูกต้อง`);
+    }
+    return number;
+  }
+
+  function clearPeriodData(storage, year, month, options = {}) {
+    const normalizedYear = normalizePeriodPart(year, "ปี", 1900, 9999);
+    const normalizedMonth = normalizePeriodPart(month, "เดือน", 0, 11);
+    const suffix = `${normalizedYear}-${normalizedMonth}`;
+    const keys = options.slipOnly
+      ? [`actual-slip-${suffix}`]
+      : [`payroll-${suffix}`, `settings-${suffix}`, `actual-slip-${suffix}`];
+    const removedKeys = [];
+
+    keys.forEach(key => {
+      if (storage.getItem(key) === null) return;
+      storage.removeItem(key);
+      removedKeys.push(key);
+    });
+
+    return { removedKeys };
+  }
+
+  function clearAllAppData(storage) {
+    const keys = listAppStorageKeys(storage);
+    keys.forEach(key => storage.removeItem(key));
+    return { removedKeys: keys };
+  }
+
   return {
     APP_ID,
     SCHEMA_VERSION,
@@ -216,6 +248,8 @@
     listAppStorageKeys,
     createBackup,
     parseAndValidateBackup,
-    restoreBackup
+    restoreBackup,
+    clearPeriodData,
+    clearAllAppData
   };
 });

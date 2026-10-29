@@ -320,6 +320,13 @@
     <input type="file" id="importDataFile" accept="application/json,.json" hidden>
   </div>
   <div id="backupStatus" class="backup-status" role="status" aria-live="polite"></div>
+  <div class="data-management">
+    <div class="data-management-copy">
+      <strong>จัดการข้อมูลในเครื่อง</strong>
+      <span>เลือกล้างเฉพาะงวด สลิปจริง หรือข้อมูล Payrolls ทั้งหมด</span>
+    </div>
+    <button type="button" id="openClearDataBtn" class="backup-button danger-outline-button">ล้างข้อมูล…</button>
+  </div>
 </section>
 
 <section class="standalone-disclaimer-card" aria-label="หมายเหตุการคำนวณ">
@@ -329,12 +336,55 @@
   </div>
 </section>
 
-<script src="./payroll-engine.js?v=38"></script>
-<script src="./storage-transfer.js?v=38"></script>
-<script src="./sheet-export.js?v=38"></script>
-<script src="./app.js?v=38"></script>
+<dialog id="clearDataDialog" class="clear-data-dialog" aria-labelledby="clearDataTitle">
+  <div class="clear-dialog-header">
+    <div>
+      <span class="dialog-eyebrow">จัดการข้อมูลในเครื่อง</span>
+      <h2 id="clearDataTitle">ต้องการล้างข้อมูลส่วนไหน?</h2>
+    </div>
+    <button type="button" id="closeClearDataBtn" class="dialog-close-button" aria-label="ปิด">×</button>
+  </div>
+
+  <p class="clear-dialog-intro">ข้อมูลที่ลบจะกู้คืนไม่ได้หากไม่มีไฟล์สำรอง JSON</p>
+
+  <fieldset class="clear-options">
+    <legend class="visually-hidden">เลือกขอบเขตข้อมูลที่ต้องการล้าง</legend>
+    <label class="clear-option">
+      <input type="radio" name="clearScope" value="period" checked>
+      <span><strong>ข้อมูลงวดปัจจุบัน</strong><small>วันทำงาน การตั้งค่า และสลิปจริงของ <b id="clearPeriodLabel">งวดนี้</b></small></span>
+    </label>
+    <label class="clear-option">
+      <input type="radio" name="clearScope" value="slip">
+      <span><strong>เฉพาะสลิปจริงของงวดนี้</strong><small>ข้อมูลวันทำงานและค่าตั้งต้นจะยังอยู่ครบ</small></span>
+    </label>
+    <label class="clear-option clear-option-danger">
+      <input type="radio" name="clearScope" value="all">
+      <span><strong>ข้อมูล Payrolls ทั้งหมด</strong><small>ลบทุกงวด สลิปจริง ประวัติ Dashboard และการตั้งค่าบนเครื่องนี้</small></span>
+    </label>
+  </fieldset>
+
+  <label id="clearAllConfirmWrap" class="clear-confirm-wrap" hidden>
+    <span>พิมพ์ <b>ล้างข้อมูล</b> เพื่อยืนยัน</span>
+    <input type="text" id="clearAllConfirmInput" autocomplete="off" placeholder="ล้างข้อมูล">
+  </label>
+
+  <div class="clear-dialog-backup">
+    <span>ยังไม่ได้สำรองข้อมูลใช่ไหม?</span>
+    <button type="button" id="backupBeforeClearBtn" class="text-button">ดาวน์โหลด JSON ก่อน</button>
+  </div>
+
+  <div class="clear-dialog-actions">
+    <button type="button" id="cancelClearDataBtn" class="backup-button">ยกเลิก</button>
+    <button type="button" id="confirmClearDataBtn" class="backup-button danger-solid-button">ล้างข้อมูลงวดนี้</button>
+  </div>
+</dialog>
+
+<script src="./payroll-engine.js?v=39"></script>
+<script src="./storage-transfer.js?v=39"></script>
+<script src="./sheet-export.js?v=39"></script>
+<script src="./app.js?v=39"></script>
 
 </body>
 </html>
 
-<!-- app-version: period-arrow-order-v38 -->
+<!-- app-version: safe-data-clearing-v39 -->
