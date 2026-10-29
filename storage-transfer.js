@@ -22,6 +22,8 @@
     "payrollSummaryCollapsed",
     "payrollSlipCollapsed",
     "payrollDashboardCollapsed",
+    "payrollYearlyCollapsed",
+    "payrollYearlyYear",
     "payrollLastBackupAt",
     "lastViewedMonth",
     "lastViewedYear"
@@ -100,7 +102,7 @@
       }
     }
 
-    if (["payrollInputCollapsed", "payrollSummaryCollapsed", "payrollSlipCollapsed", "payrollDashboardCollapsed"].includes(key)) {
+    if (["payrollInputCollapsed", "payrollSummaryCollapsed", "payrollSlipCollapsed", "payrollDashboardCollapsed", "payrollYearlyCollapsed"].includes(key)) {
       if (value !== "0" && value !== "1") {
         throw new Error("สถานะการพับส่วนแสดงผลไม่ถูกต้อง");
       }
@@ -112,6 +114,10 @@
 
     if (key === "lastViewedYear" && !/^\d{4}$/.test(value)) {
       throw new Error("ปีล่าสุดในไฟล์สำรองไม่ถูกต้อง");
+    }
+
+    if (key === "payrollYearlyYear" && !/^\d{4}$/.test(value)) {
+      throw new Error("ปีสรุปรายปีในไฟล์สำรองไม่ถูกต้อง");
     }
 
     if (key === "payrollLastBackupAt" && Number.isNaN(Date.parse(value))) {

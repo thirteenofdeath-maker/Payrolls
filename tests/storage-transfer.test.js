@@ -249,3 +249,19 @@ test("สำรองและตรวจสอบเวลาสำรอง�
     data: { payrollLastBackupAt: "not-a-date" }
   }), /เวลาสำรอง/);
 });
+
+test("สำรองสถานะและปีของ Dashboard รายปี", () => {
+  const storage = new MemoryStorage({
+    payrollYearlyCollapsed: "0",
+    payrollYearlyYear: "2026"
+  });
+  const backup = createBackup(storage);
+
+  assert.equal(backup.data.payrollYearlyCollapsed, "0");
+  assert.equal(backup.data.payrollYearlyYear, "2026");
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { payrollYearlyYear: "26" }
+  }), /ปีสรุปรายปี/);
+});
