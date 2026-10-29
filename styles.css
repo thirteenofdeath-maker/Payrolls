@@ -1254,6 +1254,8 @@ input[readonly] {
   font-size: .85rem;
 }
 
+.clear-confirm-wrap[hidden] { display: none; }
+
 .clear-confirm-wrap input {
   width: 100%;
   padding: 9px 12px;
