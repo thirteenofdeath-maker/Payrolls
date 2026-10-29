@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<link rel="stylesheet" href="./styles.css?v=42">
+<link rel="stylesheet" href="./styles.css?v=43">
 </head>
 
 <body>
@@ -81,7 +81,10 @@
           <span class="nav-label">ก่อนหน้า</span>
         </button>
         <div class="period-picker-control">
-          <span id="periodPickerLabel" aria-hidden="true">เลือกเดือนและปี</span>
+          <span id="periodPickerLabel" class="period-picker-label" aria-hidden="true">
+            <strong id="periodPickerRange">เลือกงวดจ่าย</strong>
+            <small id="periodPickerMonth">เลือกเดือนและปี</small>
+          </span>
           <input type="month" id="periodMonthPicker" aria-label="เลือกเดือนและปี">
         </div>
         <button type="button" id="nextPeriodBtn" class="period-nav-btn" aria-label="งวดถัดไป">
@@ -92,6 +95,17 @@
       <div class="period-select-source" hidden>
         <label>เดือน<select id="monthSelect"></select></label>
         <label>ปี<select id="yearSelect"></select></label>
+      </div>
+      <div id="periodProgress" class="period-progress" aria-live="polite">
+        <div class="period-progress-copy">
+          <strong id="periodProgressText">ลงข้อมูลแล้ว 0/0 วัน</strong>
+          <span id="periodProgressHint">เลือกวันที่ในปฏิทินเพื่อเริ่มลงข้อมูล</span>
+        </div>
+        <button type="button" id="showMissingDaysBtn" class="period-progress-button" aria-expanded="false" aria-controls="missingDaysPanel">ดูวันที่ยังไม่ได้กรอก</button>
+      </div>
+      <div id="missingDaysPanel" class="missing-days-panel" hidden>
+        <div class="missing-days-heading">วันที่ยังไม่ได้เลือกสถานะ</div>
+        <div id="missingDaysList" class="missing-days-list"></div>
       </div>
       <div class="period-calendar-wrap">
         <div class="calendar" role="group" aria-label="ปฏิทินงวดเงินเดือน">
@@ -320,6 +334,7 @@
     <input type="file" id="importDataFile" accept="application/json,.json" hidden>
   </div>
   <div id="backupStatus" class="backup-status" role="status" aria-live="polite"></div>
+  <div id="lastBackupStatus" class="last-backup-status">ยังไม่เคยสำรอง JSON บนเครื่องนี้</div>
   <div class="data-management">
     <div class="data-management-copy">
       <strong>จัดการข้อมูลในเครื่อง</strong>
@@ -335,6 +350,22 @@
     ข้อมูลนี้เป็นเพียงการคำนวณแบบคร่าวๆ ไม่สามารถนำมาอ้างอิงจริงได้ โปรดใช้วิจารณญาณในการใช้งาน
   </div>
 </section>
+
+<dialog id="exportCheckDialog" class="clear-data-dialog export-check-dialog" aria-labelledby="exportCheckTitle">
+  <div class="clear-dialog-header">
+    <div>
+      <span class="dialog-eyebrow">ตรวจสอบก่อนส่งออก</span>
+      <h2 id="exportCheckTitle">พบข้อมูลที่ควรตรวจอีกครั้ง</h2>
+    </div>
+    <button type="button" id="closeExportCheckBtn" class="dialog-close-button" aria-label="ปิด">×</button>
+  </div>
+  <p class="clear-dialog-intro">ยังส่งออกได้ตามปกติ รายการเหล่านี้เป็นเพียงคำเตือนเพื่อช่วยกันข้อมูลตกหล่น</p>
+  <ul id="exportIssueList" class="export-issue-list"></ul>
+  <div class="clear-dialog-actions export-check-actions">
+    <button type="button" id="cancelExportBtn" class="backup-button">กลับไปตรวจ</button>
+    <button type="button" id="continueExportBtn" class="backup-button backup-button-primary">ส่งออกต่อ</button>
+  </div>
+</dialog>
 
 <dialog id="clearDataDialog" class="clear-data-dialog" aria-labelledby="clearDataTitle">
   <div class="clear-dialog-header">
@@ -379,12 +410,13 @@
   </div>
 </dialog>
 
-<script src="./payroll-engine.js?v=42"></script>
-<script src="./storage-transfer.js?v=42"></script>
-<script src="./sheet-export.js?v=42"></script>
-<script src="./app.js?v=42"></script>
+<script src="./payroll-engine.js?v=43"></script>
+<script src="./payroll-quality.js?v=43"></script>
+<script src="./storage-transfer.js?v=43"></script>
+<script src="./sheet-export.js?v=43"></script>
+<script src="./app.js?v=43"></script>
 
 </body>
 </html>
 
-<!-- app-version: balanced-dialog-typography-v42 -->
+<!-- app-version: data-quality-workflow-v43 -->

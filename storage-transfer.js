@@ -22,6 +22,7 @@
     "payrollSummaryCollapsed",
     "payrollSlipCollapsed",
     "payrollDashboardCollapsed",
+    "payrollLastBackupAt",
     "lastViewedMonth",
     "lastViewedYear"
   ]);
@@ -111,6 +112,10 @@
 
     if (key === "lastViewedYear" && !/^\d{4}$/.test(value)) {
       throw new Error("ปีล่าสุดในไฟล์สำรองไม่ถูกต้อง");
+    }
+
+    if (key === "payrollLastBackupAt" && Number.isNaN(Date.parse(value))) {
+      throw new Error("เวลาสำรองข้อมูลล่าสุดไม่ถูกต้อง");
     }
   }
 
