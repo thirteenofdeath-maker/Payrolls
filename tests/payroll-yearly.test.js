@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { calculatePayroll } = require("../payroll-engine.js");
-const { buildYearSummary } = require("../payroll-yearly.js");
+const { buildYearSummary, resolveYearSelection } = require("../payroll-yearly.js");
 
 const settings = {
   DAILY_WAGE: 400,
@@ -76,4 +76,19 @@ test("แยกองค์ประกอบรายได้เพื่อ�
   assert.equal(month.breakdown.baseIncome, 400);
   assert.equal(month.breakdown.overtimeIncome, 150);
   assert.equal(month.breakdown.extraIncome, 300);
+});
+
+test("ปีที่ยังไม่เคยบันทึกไม่ถูกแปลงเป็นปี 0", () => {
+  assert.equal(resolveYearSelection({
+    requestedYear: null,
+    storedYear: null,
+    currentYear: 2026,
+    availableYears: [2026]
+  }), 2026);
+  assert.equal(resolveYearSelection({
+    requestedYear: "",
+    storedYear: "0000",
+    currentYear: 2026,
+    availableYears: [0, 2026]
+  }), 2026);
 });

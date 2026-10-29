@@ -264,4 +264,9 @@ test("สำรองสถานะและปีของ Dashboard ราย
     schemaVersion: 1,
     data: { payrollYearlyYear: "26" }
   }), /ปีสรุปรายปี/);
+  assert.throws(() => parseAndValidateBackup({
+    app: "payroll-estimator",
+    schemaVersion: 1,
+    data: { payrollYearlyYear: "0000" }
+  }), /ปีสรุปรายปี/);
 });

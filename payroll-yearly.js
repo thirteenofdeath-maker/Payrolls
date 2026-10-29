@@ -21,6 +21,22 @@
     return values.reduce((total, value) => total + (Number(value) || 0), 0);
   }
 
+  function validYear(value) {
+    if (value === null || value === undefined || value === "") return null;
+    const year = Number(value);
+    return Number.isInteger(year) && year >= 1900 && year <= 2199 ? year : null;
+  }
+
+  function resolveYearSelection({ requestedYear, storedYear, currentYear, availableYears = [] }) {
+    const requested = validYear(requestedYear);
+    if (requested !== null) return requested;
+    const stored = validYear(storedYear);
+    if (stored !== null && availableYears.includes(stored)) return stored;
+    const current = validYear(currentYear);
+    if (current !== null) return current;
+    return new Date().getFullYear();
+  }
+
   function buildYearSummary({ year, periods = [], calculatePayroll }) {
     if (!Number.isInteger(Number(year))) throw new Error("ปีสรุปไม่ถูกต้อง");
     if (typeof calculatePayroll !== "function") throw new Error("ไม่พบฟังก์ชันคำนวณเงินเดือน");
@@ -111,5 +127,5 @@
     };
   }
 
-  return { buildYearSummary };
+  return { buildYearSummary, resolveYearSelection };
 });
