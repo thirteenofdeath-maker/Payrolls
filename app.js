@@ -51,6 +51,8 @@ const slipToggle = document.getElementById("slipToggle");
 const slipDetails = document.getElementById("slipDetails");
 const dashboardToggle = document.getElementById("dashboardToggle");
 const slipDashboard = document.getElementById("slipDashboard");
+const yearlyToggle = document.getElementById("yearlyToggle");
+const yearlyDashboard = document.getElementById("yearlyDashboard");
 const actualSlipGrossInput = document.getElementById("actualSlipGross");
 const actualSlipDeductionsInput = document.getElementById("actualSlipDeductions");
 const actualSlipNetInput = document.getElementById("actualSlipNet");
@@ -60,6 +62,7 @@ const deleteActualSlipBtn = document.getElementById("deleteActualSlipBtn");
 const actualSlipStatus = document.getElementById("actualSlipStatus");
 const { calculatePayroll } = PayrollEngine;
 const { analyzePeriod, describeMoneyDifference } = PayrollQuality;
+const { buildYearSummary } = PayrollYearly;
 const {
   createBackup,
   parseAndValidateBackup,
@@ -274,6 +277,13 @@ function setDashboardCollapsed(collapsed, immediate = false) {
   setPanelCollapsed(slipDashboard, collapsed, immediate);
 }
 
+function setYearlyCollapsed(collapsed, immediate = false) {
+  if (!yearlyDashboard || !yearlyToggle) return;
+  updateCollapseButton(yearlyToggle, collapsed, "สรุปรายปี", "ซ่อนสรุปรายปี", "แสดงสรุปรายปี");
+  localStorage.setItem("payrollYearlyCollapsed", collapsed ? "1" : "0");
+  setPanelCollapsed(yearlyDashboard, collapsed, immediate);
+}
+
 if (inputToggle) {
   inputToggle.onclick = () => setInputCollapsed(!inputToggle.matches('[aria-expanded="false"]'));
 }
@@ -285,6 +295,9 @@ if (slipToggle) {
 }
 if (dashboardToggle) {
   dashboardToggle.onclick = () => setDashboardCollapsed(dashboardToggle.getAttribute("aria-expanded") === "true");
+}
+if (yearlyToggle) {
+  yearlyToggle.onclick = () => setYearlyCollapsed(yearlyToggle.getAttribute("aria-expanded") === "true");
 }
 
 function syncHourly(){
@@ -1045,6 +1058,264 @@ function renderSlipDashboard(result = lastPayrollResult) {
   setDashboardCollapsed(dashboardToggle?.getAttribute("aria-expanded") === "false", true);
 }
 
+const monthShortNames = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+function safeParseStorage(key, fallback = null) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    return value ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function storedPeriodSettings(year, month) {
+  const saved = safeParseStorage(`settings-${year}-${month}`, {});
+  const dailyWage = num(saved?.dailyWage || 447);
+  const socialPercent = num(saved?.socialSecurityPercent ?? 5);
+  return {
+    DAILY_WAGE: dailyWage,
+    HOURLY_WAGE: dailyWage / 8,
+    OT_RATE_1: 1,
+    OT_RATE_15: 1.5,
+    OT_RATE_2: 2,
+    OT_RATE_3: 3,
+    NIGHT_SHIFT_FEE: num(saved?.nightShiftFee || 140),
+    FOOD_NIGHT_FEE: num(saved?.nightFoodFee || 70),
+    FOOD_OT_FEE: num(saved?.otFoodFee || 45),
+    SKILL_FEE: 20,
+    MENTOR_FEE: 200,
+    SOCIAL_SECURITY_PERCENT: socialPercent,
+    SOCIAL_SECURITY_RATE: socialPercent / 100,
+    mentor: Boolean(saved?.mentor),
+    incentive1: num(saved?.incentive1),
+    incentive2: num(saved?.incentive2)
+  };
+}
+
+function storedPeriodData(year, month) {
+  if (Number(yearSelect.value) === Number(year) && Number(monthSelect.value) === Number(month)) {
+    const data = getPayrollData();
+    return {
+      year: Number(year),
+      month: Number(month),
+      data,
+      hasData: data.days.some(day => String(day.status || "").trim()),
+      slip: readActualSlip(year, month)
+    };
+  }
+
+  const cards = safeParseStorage(`payroll-${year}-${month}`, []);
+  const days = Array.isArray(cards) ? cards.map(card => ({
+    date: String(card?.date || ""),
+    status: String(card?.status || ""),
+    shift: String(card?.shift || ""),
+    normalHours: num(card?.normal),
+    normalHoursRaw: String(card?.normal ?? ""),
+    otHours: num(card?.ot),
+    skill: num(card?.skill) === 1
+  })) : [];
+
+  return {
+    year: Number(year),
+    month: Number(month),
+    data: { settings: storedPeriodSettings(year, month), days },
+    hasData: days.some(day => day.status.trim()),
+    slip: readActualSlip(year, month)
+  };
+}
+
+function listYearlyYears() {
+  const years = new Set([Number(yearSelect.value) || new Date().getFullYear()]);
+  for (let index = 0; index < localStorage.length; index++) {
+    const key = localStorage.key(index) || "";
+    const match = /^(?:payroll|settings|actual-slip)-(\d{4})-(?:[0-9]|1[01])$/.exec(key);
+    if (match) years.add(Number(match[1]));
+  }
+  const storedYear = Number(localStorage.getItem("payrollYearlyYear"));
+  if (Number.isInteger(storedYear)) years.add(storedYear);
+  return [...years].sort((left, right) => right - left);
+}
+
+function compactMoney(value) {
+  return Number(value || 0).toLocaleString("th-TH", {
+    notation: "compact",
+    maximumFractionDigits: 1
+  });
+}
+
+function yearlyLineChart(months) {
+  const width = 720;
+  const height = 250;
+  const plot = { left: 54, right: 18, top: 20, bottom: 42 };
+  const values = months.flatMap(month => [month.estimatedNet, month.actualNet]).filter(value => value !== null);
+  if (!values.length) return "";
+  const maxValue = Math.max(1, ...values) * 1.08;
+  const chartWidth = width - plot.left - plot.right;
+  const chartHeight = height - plot.top - plot.bottom;
+  const x = index => plot.left + (chartWidth * index / 11);
+  const y = value => plot.top + chartHeight - (Number(value) / maxValue * chartHeight);
+  const points = field => months
+    .map((month, index) => month[field] === null ? null : `${x(index).toFixed(1)},${y(month[field]).toFixed(1)}`)
+    .filter(Boolean)
+    .join(" ");
+  const grid = Array.from({ length: 5 }, (_, index) => {
+    const amount = maxValue * (4 - index) / 4;
+    const gridY = plot.top + chartHeight * index / 4;
+    return `<line class="year-chart-grid" x1="${plot.left}" y1="${gridY}" x2="${width - plot.right}" y2="${gridY}"></line><text class="year-chart-axis" x="${plot.left - 8}" y="${gridY + 4}" text-anchor="end">${compactMoney(amount)}</text>`;
+  }).join("");
+  const dots = (field, className, label) => months.map((month, index) => month[field] === null ? "" : `
+    <circle class="${className}" cx="${x(index)}" cy="${y(month[field])}" r="4">
+      <title>${monthNames[index]}: ${label} ${format2(month[field])} บาท</title>
+    </circle>`).join("");
+
+  return `
+    <div class="year-chart-scroll">
+      <svg class="year-line-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="กราฟแนวโน้มยอดสุทธิรายเดือน">
+        ${grid}
+        ${months.map((month, index) => `<text class="year-chart-axis" x="${x(index)}" y="${height - 14}" text-anchor="middle">${monthShortNames[index]}</text>`).join("")}
+        ${points("estimatedNet") ? `<polyline class="year-line year-line-estimated" points="${points("estimatedNet")}"></polyline>` : ""}
+        ${points("actualNet") ? `<polyline class="year-line year-line-actual" points="${points("actualNet")}"></polyline>` : ""}
+        ${dots("estimatedNet", "year-dot year-dot-estimated", "ยอดคำนวณ")}
+        ${dots("actualNet", "year-dot year-dot-actual", "สลิปจริง")}
+      </svg>
+    </div>`;
+}
+
+function yearlyBreakdownChart(months) {
+  const width = 720;
+  const height = 230;
+  const plot = { left: 46, right: 18, top: 16, bottom: 40 };
+  const totals = months.map(month => month.estimatedGross || 0);
+  const maxValue = Math.max(1, ...totals) * 1.08;
+  const chartWidth = width - plot.left - plot.right;
+  const chartHeight = height - plot.top - plot.bottom;
+  const columnWidth = chartWidth / 12;
+  const barWidth = Math.min(30, columnWidth * .58);
+  const categories = [
+    ["baseIncome", "year-bar-base"],
+    ["overtimeIncome", "year-bar-ot"],
+    ["shiftFoodIncome", "year-bar-shift"],
+    ["extraIncome", "year-bar-extra"]
+  ];
+  const bars = months.map((month, index) => {
+    const x = plot.left + columnWidth * index + (columnWidth - barWidth) / 2;
+    let bottom = plot.top + chartHeight;
+    const segments = categories.map(([field, className]) => {
+      const amount = month.breakdown[field];
+      const segmentHeight = amount / maxValue * chartHeight;
+      bottom -= segmentHeight;
+      return amount > 0 ? `<rect class="${className}" x="${x}" y="${bottom}" width="${barWidth}" height="${segmentHeight}"><title>${monthNames[index]} ${format2(amount)} บาท</title></rect>` : "";
+    }).join("");
+    return `${segments}<text class="year-chart-axis" x="${x + barWidth / 2}" y="${height - 13}" text-anchor="middle">${monthShortNames[index]}</text>`;
+  }).join("");
+
+  return `
+    <div class="year-chart-scroll">
+      <svg class="year-breakdown-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="กราฟองค์ประกอบรายได้แต่ละเดือน">
+        <line class="year-chart-grid" x1="${plot.left}" y1="${plot.top + chartHeight}" x2="${width - plot.right}" y2="${plot.top + chartHeight}"></line>
+        ${bars}
+      </svg>
+    </div>`;
+}
+
+function yearlyMoney(value) {
+  return value === null ? "ยังไม่มีข้อมูล" : `${format2(value)} บาท`;
+}
+
+function yearlyMonthDetails(month) {
+  const hasAnything = month.hasData || month.hasSlip;
+  const differenceClass = month.difference > 0 ? "positive" : month.difference < 0 ? "negative" : "";
+  return `
+    <details class="year-month-detail${hasAnything ? "" : " is-empty"}">
+      <summary>
+        <span class="year-month-name">${monthNames[month.month]}</span>
+        <span class="year-month-status">${hasAnything ? (month.hasData ? "มีข้อมูลคำนวณ" : "มีเฉพาะสลิป") : "ยังไม่มีข้อมูล"}</span>
+        <span><small>คำนวณสุทธิ</small>${yearlyMoney(month.estimatedNet)}</span>
+        <span><small>สลิปจริง</small>${yearlyMoney(month.actualNet)}</span>
+        <span class="year-month-difference ${differenceClass}"><small>ผลต่าง</small>${month.difference === null ? "—" : `${month.difference > 0 ? "+" : ""}${format2(month.difference)} บาท`}</span>
+      </summary>
+      <div class="year-month-breakdown">
+        <span><small>รายได้รวม</small>${yearlyMoney(month.estimatedGross)}</span>
+        <span><small>รายการหัก</small>${yearlyMoney(month.estimatedDeductions)}</span>
+        <span><small>ค่าแรงหลัก</small>${format2(month.breakdown.baseIncome)} บาท</span>
+        <span><small>โอที</small>${format2(month.breakdown.overtimeIncome)} บาท</span>
+        <span><small>ค่ากะ/อาหาร</small>${format2(month.breakdown.shiftFoodIncome)} บาท</span>
+        <span><small>ค่าพิเศษ</small>${format2(month.breakdown.extraIncome)} บาท</span>
+        <span><small>วันทำงาน</small>${format2(month.workDays)} วัน</span>
+        <span><small>ขาดงาน</small>${format2(month.absentDays)} วัน</span>
+        <span><small>ชั่วโมง OT</small>${format2(month.otHours)} ชม.</span>
+      </div>
+    </details>`;
+}
+
+function renderYearlyDashboard(requestedYear = null) {
+  if (!yearlyDashboard) return;
+  const availableYears = listYearlyYears();
+  const storedYear = Number(localStorage.getItem("payrollYearlyYear"));
+  const selectedYear = Number(requestedYear) || (availableYears.includes(storedYear) ? storedYear : Number(yearSelect.value));
+  if (!availableYears.includes(selectedYear)) availableYears.push(selectedYear);
+  availableYears.sort((left, right) => right - left);
+  localStorage.setItem("payrollYearlyYear", String(selectedYear));
+
+  const periods = Array.from({ length: 12 }, (_, month) => storedPeriodData(selectedYear, month));
+  const summary = buildYearSummary({ year: selectedYear, periods, calculatePayroll });
+  const hasAnything = summary.counts.estimatedMonths || summary.counts.actualMonths;
+  const highestText = summary.highest ? `${monthNames[summary.highest.month]} ${format2(summary.highest.estimatedNet)} บาท` : "—";
+  const lowestText = summary.lowest ? `${monthNames[summary.lowest.month]} ${format2(summary.lowest.estimatedNet)} บาท` : "—";
+
+  yearlyDashboard.innerHTML = `
+    <div class="dashboard-card yearly-card">
+      <div class="yearly-header">
+        <div>
+          <h2><svg class="oh-icon" aria-hidden="true"><use href="#icon-chart"></use></svg>ภาพรวมรายปี</h2>
+          <p>รวมตามเดือนอ้างอิงของงวด 16–15 · ข้อมูลอยู่เฉพาะในเครื่องนี้</p>
+        </div>
+        <label class="year-selector-label">ปี
+          <select id="yearlyYearSelect" aria-label="เลือกปีสำหรับสรุปรายปี">
+            ${availableYears.map(year => `<option value="${year}"${year === selectedYear ? " selected" : ""}>${toBuddhistYear(year)}</option>`).join("")}
+          </select>
+        </label>
+      </div>
+      ${hasAnything ? `
+        <div class="yearly-metrics">
+          <div class="yearly-metric metric-primary"><span>สุทธิคำนวณทั้งปี</span><strong>${format2(summary.totals.estimatedNet)}</strong><small>${summary.counts.estimatedMonths} งวด</small></div>
+          <div class="yearly-metric"><span>สุทธิจากสลิปจริง</span><strong>${format2(summary.totals.actualNet)}</strong><small>${summary.counts.actualMonths} งวด</small></div>
+          <div class="yearly-metric"><span>รายได้รวม</span><strong>${format2(summary.totals.estimatedGross)}</strong><small>บาท</small></div>
+          <div class="yearly-metric"><span>รายการหักรวม</span><strong>${format2(summary.totals.estimatedDeductions)}</strong><small>บาท</small></div>
+          <div class="yearly-metric"><span>สุทธิเฉลี่ย/งวด</span><strong>${format2(summary.totals.averageNet)}</strong><small>บาท</small></div>
+          <div class="yearly-metric"><span>OT รวม</span><strong>${format2(summary.totals.otHours)}</strong><small>ชั่วโมง</small></div>
+        </div>
+        <div class="yearly-highlights">
+          <span><small>สูงสุด</small><b>${highestText}</b></span>
+          <span><small>ต่ำสุด</small><b>${lowestText}</b></span>
+          <span><small>วันทำงาน / ขาด</small><b>${format2(summary.totals.workDays)} / ${format2(summary.totals.absentDays)} วัน</b></span>
+        </div>
+        <section class="year-chart-section">
+          <div class="year-chart-heading"><div><h3>แนวโน้มยอดสุทธิ</h3><p>ยอดที่คำนวณเทียบกับสลิปจริง</p></div><div class="year-chart-legend"><span class="estimated">คำนวณ</span><span class="actual">สลิปจริง</span></div></div>
+          ${yearlyLineChart(summary.months)}
+        </section>
+        <section class="year-chart-section">
+          <div class="year-chart-heading"><div><h3>องค์ประกอบรายได้</h3><p>ดูว่าแต่ละเดือนรายได้มาจากส่วนใด</p></div></div>
+          ${yearlyBreakdownChart(summary.months)}
+          <div class="year-breakdown-legend"><span class="base">ค่าแรงหลัก</span><span class="ot">โอที</span><span class="shift">ค่ากะ/อาหาร</span><span class="extra">ค่าพิเศษ</span></div>
+        </section>
+        <section class="year-month-list">
+          <div class="year-chart-heading"><div><h3>รายละเอียดรายเดือน</h3><p>แตะเดือนเพื่อดูองค์ประกอบทั้งหมด</p></div></div>
+          ${summary.months.map(yearlyMonthDetails).join("")}
+        </section>` : `
+        <div class="yearly-empty">
+          <strong>ยังไม่มีข้อมูลสำหรับปี ${toBuddhistYear(selectedYear)}</strong>
+          <span>เมื่อเริ่มลงข้อมูลรายงวด กราฟและสรุปรายปีจะแสดงที่นี่อัตโนมัติ</span>
+        </div>`}
+    </div>`;
+
+  document.getElementById("yearlyYearSelect")?.addEventListener("change", event => {
+    renderYearlyDashboard(Number(event.target.value));
+  });
+  setYearlyCollapsed(yearlyToggle?.getAttribute("aria-expanded") === "false", true);
+}
+
 // UI adapter: renders only the result returned by the payroll engine.
 function calculate(data=getPayrollData()){
   const result=calculatePayroll(data);
@@ -1065,6 +1336,7 @@ function calculate(data=getPayrollData()){
   }
   updateHeaderInfo();
   renderSlipDashboard(result);
+  renderYearlyDashboard();
 
   const quality = analyzePeriod(data.days, { hasActualSlip: Boolean(readActualSlip()) });
   if (quality.completedDays === 0) {
@@ -1650,6 +1922,7 @@ function initApp() {
     setSummaryCollapsed(localStorage.getItem("payrollSummaryCollapsed") === "1", true);
     setSlipCollapsed(localStorage.getItem("payrollSlipCollapsed") !== "0", true);
     setDashboardCollapsed(localStorage.getItem("payrollDashboardCollapsed") === "1", true);
+    setYearlyCollapsed(localStorage.getItem("payrollYearlyCollapsed") !== "0", true);
     updateHeaderInfo();
     setInterval(updateHeaderInfo, 1000);
     const now = new Date();
