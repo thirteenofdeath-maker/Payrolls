@@ -306,9 +306,9 @@ input:disabled {
 
 .period-switcher {
   display: grid;
-  grid-template-columns: minmax(88px, auto) minmax(0, 1fr) minmax(88px, auto);
-  gap: 10px;
-  align-items: stretch;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  gap: 8px;
+  align-items: center;
 }
 
 .period-nav-btn,
@@ -330,12 +330,26 @@ input:disabled {
 
 .period-nav-btn {
   display: inline-flex;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  font-weight: 700;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+
+.nav-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
 .nav-symbol {
@@ -1156,7 +1170,6 @@ input[readonly] {
     gap: 7px;
   }
 
-  .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .period-nav-btn { padding: 8px; }
 
   .two-cols,
