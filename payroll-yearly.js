@@ -79,6 +79,13 @@
         result.income.incentive1Pay,
         result.income.incentive2Pay
       ]) : 0;
+      const leaveDays = result ? sum([
+        result.counts.cVacation,
+        result.counts.cSickDoctor,
+        result.counts.cBusinessExtra,
+        result.counts.cSick,
+        result.counts.cBusiness
+      ]) : 0;
 
       return {
         year: Number(year),
@@ -93,6 +100,7 @@
         actualNet,
         difference: result && actualNet !== null ? actualNet - result.totals.netPay : null,
         workDays: result?.counts.workDays ?? 0,
+        leaveDays,
         absentDays: result?.counts.cAbsent ?? 0,
         otHours: result?.hours.totalOtHours ?? 0,
         breakdown: { baseIncome, overtimeIncome, shiftFoodIncome, extraIncome }
@@ -114,6 +122,7 @@
         actualNet: sum(actualMonths.map(month => month.actualNet)),
         difference: sum(actualMonths.map(month => month.difference)),
         workDays: sum(estimatedMonths.map(month => month.workDays)),
+        leaveDays: sum(estimatedMonths.map(month => month.leaveDays)),
         absentDays: sum(estimatedMonths.map(month => month.absentDays)),
         otHours: sum(estimatedMonths.map(month => month.otHours)),
         averageNet: estimatedMonths.length ? estimatedNet / estimatedMonths.length : 0

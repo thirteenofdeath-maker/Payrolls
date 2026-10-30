@@ -1214,6 +1214,7 @@ function yearlyMonthDetails(month) {
         <span><small>ค่ากะ/อาหาร</small>${format2(month.breakdown.shiftFoodIncome)} บาท</span>
         <span><small>ค่าพิเศษ</small>${format2(month.breakdown.extraIncome)} บาท</span>
         <span><small>วันทำงาน</small>${format2(month.workDays)} วัน</span>
+        <span><small>ลา</small>${format2(month.leaveDays)} วัน</span>
         <span><small>ขาดงาน</small>${format2(month.absentDays)} วัน</span>
         <span><small>ชั่วโมง OT</small>${format2(month.otHours)} ชม.</span>
       </div>
@@ -1265,7 +1266,7 @@ function renderYearlyDashboard(requestedYear = null) {
         <div class="yearly-highlights">
           <span><small>สูงสุด</small><b>${highestText}</b></span>
           <span><small>ต่ำสุด</small><b>${lowestText}</b></span>
-          <span><small>วันทำงาน / ขาด</small><b>${format2(summary.totals.workDays)} / ${format2(summary.totals.absentDays)} วัน</b></span>
+          <span><small>วันทำงาน / ลา / ขาด</small><b>${format2(summary.totals.workDays)} / ${format2(summary.totals.leaveDays)} / ${format2(summary.totals.absentDays)} วัน</b></span>
         </div>
         <section class="year-chart-section">
           <div class="year-chart-heading"><div><h3>แนวโน้มยอดสุทธิ</h3><p>ยอดที่คำนวณเทียบกับสลิปจริง</p></div><div class="year-chart-legend"><span class="estimated">คำนวณ</span><span class="actual">สลิปจริง</span></div></div>

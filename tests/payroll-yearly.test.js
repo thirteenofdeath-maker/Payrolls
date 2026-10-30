@@ -26,6 +26,10 @@ function workDay(date, otHours = 0) {
   return { date, status: "วันทำงาน", shift: "เช้า", normalHours: 8, normalHoursRaw: "8", otHours, skill: false };
 }
 
+function leaveDay(date, status, normalHours = 0) {
+  return { date, status, shift: "เช้า", normalHours, normalHoursRaw: String(normalHours), otHours: 0, skill: false };
+}
+
 test("รวมยอดแต่ละงวดตามเดือนอ้างอิงของปี", () => {
   const summary = buildYearSummary({
     year: 2026,
@@ -76,6 +80,30 @@ test("แยกองค์ประกอบรายได้เพื่อ�
   assert.equal(month.breakdown.baseIncome, 400);
   assert.equal(month.breakdown.overtimeIncome, 150);
   assert.equal(month.breakdown.extraIncome, 300);
+});
+
+test("รวมวันลาทุกประเภทและรองรับลาครึ่งวันในสรุปรายปี", () => {
+  const summary = buildYearSummary({
+    year: 2026,
+    calculatePayroll,
+    periods: [{
+      year: 2026,
+      month: 8,
+      data: {
+        settings,
+        days: [
+          leaveDay("2026-08-16", "ลาพักร้อน", 4),
+          leaveDay("2026-08-17", "ลาป่วยแพทย์(เขียนใบสอบสวน)"),
+          leaveDay("2026-08-18", "ลากิจพิเศษ"),
+          leaveDay("2026-08-19", "ลาป่วย"),
+          leaveDay("2026-08-20", "ลากิจ")
+        ]
+      }
+    }]
+  });
+
+  assert.equal(summary.months[8].leaveDays, 4.5);
+  assert.equal(summary.totals.leaveDays, 4.5);
 });
 
 test("ปีที่ยังไม่เคยบันทึกไม่ถูกแปลงเป็นปี 0", () => {
