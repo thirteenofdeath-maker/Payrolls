@@ -19,6 +19,8 @@
   --overtime: #986312;
   --shift: #7558a6;
   --slip: #397a91;
+  --chart-estimated: #2f754e;
+  --chart-actual: #3268c7;
   --special: #8269a5;
   --shift-morning: #c3951c;
   --shift-night: #7558a6;
@@ -1171,9 +1173,9 @@ input[readonly] {
   content: "";
 }
 
-.year-chart-legend .estimated::before,
+.year-chart-legend .estimated::before { background: var(--chart-estimated); }
 .year-breakdown-legend .base::before { background: var(--accent); }
-.year-chart-legend .actual::before { background: var(--slip); }
+.year-chart-legend .actual::before { background: var(--chart-actual); }
 .year-breakdown-legend .extra::before { background: var(--special); }
 .year-breakdown-legend .ot::before { background: var(--overtime); }
 .year-breakdown-legend .shift::before { background: var(--shift); }
@@ -1211,11 +1213,14 @@ input[readonly] {
   stroke-width: 3;
 }
 
-.year-line-estimated { stroke: var(--accent); }
-.year-line-actual { stroke: var(--slip); }
+.year-line-estimated { stroke: var(--chart-estimated); }
+.year-line-actual {
+  stroke: var(--chart-actual);
+  stroke-dasharray: 8 6;
+}
 .year-dot { stroke: var(--surface); stroke-width: 2; }
-.year-dot-estimated { fill: var(--accent); }
-.year-dot-actual { fill: var(--slip); }
+.year-dot-estimated { fill: var(--chart-estimated); }
+.year-dot-actual { fill: var(--chart-actual); }
 .year-bar-base { fill: var(--accent); }
 .year-bar-ot { fill: var(--overtime); }
 .year-bar-shift { fill: var(--shift); }
