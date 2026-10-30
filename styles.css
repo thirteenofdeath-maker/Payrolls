@@ -14,13 +14,15 @@
   --warning: #986312;
   --danger: #b9564f;
   --info: #4e7fa5;
-  --leave: #8269a5;
+  --holiday: #6f7672;
+  --leave: #a95328;
   --overtime: #986312;
-  --shift: #52658d;
+  --shift: #7558a6;
   --slip: #397a91;
   --special: #8269a5;
-  --shift-morning: #986312;
-  --shift-night: #52658d;
+  --shift-morning: #c3951c;
+  --shift-night: #7558a6;
+  --selection: #2f3935;
   --shadow: 0 1px 2px rgb(36 48 44 / 4%), 0 8px 24px rgb(36 48 44 / 7%);
   --control-shadow: 0 2px 8px rgb(36 48 44 / 5%);
   --nested-shadow: inset 0 0 0 1px var(--line), 0 2px 8px rgb(36 48 44 / 4%);
@@ -575,7 +577,7 @@ input[readonly] {
 
 .day-cell.active,
 .day-cell[aria-expanded="true"] {
-  background: var(--accent);
+  background: var(--selection);
   color: var(--on-accent);
 }
 
@@ -583,9 +585,10 @@ input[readonly] {
 .day-cell::after {
   position: absolute;
   bottom: 6px;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--surface);
   content: "";
   opacity: 0;
 }
@@ -594,7 +597,7 @@ input[readonly] {
 .day-cell::after { left: calc(50% + 2px); }
 
 .day-cell.day-work::before { background: var(--success); opacity: 1; }
-.day-cell.day-holiday::before { background: var(--info); opacity: 1; }
+.day-cell.day-holiday::before { background: var(--holiday); opacity: 1; }
 .day-cell.day-leave::before { background: var(--leave); opacity: 1; }
 .day-cell.day-absent::before { background: var(--danger); opacity: 1; }
 .day-cell.shift-morning::after { background: var(--shift-morning); opacity: 1; }
@@ -641,10 +644,11 @@ input[readonly] {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 20%, transparent);
 }
 
 .legend-work { background: var(--success); }
-.legend-holiday { background: var(--info); }
+.legend-holiday { background: var(--holiday); }
 .legend-leave { background: var(--leave); }
 .legend-absent { background: var(--danger); }
 .legend-morning { background: var(--shift-morning); }
@@ -729,9 +733,9 @@ input[readonly] {
 }
 
 .badge-holiday {
-  border-color: color-mix(in srgb, var(--info) 35%, var(--line));
-  background: color-mix(in srgb, var(--info) 11%, var(--surface));
-  color: var(--info);
+  border-color: color-mix(in srgb, var(--holiday) 35%, var(--line));
+  background: color-mix(in srgb, var(--holiday) 11%, var(--surface));
+  color: var(--holiday);
 }
 
 .badge-leave {
