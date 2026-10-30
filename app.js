@@ -184,6 +184,8 @@ function getSummaryCollapseTarget() {
 function setPanelCollapsed(panel, collapsed, immediate = false) {
   if (!panel) return Promise.resolve();
 
+  panel.getAnimations().forEach(animation => animation.cancel());
+
   panel.style.overflow = "hidden";
   panel.style.willChange = "max-height, opacity, transform";
 
@@ -215,6 +217,7 @@ function setPanelCollapsed(panel, collapsed, immediate = false) {
       panel.style.maxHeight = "0px";
       panel.style.opacity = "0";
       panel.style.transform = "translateY(-8px)";
+      anim.cancel();
     });
   }
 
@@ -234,6 +237,7 @@ function setPanelCollapsed(panel, collapsed, immediate = false) {
     panel.style.maxHeight = "none";
     panel.style.opacity = "1";
     panel.style.transform = "translateY(0)";
+    anim.cancel();
   });
 }
 
@@ -1308,7 +1312,9 @@ function renderYearlyDashboard(requestedYear = null) {
         </section>
         <section class="year-month-list">
           <div class="year-chart-heading"><div><h3>รายละเอียดรายเดือน</h3><p>แตะเดือนเพื่อดูองค์ประกอบทั้งหมด</p></div></div>
-          ${summary.months.map(yearlyMonthDetails).join("")}
+          <div class="year-month-scroll" tabindex="0" role="region" aria-label="รายละเอียดรายเดือน เลื่อนขึ้นลงเพื่อดูเดือนอื่น">
+            ${summary.months.map(yearlyMonthDetails).join("")}
+          </div>
         </section>` : `
         <div class="yearly-empty">
           <strong>ยังไม่มีข้อมูลสำหรับปี ${toBuddhistYear(selectedYear)}</strong>
