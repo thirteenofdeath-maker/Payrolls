@@ -73,40 +73,6 @@ const {
 let lastPayrollResult = null;
 let missingDaysVisible = false;
 
-function applyDaypartTone(now = new Date()) {
-  let hour = now.getHours();
-  try {
-    hour = Number(new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      hourCycle: "h23",
-      timeZone: "Asia/Bangkok"
-    }).format(now));
-  } catch {
-    // Use the device hour when the requested time zone is unavailable.
-  }
-  const daypart = hour >= 5 && hour < 8 ? "morning"
-    : hour >= 8 && hour < 11 ? "late-morning"
-    : hour >= 11 && hour < 14 ? "noon"
-    : hour >= 14 && hour < 17 ? "afternoon"
-    : hour >= 17 && hour < 20 ? "evening"
-    : hour >= 20 && hour < 23 ? "night"
-    : "late-night";
-  const themeColors = {
-    morning: "#607a65",
-    "late-morning": "#6f7653",
-    noon: "#7c6c4f",
-    afternoon: "#7e6b4c",
-    evening: "#715348",
-    night: "#eef2f4",
-    "late-night": "#e8eef2"
-  };
-
-  document.documentElement.removeAttribute("data-theme");
-  document.documentElement.removeAttribute("data-palette");
-  document.documentElement.dataset.daypart = daypart;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColors[daypart]);
-}
-
 function toBuddhistYear(year) {
   return Number(year) + 543;
 }
@@ -1366,7 +1332,7 @@ function calculate(data=getPayrollData()){
   document.getElementById("result").innerHTML = `
   <div class="summary-panel">
     <div id="summaryCategoryList" class="summary-grid">
-      <section class="summary-card">
+      <section class="summary-card summary-card-base">
         <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-briefcase"></use></svg>รายได้หลัก</h3>
         <div class="summary-item">
           <span class="summary-label">วันทำงาน</span>
@@ -1395,7 +1361,7 @@ function calculate(data=getPayrollData()){
         </div>
       </section>
 
-      <section class="summary-card">
+      <section class="summary-card summary-card-ot">
         <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-timer"></use></svg>โอที</h3>
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมชั่วโมงโอที</b></span>
@@ -1424,7 +1390,7 @@ function calculate(data=getPayrollData()){
         </div>
       </section>
 
-      <section class="summary-card">
+      <section class="summary-card summary-card-shift">
         <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-moon"></use></svg>ค่ากะ / ค่าอาหาร</h3>
         <div class="summary-item">
           <span class="summary-label">ค่ากะดึก</span>
@@ -1443,7 +1409,7 @@ function calculate(data=getPayrollData()){
         </div>
       </section>
 
-      <section class="summary-card">
+      <section class="summary-card summary-card-special">
         <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-sparkles"></use></svg>ค่าพิเศษ</h3>
         <div class="summary-item">
           <span class="summary-label">ค่าทักษะ</span>
@@ -1462,7 +1428,7 @@ function calculate(data=getPayrollData()){
         </div>
       </section>
 
-      <section class="summary-card full">
+      <section class="summary-card summary-card-totals full">
         <h3 class="summary-heading"><svg class="oh-icon" aria-hidden="true"><use href="#icon-receipt"></use></svg>รวมและรายการหัก</h3>
         <div class="summary-item summary-emphasis">
           <span class="summary-label"><b>รวมรายได้</b></span>
@@ -1928,8 +1894,9 @@ confirmClearDataBtn.addEventListener("click", () => {
 /* ===== ปรับปรุงฟังก์ชันเริ่มต้น (initApp) ให้เสถียรกว่าเดิม ===== */
 function initApp() {
     localStorage.removeItem("payrollTheme");
-    applyDaypartTone();
-    setInterval(applyDaypartTone, 60 * 1000);
+    document.documentElement.removeAttribute("data-daypart");
+    document.documentElement.removeAttribute("data-theme");
+    document.documentElement.removeAttribute("data-palette");
     setInputCollapsed(localStorage.getItem("payrollInputCollapsed") === "1", true);
     setSummaryCollapsed(localStorage.getItem("payrollSummaryCollapsed") === "1", true);
     setSlipCollapsed(localStorage.getItem("payrollSlipCollapsed") !== "0", true);
